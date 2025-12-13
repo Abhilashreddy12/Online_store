@@ -1,0 +1,72 @@
+{% extends 'base.html' %}
+
+{% block title %}My Orders - Fashion Store{% endblock %}
+
+{% block content %}
+<div class="container">
+    <h1 style="font-size: 2.5rem; margin-bottom: 2rem;">My Orders</h1>
+    
+    {% if orders %}
+    {% for order in orders %}
+    <div class="card" style="margin-bottom: 2rem;">
+        <div style="display: flex; justify-content: space-between; align-items: start; margin-bottom: 1.5rem; padding-bottom: 1rem; border-bottom: 2px solid #e2e8f0;">
+            <div>
+                <h3 style="margin-bottom: 0.5rem;">Order #{{ order.order_number }}</h3>
+                <p style="color: #718096;">Placed on {{ order.created_at|date:"F d, Y" }}</p>
+            </div>
+            <div style="text-align: right;">
+                {% if order.status == 'PENDING' %}
+                <span class="badge badge-warning">⏳ {{ order.get_status_display }}</span>
+                {% elif order.status == 'PROCESSING' %}
+                <span class="badge badge-info">🔄 {{ order.get_status_display }}</span>
+                {% elif order.status == 'SHIPPED' %}
+                <span class="badge badge-info">📦 {{ order.get_status_display }}</span>
+                {% elif order.status == 'DELIVERED' %}
+                <span class="badge badge-success">✓ {{ order.get_status_display }}</span>
+                {% elif order.status == 'CANCELLED' %}
+                <span class="badge badge-danger">✗ {{ order.get_status_display }}</span>
+                {% endif %}
+                <br>
+                <strong style="font-size: 1.5rem; color: #667eea;">${{ order.total_amount }}</strong>
+            </div>
+        </div>
+        
+        <div style="margin-bottom: 1.5rem;">
+            {% for item in order.items.all|slice:":3" %}
+            <div style="display: flex; gap: 1rem; align-items: center; margin-bottom: 1rem;">
+                {% if item.product.images.first %}
+                <img src="{{ item.product.images.first.image.url }}" alt="{{ item.product_name }}" style="width: 80px; height: 80px; object-fit: cover; border-radius: 8px;">
+                {% endif %}
+                <div style="flex: 1;">
+                    <strong>{{ item.product_name }}</strong><br>
+                    <small style="color: #718096;">{{ item.variant_details }} | Qty: {{ item.quantity }}</small>
+                </div>
+                <strong>${{ item.line_total }}</strong>
+            </div>
+            {% endfor %}
+            {% if order.items.count > 3 %}
+            <p style="color: #718096; text-align: center;">+ {{ order.items.count|add:"-3" }} more item(s)</p>
+            {% endif %}
+        </div>
+        
+        <div style="display: flex; gap: 1rem;">
+            <a href="{% url 'orders:order_detail' order.order_number %}" class="btn">View Details</a>
+            {% if order.status in 'PENDING,PROCESSING' %}
+            <form method="post" action="{% url 'orders:cancel_order' order.order_number %}" style="display: inline;">
+                {% csrf_token %}
+                <button type="submit" class="btn btn-danger" onclick="return confirm('Are you sure you want to cancel this order?');">Cancel Order</button>
+            </form>
+            {% endif %}
+        </div>
+    </div>
+    {% endfor %}
+    {% else %}
+    <div class="card" style="text-align: center; padding: 4rem 2rem;">
+        <div style="font-size: 5rem; margin-bottom: 1rem;">📦</div>
+        <h2 style="margin-bottom: 1rem;">No orders yet</h2>
+        <p style="color: #718096; margin-bottom: 2rem;">Start shopping to place your first order!</p>
+        <a href="{% url 'catalog:product_list' %}" class="btn">Browse Products</a>
+    </div>
+    {% endif %}
+</div>
+{% endblock %}

@@ -1,0 +1,97 @@
+{% extends 'base.html' %}
+
+{% block title %}Shopping Cart - Fashion Store{% endblock %}
+
+{% block content %}
+<div class="container">
+    <h1 style="font-size: 2.5rem; margin-bottom: 2rem;">Shopping Cart</h1>
+    
+    {% if cart.items.exists %}
+    <div style="display: grid; grid-template-columns: 2fr 1fr; gap: 2rem;">
+        <div>
+            <table>
+                <thead>
+                    <tr>
+                        <th>Product</th>
+                        <th>Price</th>
+                        <th>Quantity</th>
+                        <th>Total</th>
+                        <th>Action</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for item in cart.items.all %}
+                    <tr>
+                        <td>
+                            <div style="display: flex; align-items: center; gap: 1rem;">
+                                {% if item.product.images.first %}
+                                <img src="{{ item.product.images.first.image.url }}" alt="{{ item.product.name }}" style="width: 80px; height: 80px; object-fit: cover; border-radius: 8px;">
+                                {% endif %}
+                                <div>
+                                    <strong>{{ item.product.name }}</strong>
+                                    {% if item.variant %}
+                                    <br><small style="color: #718096;">{{ item.variant.size.name }} - {{ item.variant.color.name }}</small>
+                                    {% endif %}
+                                </div>
+                            </div>
+                        </td>
+                        <td><strong>${{ item.unit_price }}</strong></td>
+                        <td>
+                            <form method="post" action="{% url 'cart:update_cart_item' item.id %}" style="display: flex; gap: 0.5rem;">
+                                {% csrf_token %}
+                                <input type="number" name="quantity" value="{{ item.quantity }}" min="1" style="width: 70px; padding: 0.5rem; border: 2px solid #e2e8f0; border-radius: 5px;">
+                                <button type="submit" class="btn" style="padding: 0.5rem 1rem;">Update</button>
+                            </form>
+                        </td>
+                        <td><strong style="color: #667eea;">${{ item.line_total }}</strong></td>
+                        <td>
+                            <form method="post" action="{% url 'cart:remove_from_cart' item.id %}">
+                                {% csrf_token %}
+                                <button type="submit" class="btn btn-danger" style="padding: 0.5rem 1rem;">Remove</button>
+                            </form>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+        
+        <div>
+            <div class="card">
+                <h3 style="margin-bottom: 1.5rem; font-size: 1.5rem;">Order Summary</h3>
+                
+                <div style="display: flex; justify-content: space-between; margin-bottom: 1rem; padding-bottom: 1rem; border-bottom: 2px solid #e2e8f0;">
+                    <span>Subtotal ({{ cart.total_items }} items):</span>
+                    <strong>${{ cart.subtotal }}</strong>
+                </div>
+                
+                <div style="display: flex; justify-content: space-between; margin-bottom: 1rem; padding-bottom: 1rem; border-bottom: 2px solid #e2e8f0;">
+                    <span>Shipping:</span>
+                    <strong>$10.00</strong>
+                </div>
+                
+                <div style="display: flex; justify-content: space-between; margin-bottom: 1rem; padding-bottom: 1rem; border-bottom: 2px solid #e2e8f0;">
+                    <span>Tax (10%):</span>
+                    <strong>${{ cart.subtotal|floatformat:2|add:"0"|floatformat:2 }}</strong>
+                </div>
+                
+                <div style="display: flex; justify-content: space-between; margin-bottom: 2rem; font-size: 1.3rem;">
+                    <strong>Total:</strong>
+                    <strong style="color: #667eea;">${{ cart.subtotal|add:"10"|floatformat:2 }}</strong>
+                </div>
+                
+                <a href="{% url 'orders:checkout' %}" class="btn" style="width: 100%; text-align: center; display: block; margin-bottom: 1rem;">Proceed to Checkout</a>
+                <a href="{% url 'catalog:product_list' %}" class="btn btn-secondary" style="width: 100%; text-align: center; display: block;">Continue Shopping</a>
+            </div>
+        </div>
+    </div>
+    {% else %}
+    <div class="card" style="text-align: center; padding: 4rem 2rem;">
+        <div style="font-size: 5rem; margin-bottom: 1rem;">🛒</div>
+        <h2 style="margin-bottom: 1rem;">Your cart is empty</h2>
+        <p style="color: #718096; margin-bottom: 2rem;">Add some products to your cart to get started!</p>
+        <a href="{% url 'catalog:product_list' %}" class="btn">Start Shopping</a>
+    </div>
+    {% endif %}
+</div>
+{% endblock %}

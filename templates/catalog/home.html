@@ -1,0 +1,68 @@
+{% extends 'base.html' %}
+
+{% block title %}Welcome to Fashion Store{% endblock %}
+
+{% block content %}
+<div class="hero">
+    <div class="container">
+        <h1>Welcome to Fashion Store</h1>
+        <p style="font-size: 1.3rem; margin-bottom: 2rem;">Discover the latest trends in fashion</p>
+        <a href="{% url 'catalog:product_list' %}" class="btn">Shop Now</a>
+    </div>
+</div>
+
+<div class="container">
+    {% if featured_products %}
+    <section>
+        <h2 style="text-align: center; margin-bottom: 2rem; font-size: 2rem;">Featured Products</h2>
+        <div class="product-grid">
+            {% for product in featured_products %}
+            <div class="product-card">
+                <a href="{% url 'catalog:product_detail' product.slug %}" style="text-decoration: none; color: inherit;">
+                    {% if product.images.first %}
+                    <img src="{{ product.images.first.image.url }}" alt="{{ product.name }}" class="product-image">
+                    {% else %}
+                    <div class="product-image" style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); display: flex; align-items: center; justify-content: center; color: white; font-size: 3rem;">👕</div>
+                    {% endif %}
+                    <div class="product-info">
+                        <h3 class="product-title">{{ product.name }}</h3>
+                        <p style="color: #718096; margin-bottom: 1rem;">{{ product.category.name }}</p>
+                        <div style="display: flex; justify-content: space-between; align-items: center;">
+                            <span class="product-price">${{ product.price }}</span>
+                            {% if product.discount_percentage %}
+                            <span style="background: #f56565; color: white; padding: 0.3rem 0.6rem; border-radius: 5px; font-size: 0.9rem;">-{{ product.discount_percentage }}%</span>
+                            {% endif %}
+                        </div>
+                    </div>
+                </a>
+            </div>
+            {% endfor %}
+        </div>
+    </section>
+    {% endif %}
+
+    {% if new_arrivals %}
+    <section style="margin-top: 4rem;">
+        <h2 style="text-align: center; margin-bottom: 2rem; font-size: 2rem;">New Arrivals</h2>
+        <div class="product-grid">
+            {% for product in new_arrivals %}
+            <div class="product-card">
+                <a href="{% url 'catalog:product_detail' product.slug %}" style="text-decoration: none; color: inherit;">
+                    {% if product.images.first %}
+                    <img src="{{ product.images.first.image.url }}" alt="{{ product.name }}" class="product-image">
+                    {% else %}
+                    <div class="product-image" style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); display: flex; align-items: center; justify-content: center; color: white; font-size: 3rem;">👔</div>
+                    {% endif %}
+                    <div class="product-info">
+                        <h3 class="product-title">{{ product.name }}</h3>
+                        <p style="color: #718096; margin-bottom: 1rem;">{{ product.category.name }}</p>
+                        <span class="product-price">${{ product.price }}</span>
+                    </div>
+                </a>
+            </div>
+            {% endfor %}
+        </div>
+    </section>
+    {% endif %}
+</div>
+{% endblock %}

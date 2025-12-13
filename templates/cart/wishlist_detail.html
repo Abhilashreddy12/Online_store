@@ -1,0 +1,50 @@
+{% extends 'base.html' %}
+
+{% block title %}Wishlist - Fashion Store{% endblock %}
+
+{% block content %}
+<div class="container">
+    <h1 style="font-size: 2.5rem; margin-bottom: 2rem;">My Wishlist</h1>
+    
+    {% if wishlist.items.exists %}
+    <div class="product-grid">
+        {% for item in wishlist.items.all %}
+        <div class="product-card">
+            <a href="{% url 'catalog:product_detail' item.product.slug %}" style="text-decoration: none; color: inherit;">
+                {% if item.product.images.first %}
+                <img src="{{ item.product.images.first.image.url }}" alt="{{ item.product.name }}" class="product-image">
+                {% else %}
+                <div class="product-image" style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); display: flex; align-items: center; justify-content: center; color: white; font-size: 3rem;">👕</div>
+                {% endif %}
+            </a>
+            <div class="product-info">
+                <h3 class="product-title">{{ item.product.name }}</h3>
+                <p style="color: #718096; margin-bottom: 1rem;">{{ item.product.category.name }}</p>
+                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem;">
+                    <span class="product-price">${{ item.product.price }}</span>
+                </div>
+                
+                <form method="post" action="{% url 'cart:add_to_cart' item.product.id %}" style="margin-bottom: 0.5rem;">
+                    {% csrf_token %}
+                    <input type="hidden" name="quantity" value="1">
+                    <button type="submit" class="btn" style="width: 100%; padding: 0.6rem;">Add to Cart</button>
+                </form>
+                
+                <form method="post" action="{% url 'cart:remove_from_wishlist' item.id %}">
+                    {% csrf_token %}
+                    <button type="submit" class="btn btn-danger" style="width: 100%; padding: 0.6rem;">Remove</button>
+                </form>
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+    {% else %}
+    <div class="card" style="text-align: center; padding: 4rem 2rem;">
+        <div style="font-size: 5rem; margin-bottom: 1rem;">❤️</div>
+        <h2 style="margin-bottom: 1rem;">Your wishlist is empty</h2>
+        <p style="color: #718096; margin-bottom: 2rem;">Save items you love for later!</p>
+        <a href="{% url 'catalog:product_list' %}" class="btn">Browse Products</a>
+    </div>
+    {% endif %}
+</div>
+{% endblock %}

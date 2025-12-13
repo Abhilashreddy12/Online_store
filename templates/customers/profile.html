@@ -1,0 +1,91 @@
+{% extends 'base.html' %}
+
+{% block title %}My Profile - Fashion Store{% endblock %}
+
+{% block content %}
+<div class="container">
+    <h1 style="font-size: 2.5rem; margin-bottom: 2rem;">My Profile</h1>
+    
+    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 2rem;">
+        <!-- User Information -->
+        <div class="card">
+            <h3 style="margin-bottom: 1.5rem;">👤 Personal Information</h3>
+            <div style="margin-bottom: 1rem;">
+                <strong>Name:</strong> {{ user.get_full_name|default:user.username }}
+            </div>
+            <div style="margin-bottom: 1rem;">
+                <strong>Email:</strong> {{ user.email }}
+            </div>
+            <div style="margin-bottom: 1rem;">
+                <strong>Phone:</strong> {{ customer.phone|default:"Not provided" }}
+            </div>
+            {% if customer.is_vip %}
+            <div style="margin-bottom: 1rem;">
+                <span class="badge badge-success" style="font-size: 1rem;">⭐ VIP Customer</span>
+            </div>
+            {% endif %}
+            <div style="margin-bottom: 1rem;">
+                <strong>Loyalty Points:</strong> <span style="color: #667eea; font-weight: bold;">{{ customer.loyalty_points }} points</span>
+            </div>
+        </div>
+        
+        <!-- Order Statistics -->
+        <div class="card">
+            <h3 style="margin-bottom: 1.5rem;">📊 Order Statistics</h3>
+            <div style="margin-bottom: 1rem;">
+                <strong>Total Orders:</strong> {{ customer.total_orders }}
+            </div>
+            <div style="margin-bottom: 1rem;">
+                <strong>Total Spent:</strong> <span style="color: #667eea; font-weight: bold;">${{ customer.total_spent|floatformat:2 }}</span>
+            </div>
+            <div style="margin-top: 2rem;">
+                <a href="{% url 'orders:order_list' %}" class="btn">View All Orders</a>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Addresses -->
+    <div class="card" style="margin-top: 2rem;">
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.5rem;">
+            <h3>📍 My Addresses</h3>
+            <a href="{% url 'customers:add_address' %}" class="btn">+ Add New Address</a>
+        </div>
+        
+        {% if addresses %}
+        <div style="display: grid; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); gap: 1.5rem;">
+            {% for address in addresses %}
+            <div style="border: 2px solid #e2e8f0; padding: 1.5rem; border-radius: 8px; position: relative;">
+                {% if address.is_default %}
+                <span class="badge badge-success" style="position: absolute; top: 1rem; right: 1rem;">Default</span>
+                {% endif %}
+                
+                <div style="margin-bottom: 0.5rem;">
+                    <strong style="font-size: 1.1rem;">{{ address.full_name }}</strong>
+                    <span class="badge {% if address.address_type == 'SHIPPING' %}badge-info{% else %}badge-warning{% endif %}" style="margin-left: 0.5rem;">
+                        {{ address.get_address_type_display }}
+                    </span>
+                </div>
+                
+                <p style="color: #4a5568; margin-bottom: 1rem;">
+                    {{ address.address_line1 }}{% if address.address_line2 %}, {{ address.address_line2 }}{% endif %}<br>
+                    {{ address.city }}, {{ address.state }} {{ address.postal_code }}<br>
+                    {{ address.country }}<br>
+                    📞 {{ address.phone }}
+                </p>
+                
+                <div style="display: flex; gap: 0.5rem;">
+                    <a href="{% url 'customers:edit_address' address.id %}" class="btn btn-secondary" style="padding: 0.5rem 1rem; font-size: 0.9rem;">Edit</a>
+                    <form method="post" action="{% url 'customers:delete_address' address.id %}" style="display: inline;">
+                        {% csrf_token %}
+                        <button type="submit" class="btn btn-danger" style="padding: 0.5rem 1rem; font-size: 0.9rem;" onclick="return confirm('Are you sure?');">Delete</button>
+                    </form>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+        {% else %}
+        <p style="color: #718096; text-align: center; padding: 2rem;">No addresses added yet.</p>
+        {% endif %}
+    </div>
+</div>
+{% endblock %}

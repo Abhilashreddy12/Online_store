@@ -1,0 +1,152 @@
+{% extends 'base.html' %}
+
+{% block title %}Order #{{ order.order_number }} - Fashion Store{% endblock %}
+
+{% block content %}
+<div class="container">
+    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 2rem;">
+        <h1 style="font-size: 2.5rem;">Order #{{ order.order_number }}</h1>
+        {% if order.status == 'PENDING' %}
+        <span class="badge badge-warning" style="font-size: 1.1rem; padding: 0.6rem 1.5rem;">⏳ {{ order.get_status_display }}</span>
+        {% elif order.status == 'PROCESSING' %}
+        <span class="badge badge-info" style="font-size: 1.1rem; padding: 0.6rem 1.5rem;">🔄 {{ order.get_status_display }}</span>
+        {% elif order.status == 'SHIPPED' %}
+        <span class="badge badge-info" style="font-size: 1.1rem; padding: 0.6rem 1.5rem;">📦 {{ order.get_status_display }}</span>
+        {% elif order.status == 'DELIVERED' %}
+        <span class="badge badge-success" style="font-size: 1.1rem; padding: 0.6rem 1.5rem;">✓ {{ order.get_status_display }}</span>
+        {% elif order.status == 'CANCELLED' %}
+        <span class="badge badge-danger" style="font-size: 1.1rem; padding: 0.6rem 1.5rem;">✗ {{ order.get_status_display }}</span>
+        {% endif %}
+    </div>
+    
+    <div style="display: grid; grid-template-columns: 2fr 1fr; gap: 2rem;">
+        <div>
+            <!-- Order Items -->
+            <div class="card">
+                <h3 style="margin-bottom: 1.5rem;">Order Items</h3>
+                {% for item in order.items.all %}
+                <div style="display: flex; gap: 1.5rem; align-items: center; margin-bottom: 1.5rem; padding-bottom: 1.5rem; border-bottom: 1px solid #e2e8f0;">
+                    {% if item.product.images.first %}
+                    <img src="{{ item.product.images.first.image.url }}" alt="{{ item.product_name }}" style="width: 100px; height: 100px; object-fit: cover; border-radius: 8px;">
+                    {% else %}
+                    <div style="width: 100px; height: 100px; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); border-radius: 8px; display: flex; align-items: center; justify-content: center; color: white; font-size: 2rem;">👕</div>
+                    {% endif %}
+                    <div style="flex: 1;">
+                        <strong style="font-size: 1.1rem;">{{ item.product_name }}</strong><br>
+                        <p style="color: #718096; margin-top: 0.3rem;">SKU: {{ item.product_sku }}</p>
+                        {% if item.variant_details %}
+                        <p style="color: #667eea; margin-top: 0.3rem;">{{ item.variant_details }}</p>
+                        {% endif %}
+                        <p style="margin-top: 0.5rem;">
+                            <strong>Price:</strong> ${{ item.unit_price }} × {{ item.quantity }} = <strong style="color: #667eea;">${{ item.line_total }}</strong>
+                        </p>
+                    </div>
+                </div>
+                {% endfor %}
+            </div>
+            
+            <!-- Order Status History -->
+            <div class="card">
+                <h3 style="margin-bottom: 1.5rem;">📋 Order Timeline</h3>
+                {% for history in order.status_history.all %}
+                <div style="display: flex; gap: 1rem; margin-bottom: 1rem; padding-left: 1rem; border-left: 3px solid #667eea;">
+                    <div>
+                        <strong>{{ history.get_status_display }}</strong><br>
+                        <small style="color: #718096;">{{ history.created_at|date:"F d, Y - g:i A" }}</small>
+                        {% if history.notes %}
+                        <p style="color: #4a5568; margin-top: 0.5rem;">{{ history.notes }}</p>
+                        {% endif %}
+                    </div>
+                </div>
+                {% endfor %}
+            </div>
+            
+            <!-- Shipping Address -->
+            <div class="card">
+                <h3 style="margin-bottom: 1.5rem;">📍 Shipping Address</h3>
+                <strong>{{ order.shipping_address.full_name }}</strong><br>
+                {{ order.shipping_address.address_line1 }}{% if order.shipping_address.address_line2 %}, {{ order.shipping_address.address_line2 }}{% endif %}<br>
+                {{ order.shipping_address.city }}, {{ order.shipping_address.state }} {{ order.shipping_address.postal_code }}<br>
+                {{ order.shipping_address.country }}<br>
+                <p style="margin-top: 0.5rem; color: #718096;">📞 {{ order.shipping_address.phone }}</p>
+                
+                {% if order.tracking_number %}
+                <div style="margin-top: 1.5rem; padding: 1rem; background: #edf2f7; border-radius: 8px;">
+                    <strong>📦 Tracking Information</strong><br>
+                    <p style="margin-top: 0.5rem;">Carrier: {{ order.carrier }}</p>
+                    <p>Tracking Number: <strong>{{ order.tracking_number }}</strong></p>
+                </div>
+                {% endif %}
+            </div>
+        </div>
+        
+        <div>
+            <!-- Order Summary -->
+            <div class="card" style="position: sticky; top: 20px;">
+                <h3 style="margin-bottom: 1.5rem;">Order Summary</h3>
+                
+                <div style="display: flex; justify-content: space-between; margin-bottom: 0.8rem;">
+                    <span>Order Date:</span>
+                    <strong>{{ order.created_at|date:"M d, Y" }}</strong>
+                </div>
+                
+                <div style="display: flex; justify-content: space-between; margin-bottom: 0.8rem;">
+                    <span>Payment Method:</span>
+                    <strong>{{ order.payment_method }}</strong>
+                </div>
+                
+                <div style="display: flex; justify-content: space-between; margin-bottom: 0.8rem;">
+                    <span>Payment Status:</span>
+                    {% if order.payment_status == 'PAID' %}
+                    <span class="badge badge-success">{{ order.get_payment_status_display }}</span>
+                    {% elif order.payment_status == 'PENDING' %}
+                    <span class="badge badge-warning">{{ order.get_payment_status_display }}</span>
+                    {% else %}
+                    <span class="badge badge-danger">{{ order.get_payment_status_display }}</span>
+                    {% endif %}
+                </div>
+                
+                <hr style="margin: 1.5rem 0; border: 1px solid #e2e8f0;">
+                
+                <div style="display: flex; justify-content: space-between; margin-bottom: 0.8rem;">
+                    <span>Subtotal:</span>
+                    <strong>${{ order.subtotal }}</strong>
+                </div>
+                
+                <div style="display: flex; justify-content: space-between; margin-bottom: 0.8rem;">
+                    <span>Shipping:</span>
+                    <strong>${{ order.shipping_cost }}</strong>
+                </div>
+                
+                <div style="display: flex; justify-content: space-between; margin-bottom: 0.8rem;">
+                    <span>Tax:</span>
+                    <strong>${{ order.tax_amount }}</strong>
+                </div>
+                
+                {% if order.discount_amount > 0 %}
+                <div style="display: flex; justify-content: space-between; margin-bottom: 0.8rem; color: #48bb78;">
+                    <span>Discount:</span>
+                    <strong>-${{ order.discount_amount }}</strong>
+                </div>
+                {% endif %}
+                
+                <hr style="margin: 1.5rem 0; border: 1px solid #e2e8f0;">
+                
+                <div style="display: flex; justify-content: space-between; font-size: 1.3rem; margin-bottom: 2rem;">
+                    <strong>Total:</strong>
+                    <strong style="color: #667eea;">${{ order.total_amount }}</strong>
+                </div>
+                
+                {% if order.status in 'PENDING,PROCESSING' %}
+                <form method="post" action="{% url 'orders:cancel_order' order.order_number %}">
+                    {% csrf_token %}
+                    <button type="submit" class="btn btn-danger" style="width: 100%;" onclick="return confirm('Are you sure you want to cancel this order?');">Cancel Order</button>
+                </form>
+                {% endif %}
+                
+                <a href="{% url 'orders:order_list' %}" class="btn btn-secondary" style="width: 100%; text-align: center; display: block; margin-top: 1rem;">Back to Orders</a>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

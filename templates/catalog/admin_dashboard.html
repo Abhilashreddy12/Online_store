@@ -1,0 +1,514 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Admin Dashboard - Analytics{% endblock %}
+
+{% block extra_css %}
+<style>
+    .dashboard-container {
+        max-width: 1400px;
+        margin: 0 auto;
+        padding: 2rem;
+    }
+
+    .dashboard-header {
+        margin-bottom: 2rem;
+    }
+
+    .dashboard-header h1 {
+        font-size: 2rem;
+        color: #2d3748;
+        margin-bottom: 0.5rem;
+    }
+
+    .dashboard-header p {
+        color: #718096;
+    }
+
+    /* Metrics Cards */
+    .metrics-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+        gap: 1.5rem;
+        margin-bottom: 2rem;
+    }
+
+    .metric-card {
+        background: white;
+        border-radius: 12px;
+        padding: 1.5rem;
+        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+        border-left: 4px solid #667eea;
+        transition: transform 0.2s, box-shadow 0.2s;
+    }
+
+    .metric-card:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.12);
+    }
+
+    .metric-card.revenue { border-left-color: #48bb78; }
+    .metric-card.profit { border-left-color: #ed8936; }
+    .metric-card.sales { border-left-color: #4299e1; }
+
+    .metric-label {
+        font-size: 0.875rem;
+        color: #718096;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+        margin-bottom: 0.5rem;
+    }
+
+    .metric-value {
+        font-size: 2rem;
+        font-weight: 700;
+        color: #2d3748;
+        margin-bottom: 0.5rem;
+    }
+
+    .metric-change {
+        font-size: 0.875rem;
+        color: #48bb78;
+    }
+
+    .metric-change.negative {
+        color: #f56565;
+    }
+
+    /* Charts Section */
+    .charts-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(400px, 1fr));
+        gap: 1.5rem;
+        margin-bottom: 2rem;
+    }
+
+    .chart-card {
+        background: white;
+        border-radius: 12px;
+        padding: 1.5rem;
+        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+    }
+
+    .chart-card h3 {
+        font-size: 1.25rem;
+        color: #2d3748;
+        margin-bottom: 1rem;
+        padding-bottom: 0.75rem;
+        border-bottom: 2px solid #f7fafc;
+    }
+
+    .chart-container {
+        position: relative;
+        height: 300px;
+    }
+
+    /* Tables */
+    .table-card {
+        background: white;
+        border-radius: 12px;
+        padding: 1.5rem;
+        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+        margin-bottom: 1.5rem;
+    }
+
+    .table-card h3 {
+        font-size: 1.25rem;
+        color: #2d3748;
+        margin-bottom: 1rem;
+    }
+
+    .data-table {
+        width: 100%;
+        border-collapse: collapse;
+    }
+
+    .data-table th {
+        background: #f7fafc;
+        color: #4a5568;
+        font-weight: 600;
+        padding: 0.75rem;
+        text-align: left;
+        font-size: 0.875rem;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+    }
+
+    .data-table td {
+        padding: 0.875rem 0.75rem;
+        border-bottom: 1px solid #e2e8f0;
+        color: #4a5568;
+    }
+
+    .data-table tr:hover {
+        background: #f7fafc;
+    }
+
+    /* Widgets Grid */
+    .widgets-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
+        gap: 1.5rem;
+        margin-bottom: 2rem;
+    }
+
+    .widget-card {
+        background: white;
+        border-radius: 12px;
+        padding: 1.5rem;
+        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+    }
+
+    .widget-card h3 {
+        font-size: 1.125rem;
+        color: #2d3748;
+        margin-bottom: 1rem;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+    }
+
+    .widget-badge {
+        background: #f56565;
+        color: white;
+        font-size: 0.75rem;
+        padding: 0.25rem 0.5rem;
+        border-radius: 12px;
+        font-weight: 600;
+    }
+
+    .widget-item {
+        padding: 0.75rem 0;
+        border-bottom: 1px solid #f7fafc;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+    }
+
+    .widget-item:last-child {
+        border-bottom: none;
+    }
+
+    .status-badge {
+        padding: 0.25rem 0.75rem;
+        border-radius: 12px;
+        font-size: 0.75rem;
+        font-weight: 600;
+    }
+
+    .status-pending { background: #feebc8; color: #744210; }
+    .status-processing { background: #bee3f8; color: #2c5282; }
+    .status-shipped { background: #c6f6d5; color: #22543d; }
+    .status-delivered { background: #48bb78; color: white; }
+
+    .stock-alert {
+        color: #f56565;
+        font-weight: 600;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="dashboard-container">
+    <div class="dashboard-header">
+        <h1>📊 Admin Dashboard</h1>
+        <p>Welcome back! Here's what's happening with your store today.</p>
+    </div>
+
+    <!-- Key Metrics -->
+    <div class="metrics-grid">
+        <div class="metric-card">
+            <div class="metric-label">Total Orders</div>
+            <div class="metric-value">{{ total_orders|default:0 }}</div>
+            <div class="metric-change">+{{ recent_orders_count|default:0 }} this month</div>
+        </div>
+
+        <div class="metric-card revenue">
+            <div class="metric-label">Total Revenue</div>
+            <div class="metric-value">${{ total_revenue|floatformat:2|default:"0.00" }}</div>
+            <div class="metric-change">+${{ recent_revenue|floatformat:2|default:"0.00" }} this month</div>
+        </div>
+
+        <div class="metric-card profit">
+            <div class="metric-label">Total Profit</div>
+            <div class="metric-value">${{ total_profit|floatformat:2|default:"0.00" }}</div>
+            <div class="metric-change">Gross margin</div>
+        </div>
+
+        <div class="metric-card sales">
+            <div class="metric-label">Total Sales</div>
+            <div class="metric-value">{{ total_sales|default:0 }} items</div>
+            <div class="metric-change">Avg: ${{ avg_order_value|floatformat:2|default:"0.00" }}/order</div>
+        </div>
+    </div>
+
+    <!-- Charts -->
+    <div class="charts-grid">
+        <!-- Monthly Revenue Chart -->
+        <div class="chart-card" style="grid-column: span 2;">
+            <h3>📈 Monthly Revenue (Last 12 Months)</h3>
+            <div class="chart-container">
+                <canvas id="revenueChart"></canvas>
+            </div>
+        </div>
+
+        <!-- Sales by Category Chart -->
+        <div class="chart-card">
+            <h3>🎯 Sales by Category</h3>
+            <div class="chart-container">
+                <canvas id="categoryChart"></canvas>
+            </div>
+        </div>
+
+        <!-- Top Products Chart -->
+        <div class="chart-card">
+            <h3>🏆 Top Selling Products</h3>
+            <div class="chart-container">
+                <canvas id="topProductsChart"></canvas>
+            </div>
+        </div>
+    </div>
+
+    <!-- Widgets -->
+    <div class="widgets-grid">
+        <!-- Recent Orders -->
+        <div class="widget-card">
+            <h3>
+                📦 Recent Orders
+                <span class="widget-badge">{{ recent_orders_list.count }}</span>
+            </h3>
+            {% for order in recent_orders_list %}
+            <div class="widget-item">
+                <div>
+                    <strong>#{{ order.order_number }}</strong><br>
+                    <small>{{ order.customer.get_full_name|default:order.customer.username }}</small>
+                </div>
+                <div style="text-align: right;">
+                    <span class="status-badge status-{{ order.status|lower }}">{{ order.get_status_display }}</span><br>
+                    <small>${{ order.total_amount|floatformat:2 }}</small>
+                </div>
+            </div>
+            {% empty %}
+            <p style="color: #a0aec0; text-align: center; padding: 2rem 0;">No recent orders</p>
+            {% endfor %}
+        </div>
+
+        <!-- Low Stock Alerts -->
+        <div class="widget-card">
+            <h3>
+                ⚠️ Low Stock Alerts
+                <span class="widget-badge">{{ low_stock_products.count }}</span>
+            </h3>
+            {% for product in low_stock_products %}
+            <div class="widget-item">
+                <div>
+                    <strong>{{ product.name }}</strong><br>
+                    <small>{{ product.category.name }}</small>
+                </div>
+                <div style="text-align: right;">
+                    <span class="stock-alert">{{ product.stock_quantity }} left</span><br>
+                    <small>Min: {{ product.low_stock_threshold }}</small>
+                </div>
+            </div>
+            {% empty %}
+            <p style="color: #a0aec0; text-align: center; padding: 2rem 0;">All products well stocked</p>
+            {% endfor %}
+        </div>
+
+        <!-- Customer Statistics -->
+        <div class="widget-card">
+            <h3>👥 Customer Statistics</h3>
+            <div style="padding: 1rem 0;">
+                <div style="margin-bottom: 1.5rem;">
+                    <div style="display: flex; justify-content: space-between; margin-bottom: 0.5rem;">
+                        <span style="color: #718096;">Total Customers</span>
+                        <strong style="font-size: 1.5rem; color: #2d3748;">{{ total_customers }}</strong>
+                    </div>
+                    <div style="display: flex; justify-content: space-between;">
+                        <span style="color: #718096; font-size: 0.875rem;">New this month</span>
+                        <span style="color: #48bb78; font-weight: 600;">+{{ new_customers_30d }}</span>
+                    </div>
+                </div>
+                <div style="margin-bottom: 1.5rem;">
+                    <div style="display: flex; justify-content: space-between; margin-bottom: 0.5rem;">
+                        <span style="color: #718096;">Avg Order Value</span>
+                        <strong style="font-size: 1.5rem; color: #2d3748;">${{ avg_order_value|floatformat:2 }}</strong>
+                    </div>
+                </div>
+                <div>
+                    <div style="display: flex; justify-content: space-between; margin-bottom: 0.5rem;">
+                        <span style="color: #718096;">Pending Reviews</span>
+                        <strong style="font-size: 1.5rem; color: #ed8936;">{{ pending_reviews_count }}</strong>
+                    </div>
+                    <div style="display: flex; justify-content: space-between;">
+                        <span style="color: #718096; font-size: 0.875rem;">Out of Stock Items</span>
+                        <span style="color: #f56565; font-weight: 600;">{{ out_of_stock_count }}</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Top Products Table -->
+    <div class="table-card">
+        <h3>🔥 Top Selling Products</h3>
+        <table class="data-table">
+            <thead>
+                <tr>
+                    <th>Product Name</th>
+                    <th style="text-align: center;">Units Sold</th>
+                    <th style="text-align: right;">Revenue</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for product in top_products %}
+                <tr>
+                    <td><strong>{{ product.product__name }}</strong></td>
+                    <td style="text-align: center;">{{ product.total_sold }}</td>
+                    <td style="text-align: right; font-weight: 600; color: #48bb78;">${{ product.revenue|floatformat:2 }}</td>
+                </tr>
+                {% empty %}
+                <tr>
+                    <td colspan="3" style="text-align: center; color: #a0aec0; padding: 2rem;">No sales data available</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+<script>
+    // Monthly Revenue Line Chart
+    const revenueCtx = document.getElementById('revenueChart').getContext('2d');
+    const revenueData = {{ monthly_revenue|safe }};
+    
+    new Chart(revenueCtx, {
+        type: 'line',
+        data: {
+            labels: revenueData.map(d => d.month),
+            datasets: [{
+                label: 'Revenue',
+                data: revenueData.map(d => d.revenue),
+                borderColor: '#667eea',
+                backgroundColor: 'rgba(102, 126, 234, 0.1)',
+                borderWidth: 3,
+                fill: true,
+                tension: 0.4,
+                pointRadius: 4,
+                pointBackgroundColor: '#667eea',
+                pointBorderColor: '#fff',
+                pointBorderWidth: 2,
+                pointHoverRadius: 6
+            }]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: {
+                legend: { display: false },
+                tooltip: {
+                    backgroundColor: 'rgba(0, 0, 0, 0.8)',
+                    padding: 12,
+                    titleColor: '#fff',
+                    bodyColor: '#fff',
+                    callbacks: {
+                        label: (context) => `Revenue: $${context.parsed.y.toFixed(2)}`
+                    }
+                }
+            },
+            scales: {
+                y: {
+                    beginAtZero: true,
+                    grid: { color: '#f7fafc' },
+                    ticks: {
+                        callback: (value) => '$' + value.toLocaleString()
+                    }
+                },
+                x: {
+                    grid: { display: false }
+                }
+            }
+        }
+    });
+
+    // Sales by Category Pie Chart
+    const categoryCtx = document.getElementById('categoryChart').getContext('2d');
+    const categoryData = [
+        {% for cat in category_sales %}
+        { name: '{{ cat.product__category__name|default:"Uncategorized" }}', value: {{ cat.total_sales }} },
+        {% endfor %}
+    ];
+    
+    new Chart(categoryCtx, {
+        type: 'doughnut',
+        data: {
+            labels: categoryData.map(d => d.name),
+            datasets: [{
+                data: categoryData.map(d => d.value),
+                backgroundColor: [
+                    '#667eea', '#48bb78', '#ed8936', '#4299e1', '#f56565', '#9f7aea'
+                ],
+                borderWidth: 0
+            }]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: {
+                legend: {
+                    position: 'bottom',
+                    labels: { padding: 15, font: { size: 12 } }
+                },
+                tooltip: {
+                    backgroundColor: 'rgba(0, 0, 0, 0.8)',
+                    padding: 12
+                }
+            }
+        }
+    });
+
+    // Top Products Bar Chart
+    const productsCtx = document.getElementById('topProductsChart').getContext('2d');
+    const productsData = [
+        {% for product in top_products|slice:":5" %}
+        { name: '{{ product.product__name|truncatechars:20 }}', sold: {{ product.total_sold }} },
+        {% endfor %}
+    ];
+    
+    new Chart(productsCtx, {
+        type: 'bar',
+        data: {
+            labels: productsData.map(d => d.name),
+            datasets: [{
+                label: 'Units Sold',
+                data: productsData.map(d => d.sold),
+                backgroundColor: '#48bb78',
+                borderRadius: 6
+            }]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: {
+                legend: { display: false },
+                tooltip: {
+                    backgroundColor: 'rgba(0, 0, 0, 0.8)',
+                    padding: 12
+                }
+            },
+            scales: {
+                y: {
+                    beginAtZero: true,
+                    grid: { color: '#f7fafc' }
+                },
+                x: {
+                    grid: { display: false }
+                }
+            }
+        }
+    });
+</script>
+{% endblock %}

@@ -1,0 +1,6 @@
+Django>=6.0
+psycopg2-binary>=2.9.9
+Pillow>=10.0.0
+django-environ>=0.11.2
+django-admin-interface>=0.28.0
+django-colorfield>=0.11.0
