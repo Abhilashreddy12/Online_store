@@ -38,7 +38,7 @@
                         <p style="color: #667eea; margin-top: 0.3rem;">{{ item.variant_details }}</p>
                         {% endif %}
                         <p style="margin-top: 0.5rem;">
-                            <strong>Price:</strong> ${{ item.unit_price }} × {{ item.quantity }} = <strong style="color: #667eea;">${{ item.line_total }}</strong>
+                            <strong>Price:</strong> ₹{{ item.unit_price }} × {{ item.quantity }} = <strong style="color: #667eea;">₹{{ item.line_total }}</strong>
                         </p>
                     </div>
                 </div>
@@ -110,23 +110,23 @@
                 
                 <div style="display: flex; justify-content: space-between; margin-bottom: 0.8rem;">
                     <span>Subtotal:</span>
-                    <strong>${{ order.subtotal }}</strong>
+                    <strong>₹{{ order.subtotal }}</strong>
                 </div>
                 
                 <div style="display: flex; justify-content: space-between; margin-bottom: 0.8rem;">
                     <span>Shipping:</span>
-                    <strong>${{ order.shipping_cost }}</strong>
+                    <strong>₹{{ order.shipping_cost }}</strong>
                 </div>
                 
                 <div style="display: flex; justify-content: space-between; margin-bottom: 0.8rem;">
                     <span>Tax:</span>
-                    <strong>${{ order.tax_amount }}</strong>
+                    <strong>₹{{ order.tax_amount }}</strong>
                 </div>
                 
                 {% if order.discount_amount > 0 %}
                 <div style="display: flex; justify-content: space-between; margin-bottom: 0.8rem; color: #48bb78;">
                     <span>Discount:</span>
-                    <strong>-${{ order.discount_amount }}</strong>
+                    <strong>-₹{{ order.discount_amount }}</strong>
                 </div>
                 {% endif %}
                 
@@ -134,7 +134,7 @@
                 
                 <div style="display: flex; justify-content: space-between; font-size: 1.3rem; margin-bottom: 2rem;">
                     <strong>Total:</strong>
-                    <strong style="color: #667eea;">${{ order.total_amount }}</strong>
+                    <strong style="color: #667eea;">₹{{ order.total_amount }}</strong>
                 </div>
                 
                 {% if order.status in 'PENDING,PROCESSING' %}

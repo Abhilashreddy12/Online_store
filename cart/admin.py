@@ -22,7 +22,7 @@ class CartAdmin(admin.ModelAdmin):
     total_items_count.short_description = 'Total Items'
 
     def subtotal_display(self, obj):
-        return format_html('<strong>${:,.2f}</strong>', obj.subtotal)
+        return format_html('<strong>₹{:,.2f}</strong>', obj.subtotal)
     subtotal_display.short_description = 'Subtotal'
 
 
@@ -34,7 +34,7 @@ class CartItemAdmin(admin.ModelAdmin):
     readonly_fields = ['unit_price', 'line_total', 'added_at', 'updated_at']
 
     def line_total_display(self, obj):
-        return format_html('<strong>${:,.2f}</strong>', obj.line_total)
+        return format_html('<strong>₹{:,.2f}</strong>', obj.line_total)
     line_total_display.short_description = 'Line Total'
 
 

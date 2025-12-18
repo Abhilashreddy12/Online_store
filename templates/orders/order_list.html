@@ -27,7 +27,7 @@
                 <span class="badge badge-danger">✗ {{ order.get_status_display }}</span>
                 {% endif %}
                 <br>
-                <strong style="font-size: 1.5rem; color: #667eea;">${{ order.total_amount }}</strong>
+                <strong style="font-size: 1.5rem; color: #667eea;">₹{{ order.total_amount }}</strong>
             </div>
         </div>
         
@@ -41,7 +41,7 @@
                     <strong>{{ item.product_name }}</strong><br>
                     <small style="color: #718096;">{{ item.variant_details }} | Qty: {{ item.quantity }}</small>
                 </div>
-                <strong>${{ item.line_total }}</strong>
+                <strong>₹{{ item.line_total }}</strong>
             </div>
             {% endfor %}
             {% if order.items.count > 3 %}

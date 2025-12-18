@@ -36,7 +36,7 @@
                 <strong>Total Orders:</strong> {{ customer.total_orders }}
             </div>
             <div style="margin-bottom: 1rem;">
-                <strong>Total Spent:</strong> <span style="color: #667eea; font-weight: bold;">${{ customer.total_spent|floatformat:2 }}</span>
+                <strong>Total Spent:</strong> <span style="color: #667eea; font-weight: bold;">₹{{ customer.total_spent|floatformat:2 }}</span>
             </div>
             <div style="margin-top: 2rem;">
                 <a href="{% url 'orders:order_list' %}" class="btn">View All Orders</a>

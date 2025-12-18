@@ -62,9 +62,9 @@
                 
                 <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem;">
                     <div>
-                        <span class="product-price">${{ product.price }}</span>
+                        <span class="product-price">₹{{ product.price }}</span>
                         {% if product.compare_price and product.discount_percentage %}
-                        <br><small style="text-decoration: line-through; color: #a0aec0;">${{ product.compare_price }}</small>
+                        <br><small style="text-decoration: line-through; color: #a0aec0;">₹{{ product.compare_price }}</small>
                         {% endif %}
                     </div>
                 </div>

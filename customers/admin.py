@@ -53,7 +53,7 @@ class CustomerAdmin(admin.ModelAdmin):
 
     def total_spent_amount(self, obj):
         amount = obj.total_spent
-        return format_html('<strong>${:,.2f}</strong>', amount)
+        return format_html('<strong>₹{:,.2f}</strong>', amount)
     total_spent_amount.short_description = 'Total Spent'
 
 

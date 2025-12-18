@@ -96,7 +96,7 @@ class OrderAdmin(admin.ModelAdmin):
     payment_status_badge.short_description = 'Payment'
 
     def total_amount_display(self, obj):
-        return format_html('<strong style="font-size: 14px;">${}</strong>', f'{obj.total_amount:,.2f}')
+        return format_html('<strong style="font-size: 14px;">₹{}</strong>', f'{obj.total_amount:,.2f}')
     total_amount_display.short_description = 'Total'
 
     def items_count(self, obj):
@@ -188,7 +188,7 @@ class CouponAdmin(admin.ModelAdmin):
     def discount_display(self, obj):
         if obj.discount_type == 'PERCENTAGE':
             return f'{obj.discount_value}%'
-        return f'${obj.discount_value}'
+        return f'₹{obj.discount_value}'
     discount_display.short_description = 'Discount'
 
     def usage_display(self, obj):

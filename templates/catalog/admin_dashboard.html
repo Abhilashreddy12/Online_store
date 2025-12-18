@@ -225,20 +225,20 @@
 
         <div class="metric-card revenue">
             <div class="metric-label">Total Revenue</div>
-            <div class="metric-value">${{ total_revenue|floatformat:2|default:"0.00" }}</div>
-            <div class="metric-change">+${{ recent_revenue|floatformat:2|default:"0.00" }} this month</div>
+            <div class="metric-value">₹{{ total_revenue|floatformat:2|default:"0.00" }}</div>
+            <div class="metric-change">+₹{{ recent_revenue|floatformat:2|default:"0.00" }} this month</div>
         </div>
 
         <div class="metric-card profit">
             <div class="metric-label">Total Profit</div>
-            <div class="metric-value">${{ total_profit|floatformat:2|default:"0.00" }}</div>
+            <div class="metric-value">₹{{ total_profit|floatformat:2|default:"0.00" }}</div>
             <div class="metric-change">Gross margin</div>
         </div>
 
         <div class="metric-card sales">
             <div class="metric-label">Total Sales</div>
             <div class="metric-value">{{ total_sales|default:0 }} items</div>
-            <div class="metric-change">Avg: ${{ avg_order_value|floatformat:2|default:"0.00" }}/order</div>
+            <div class="metric-change">Avg: ₹{{ avg_order_value|floatformat:2|default:"0.00" }}/order</div>
         </div>
     </div>
 
@@ -285,7 +285,7 @@
                 </div>
                 <div style="text-align: right;">
                     <span class="status-badge status-{{ order.status|lower }}">{{ order.get_status_display }}</span><br>
-                    <small>${{ order.total_amount|floatformat:2 }}</small>
+                    <small>₹{{ order.total_amount|floatformat:2 }}</small>
                 </div>
             </div>
             {% empty %}
@@ -332,7 +332,7 @@
                 <div style="margin-bottom: 1.5rem;">
                     <div style="display: flex; justify-content: space-between; margin-bottom: 0.5rem;">
                         <span style="color: #718096;">Avg Order Value</span>
-                        <strong style="font-size: 1.5rem; color: #2d3748;">${{ avg_order_value|floatformat:2 }}</strong>
+                        <strong style="font-size: 1.5rem; color: #2d3748;">₹{{ avg_order_value|floatformat:2 }}</strong>
                     </div>
                 </div>
                 <div>
@@ -365,7 +365,7 @@
                 <tr>
                     <td><strong>{{ product.product__name }}</strong></td>
                     <td style="text-align: center;">{{ product.total_sold }}</td>
-                    <td style="text-align: right; font-weight: 600; color: #48bb78;">${{ product.revenue|floatformat:2 }}</td>
+                    <td style="text-align: right; font-weight: 600; color: #48bb78;">₹{{ product.revenue|floatformat:2 }}</td>
                 </tr>
                 {% empty %}
                 <tr>
@@ -415,7 +415,7 @@
                     titleColor: '#fff',
                     bodyColor: '#fff',
                     callbacks: {
-                        label: (context) => `Revenue: $${context.parsed.y.toFixed(2)}`
+                        label: (context) => `Revenue: ₹${context.parsed.y.toFixed(2)}`
                     }
                 }
             },
@@ -424,7 +424,7 @@
                     beginAtZero: true,
                     grid: { color: '#f7fafc' },
                     ticks: {
-                        callback: (value) => '$' + value.toLocaleString()
+                        callback: (value) => '₹' + value.toLocaleString()
                     }
                 },
                 x: {

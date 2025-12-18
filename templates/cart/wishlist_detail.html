@@ -21,7 +21,7 @@
                 <h3 class="product-title">{{ item.product.name }}</h3>
                 <p style="color: #718096; margin-bottom: 1rem;">{{ item.product.category.name }}</p>
                 <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem;">
-                    <span class="product-price">${{ item.product.price }}</span>
+                    <span class="product-price">₹{{ item.product.price }}</span>
                 </div>
                 
                 <form method="post" action="{% url 'cart:add_to_cart' item.product.id %}" style="margin-bottom: 0.5rem;">

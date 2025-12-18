@@ -102,12 +102,12 @@ class ProductAdmin(admin.ModelAdmin):
     def price_display(self, obj):
         if obj.compare_price and obj.compare_price > obj.price:
             return format_html(
-                '<span style="color: red; font-weight: bold;">${}</span> '
-                '<span style="text-decoration: line-through; color: gray;">${}</span> '
+                '<span style="color: red; font-weight: bold;">₹{}</span> '
+                '<span style="text-decoration: line-through; color: gray;">₹{}</span> '
                 '<span style="color: green;">(-{}%)</span>',
                 obj.price, obj.compare_price, obj.discount_percentage
             )
-        return f'${obj.price}'
+        return f'₹{obj.price}'
     price_display.short_description = 'Price'
 
     def stock_status(self, obj):

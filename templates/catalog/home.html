@@ -28,7 +28,7 @@
                         <h3 class="product-title">{{ product.name }}</h3>
                         <p style="color: #718096; margin-bottom: 1rem;">{{ product.category.name }}</p>
                         <div style="display: flex; justify-content: space-between; align-items: center;">
-                            <span class="product-price">${{ product.price }}</span>
+                            <span class="product-price">₹{{ product.price }}</span>
                             {% if product.discount_percentage %}
                             <span style="background: #f56565; color: white; padding: 0.3rem 0.6rem; border-radius: 5px; font-size: 0.9rem;">-{{ product.discount_percentage }}%</span>
                             {% endif %}
@@ -56,7 +56,7 @@
                     <div class="product-info">
                         <h3 class="product-title">{{ product.name }}</h3>
                         <p style="color: #718096; margin-bottom: 1rem;">{{ product.category.name }}</p>
-                        <span class="product-price">${{ product.price }}</span>
+                        <span class="product-price">₹{{ product.price }}</span>
                     </div>
                 </a>
             </div>

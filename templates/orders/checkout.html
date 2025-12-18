@@ -118,29 +118,29 @@
                                 <strong style="font-size: 0.9rem;">{{ item.product.name }}</strong><br>
                                 <small style="color: #718096;">Qty: {{ item.quantity }}</small>
                             </div>
-                            <strong style="color: #667eea;">${{ item.line_total }}</strong>
+                            <strong style="color: #667eea;">₹{{ item.line_total }}</strong>
                         </div>
                         {% endfor %}
                     </div>
                     
                     <div style="display: flex; justify-content: space-between; margin-bottom: 0.8rem;">
                         <span>Subtotal:</span>
-                        <strong>${{ cart.subtotal }}</strong>
+                        <strong>₹{{ cart.subtotal }}</strong>
                     </div>
                     
                     <div style="display: flex; justify-content: space-between; margin-bottom: 0.8rem;">
                         <span>Shipping:</span>
-                        <strong>$10.00</strong>
+                        <strong>₹10.00</strong>
                     </div>
                     
                     <div style="display: flex; justify-content: space-between; margin-bottom: 1rem; padding-bottom: 1rem; border-bottom: 2px solid #e2e8f0;">
                         <span>Tax (10%):</span>
-                        <strong>${{ cart.subtotal|floatformat:2 }}</strong>
+                        <strong>₹{{ cart.subtotal|floatformat:2 }}</strong>
                     </div>
                     
                     <div style="display: flex; justify-content: space-between; margin-bottom: 2rem; font-size: 1.3rem;">
                         <strong>Total:</strong>
-                        <strong style="color: #667eea;">${{ cart.subtotal|add:"10"|floatformat:2 }}</strong>
+                        <strong style="color: #667eea;">₹{{ cart.subtotal|add:"10"|floatformat:2 }}</strong>
                     </div>
                     
                     <button type="submit" class="btn" style="width: 100%; padding: 1rem; font-size: 1.1rem;">Place Order</button>

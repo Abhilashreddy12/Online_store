@@ -28,9 +28,9 @@
             {% endif %}
             
             <div style="margin-bottom: 2rem;">
-                <span style="font-size: 2.5rem; color: #667eea; font-weight: bold;">${{ product.price }}</span>
+                <span style="font-size: 2.5rem; color: #667eea; font-weight: bold;">₹{{ product.price }}</span>
                 {% if product.compare_price and product.discount_percentage %}
-                <span style="text-decoration: line-through; color: #a0aec0; font-size: 1.5rem; margin-left: 1rem;">${{ product.compare_price }}</span>
+                <span style="text-decoration: line-through; color: #a0aec0; font-size: 1.5rem; margin-left: 1rem;">₹{{ product.compare_price }}</span>
                 <span style="background: #f56565; color: white; padding: 0.5rem 1rem; border-radius: 5px; margin-left: 1rem;">-{{ product.discount_percentage }}%</span>
                 {% endif %}
             </div>
@@ -38,6 +38,31 @@
             <p style="color: #4a5568; line-height: 1.8; margin-bottom: 2rem;">{{ product.description }}</p>
             
             <div style="margin-bottom: 1.5rem;">
+                <div id="live-user-count" style="margin-bottom: 1rem; color: #3182ce; font-weight: bold;">
+                    <span>Live viewers: <span id="live-count">1</span></span>
+                </div>
+                {% block extra_js %}
+                <script>
+                    (function() {
+                        var productId = {{ product.id }};
+                        var countSpan = document.getElementById('live-count');
+                        var wsScheme = window.location.protocol === "https:" ? "wss" : "ws";
+                        var wsPath = wsScheme + '://' + window.location.host + '/ws/product/' + productId + '/';
+                        var socket = new WebSocket(wsPath);
+
+                        socket.onmessage = function(e) {
+                            var data = JSON.parse(e.data);
+                            if (data.count !== undefined) {
+                                countSpan.textContent = data.count;
+                            }
+                        };
+
+                        socket.onclose = function(e) {
+                            // Optionally handle disconnect
+                        };
+                    })();
+                </script>
+                {% endblock %}
                 <strong>Category:</strong> {{ product.category.name }}
             </div>
             
@@ -68,7 +93,7 @@
                             {{ variant.size.name }} - {{ variant.color.name }} 
                             (Stock: {{ variant.stock_quantity }}) 
                             {% if variant.price_adjustment != 0 %}
-                            - ${{ variant.final_price }}
+                            - ₹{{ variant.final_price }}
                             {% endif %}
                         </option>
                         {% endif %}
@@ -205,7 +230,7 @@
                     {% endif %}
                     <div class="product-info">
                         <h3 class="product-title">{{ related.name }}</h3>
-                        <span class="product-price">${{ related.price }}</span>
+                        <span class="product-price">₹{{ related.price }}</span>
                     </div>
                 </a>
             </div>

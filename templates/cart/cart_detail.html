@@ -35,7 +35,7 @@
                                 </div>
                             </div>
                         </td>
-                        <td><strong>${{ item.unit_price }}</strong></td>
+                        <td><strong>₹{{ item.unit_price }}</strong></td>
                         <td>
                             <form method="post" action="{% url 'cart:update_cart_item' item.id %}" style="display: flex; gap: 0.5rem;">
                                 {% csrf_token %}
@@ -43,7 +43,7 @@
                                 <button type="submit" class="btn" style="padding: 0.5rem 1rem;">Update</button>
                             </form>
                         </td>
-                        <td><strong style="color: #667eea;">${{ item.line_total }}</strong></td>
+                        <td><strong style="color: #667eea;">₹{{ item.line_total }}</strong></td>
                         <td>
                             <form method="post" action="{% url 'cart:remove_from_cart' item.id %}">
                                 {% csrf_token %}
@@ -62,22 +62,22 @@
                 
                 <div style="display: flex; justify-content: space-between; margin-bottom: 1rem; padding-bottom: 1rem; border-bottom: 2px solid #e2e8f0;">
                     <span>Subtotal ({{ cart.total_items }} items):</span>
-                    <strong>${{ cart.subtotal }}</strong>
+                    <strong>₹{{ cart.subtotal }}</strong>
                 </div>
                 
                 <div style="display: flex; justify-content: space-between; margin-bottom: 1rem; padding-bottom: 1rem; border-bottom: 2px solid #e2e8f0;">
                     <span>Shipping:</span>
-                    <strong>$10.00</strong>
+                    <strong>₹10.00</strong>
                 </div>
                 
                 <div style="display: flex; justify-content: space-between; margin-bottom: 1rem; padding-bottom: 1rem; border-bottom: 2px solid #e2e8f0;">
                     <span>Tax (10%):</span>
-                    <strong>${{ cart.subtotal|floatformat:2|add:"0"|floatformat:2 }}</strong>
+                    <strong>₹{{ cart.subtotal|floatformat:2|add:"0"|floatformat:2 }}</strong>
                 </div>
                 
                 <div style="display: flex; justify-content: space-between; margin-bottom: 2rem; font-size: 1.3rem;">
                     <strong>Total:</strong>
-                    <strong style="color: #667eea;">${{ cart.subtotal|add:"10"|floatformat:2 }}</strong>
+                    <strong style="color: #667eea;">₹{{ cart.subtotal|add:"10"|floatformat:2 }}</strong>
                 </div>
                 
                 <a href="{% url 'orders:checkout' %}" class="btn" style="width: 100%; text-align: center; display: block; margin-bottom: 1rem;">Proceed to Checkout</a>
