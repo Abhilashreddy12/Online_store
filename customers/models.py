@@ -18,6 +18,7 @@ class Customer(models.Model):
     profile_picture = models.ImageField(upload_to='customers/', blank=True, null=True)
     
     # Newsletter and marketing
+    
     newsletter_subscribed = models.BooleanField(default=False)
     sms_notifications = models.BooleanField(default=False)
     
@@ -46,7 +47,6 @@ class Customer(models.Model):
 class Address(models.Model):
     """Customer addresses"""
     ADDRESS_TYPES = [
-        ('BILLING', 'Billing'),
         ('SHIPPING', 'Shipping'),
     ]
 

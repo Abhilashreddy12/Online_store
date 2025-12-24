@@ -22,16 +22,11 @@ def checkout(request):
         address_type='SHIPPING',
         is_active=True
     )
-    billing_addresses = Address.objects.filter(
-        customer=request.user,
-        address_type='BILLING',
-        is_active=True
-    )
+   
     
     context = {
         'cart': cart,
         'shipping_addresses': shipping_addresses,
-        'billing_addresses': billing_addresses,
     }
     return render(request, 'orders/checkout.html', context)
 
@@ -50,21 +45,19 @@ def place_order(request):
     
     # Get addresses
     shipping_address_id = request.POST.get('shipping_address')
-    billing_address_id = request.POST.get('billing_address')
+    
     payment_method = request.POST.get('payment_method', 'COD')
     
-    if not shipping_address_id or not billing_address_id:
-        messages.error(request, 'Please select both shipping and billing addresses!')
-        return redirect('orders:checkout')
+    
     
     shipping_address = get_object_or_404(Address, id=shipping_address_id, customer=request.user)
-    billing_address = get_object_or_404(Address, id=billing_address_id, customer=request.user)
+    
     
     # Create order
     order = Order.objects.create(
         customer=request.user,
         shipping_address=shipping_address,
-        billing_address=billing_address,
+       
         payment_method=payment_method,
         subtotal=cart.subtotal,
         shipping_cost=Decimal('10.00'),  # Fixed shipping cost

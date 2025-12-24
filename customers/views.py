@@ -175,21 +175,3 @@ def delete_address(request, address_id):
     return redirect('customers:profile')
 
 
-def register(request):
-    """User registration"""
-    if request.user.is_authenticated:
-        return redirect('catalog:home')
-    
-    if request.method == 'POST':
-        form = UserCreationForm(request.POST)
-        if form.is_valid():
-            user = form.save()
-            Customer.objects.create(user=user)
-            login(request, user)
-            messages.success(request, 'Registration successful!')
-            return redirect('catalog:home')
-    else:
-        form = UserCreationForm()
-    
-    return render(request, 'customers/register.html', {'form': form})
-

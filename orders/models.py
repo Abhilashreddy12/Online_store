@@ -33,8 +33,7 @@ class Order(models.Model):
     # Addresses
     shipping_address = models.ForeignKey(Address, on_delete=models.PROTECT, 
                                         related_name='shipping_orders', null=True)
-    billing_address = models.ForeignKey(Address, on_delete=models.PROTECT, 
-                                       related_name='billing_orders', null=True)
+    # removed customer billing address to simplify
     
     # Pricing
     subtotal = models.DecimalField(max_digits=10, decimal_places=2, default=0)

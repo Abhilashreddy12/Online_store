@@ -38,7 +38,7 @@ class OrderAdmin(admin.ModelAdmin):
             'fields': ('order_number', 'customer', 'status', 'payment_status')
         }),
         ('Addresses', {
-            'fields': ('shipping_address', 'billing_address')
+            'fields': ('shipping_address',)
         }),
         ('Pricing', {
             'fields': ('subtotal', 'tax_amount', 'shipping_cost', 'discount_amount', 
