@@ -1,15 +1,105 @@
 {% extends 'base.html' %}
-
+{% load static %}
 {% block title %}Welcome to Fashion Store{% endblock %}
 
+
 {% block content %}
-<div class="hero">
-    <div class="container">
-        <h1>Welcome to Fashion Store</h1>
-        <p style="font-size: 1.3rem; margin-bottom: 2rem;">Discover the latest trends in fashion</p>
-        <a href="{% url 'catalog:product_list' %}" class="btn">Shop Now</a>
+<section class="hero-section">
+    <div class="hero-image-bg">
+        <img src="{% static 'images/hero1.png' %}" alt="Fashion Hero">
     </div>
-</div>
+
+    <div class="hero-overlay">
+        <div class="hero-content">
+            <h1 class="hero-headline">Welcome to Fashion Store</h1>
+            <p class="hero-tagline">Discover the latest trends in fashion</p>
+            <a href="{% url 'catalog:product_list' %}" class="btn hero-cta">Shop Now</a>
+        </div>
+    </div>
+</section>
+
+<style>
+    .hero-section {
+    position: relative;
+    width: 100%;
+    height: 85vh;          /* SHOW MORE IMAGE */
+    max-height: 900px;    /* PREVENT TOO TALL ON LARGE SCREENS */
+    min-height: 70vh;
+    overflow: hidden;
+}
+
+.hero-image-bg {
+    position: absolute;
+    inset: 0;
+    z-index: 1;
+}
+
+.hero-image-bg img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;        /* FULL COVER */
+    object-position: center top; /* SHOW MORE TOP AREA */
+    display: block;
+}
+
+.hero-overlay {
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(
+        120deg,
+        rgba(102,126,234,0.25),
+        rgba(118,75,162,0.25)
+    );
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 2;
+}
+
+.hero-content {
+    text-align: center;
+    color: #fff;
+    padding: 3rem 1.5rem;
+    z-index: 3;
+}
+
+.hero-headline {
+    font-size: 3rem;
+    font-weight: 700;
+    margin-bottom: 1rem;
+    text-shadow: 0 3px 12px rgba(0,0,0,0.15);
+}
+
+.hero-tagline {
+    font-size: 1.4rem;
+    margin-bottom: 2rem;
+}
+
+@media (max-width: 992px) {
+    .hero-section {
+        min-height: 40vh !important;
+    }
+    .hero-headline {
+        font-size: 2rem !important;
+    }
+}
+@media (max-width: 576px) {
+    .hero-section {
+        min-height: 280px !important;
+    }
+    .hero-headline {
+        font-size: 1.3rem !important;
+    }
+    .hero-tagline {
+        font-size: 1rem !important;
+    }
+    .hero-cta {
+        width: 100%;
+        font-size: 1.1rem !important;
+        padding: 1rem 0 !important;
+    }
+}
+</style>
 
 <div class="container">
     {% if featured_products %}

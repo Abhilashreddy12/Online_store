@@ -4,40 +4,155 @@
 
 {% block content %}
 <div class="container">
-    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 3rem; margin-top: 2rem;">
-        <div>
+    <div class="product-detail-grid">
+        <div class="product-detail-images">
             {% if product.images.first %}
-            <img src="{{ product.images.first.image.url }}" alt="{{ product.name }}" style="width: 100%; border-radius: 10px; margin-bottom: 1rem;">
+            <img src="{{ product.images.first.image.url }}" alt="{{ product.name }}" class="product-main-image">
             {% else %}
-            <div style="width: 100%; height: 500px; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); border-radius: 10px; display: flex; align-items: center; justify-content: center; color: white; font-size: 5rem; margin-bottom: 1rem;">👕</div>
+            <div class="product-main-image product-main-image-placeholder">👕</div>
             {% endif %}
-            
             {% if product.images.all|length > 1 %}
-            <div style="display: grid; grid-template-columns: repeat(4, 1fr); gap: 0.5rem;">
+            <div class="product-thumbnails">
                 {% for image in product.images.all %}
-                <img src="{{ image.image.url }}" alt="{{ product.name }}" style="width: 100%; height: 100px; object-fit: cover; border-radius: 8px; cursor: pointer;">
+                <img src="{{ image.image.url }}" alt="{{ product.name }}" class="product-thumb">
                 {% endfor %}
             </div>
             {% endif %}
         </div>
         
-        <div>
-            <h1 style="font-size: 2.5rem; margin-bottom: 1rem;">{{ product.name }}</h1>
+        <div class="product-detail-info">
+            <h1 class="product-detail-title">{{ product.name }}</h1>
             {% if product.brand %}
-            <p style="color: #718096; font-size: 1.2rem; margin-bottom: 1rem;">by {{ product.brand.name }}</p>
+            <p class="product-detail-brand">by {{ product.brand.name }}</p>
             {% endif %}
-            
-            <div style="margin-bottom: 2rem;">
-                <span style="font-size: 2.5rem; color: #667eea; font-weight: bold;">₹{{ product.price }}</span>
+            <div class="product-detail-pricing">
+                <span class="product-detail-price">₹{{ product.price }}</span>
                 {% if product.compare_price and product.discount_percentage %}
-                <span style="text-decoration: line-through; color: #a0aec0; font-size: 1.5rem; margin-left: 1rem;">₹{{ product.compare_price }}</span>
-                <span style="background: #f56565; color: white; padding: 0.5rem 1rem; border-radius: 5px; margin-left: 1rem;">-{{ product.discount_percentage }}%</span>
+                <span class="product-detail-compare">₹{{ product.compare_price }}</span>
+                <span class="product-detail-discount">-{{ product.discount_percentage }}%</span>
                 {% endif %}
             </div>
-            
-            <p style="color: #4a5568; line-height: 1.8; margin-bottom: 2rem;">{{ product.description }}</p>
-            
+            <p class="product-detail-desc">{{ product.description }}</p>
             <div style="margin-bottom: 1.5rem;">
+                </div>
+                <style>
+                    .product-detail-grid {
+                        display: grid;
+                        grid-template-columns: 1fr 1fr;
+                        gap: 3rem;
+                        margin-top: 2rem;
+                    }
+                    .product-detail-images {
+                        display: flex;
+                        flex-direction: column;
+                        gap: 1.5rem;
+                    }
+                    .product-main-image {
+    width: 100%;
+    max-height: 420px;
+    height: auto;
+    object-fit: contain;
+    background: #f7fafc;
+    padding: 1rem;
+    border-radius: 14px;
+}
+                    .product-main-image-placeholder {
+                        display: flex;
+                        align-items: center;
+                        justify-content: center;
+                        font-size: 5rem;
+                        color: #fff;
+                        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+                        height: 420px;
+                        border-radius: 14px;
+                    }
+                    .product-thumbnails {
+                        display: grid;
+                        grid-template-columns: repeat(4, 1fr);
+                        gap: 0.5rem;
+                    }
+                    .product-thumb {
+                        width: 100%;
+                        height: 80px;
+                        object-fit: cover;
+                        border-radius: 8px;
+                        cursor: pointer;
+                        border: 2px solid transparent;
+                        transition: border 0.2s;
+                    }
+                    .product-thumb:hover {
+                        border: 2px solid #667eea;
+                    }
+                    .product-detail-info {
+                        display: flex;
+                        flex-direction: column;
+                        gap: 1.5rem;
+                    }
+                    .product-detail-title {
+                        font-size: 2.5rem;
+                        margin-bottom: 0.5rem;
+                        color: #2d3748;
+                        font-weight: 700;
+                    }
+                    .product-detail-brand {
+                        color: #718096;
+                        font-size: 1.2rem;
+                        margin-bottom: 1rem;
+                    }
+                    .product-detail-pricing {
+                        margin-bottom: 1.5rem;
+                        display: flex;
+                        align-items: center;
+                        gap: 1rem;
+                    }
+                    .product-detail-price {
+                        font-size: 2.5rem;
+                        color: #667eea;
+                        font-weight: bold;
+                    }
+                    .product-detail-compare {
+                        text-decoration: line-through;
+                        color: #a0aec0;
+                        font-size: 1.5rem;
+                    }
+                    .product-detail-discount {
+                        background: #f56565;
+                        color: white;
+                        padding: 0.5rem 1rem;
+                        border-radius: 5px;
+                        font-size: 1rem;
+                        font-weight: 600;
+                    }
+                    .product-detail-desc {
+                        color: #4a5568;
+                        line-height: 1.8;
+                        margin-bottom: 1.5rem;
+                    }
+                    @media (max-width: 992px) {
+                        .product-detail-grid {
+                            grid-template-columns: 1fr;
+                            gap: 2rem;
+                        }
+                        .product-main-image, .product-main-image-placeholder {
+                            height: 320px;
+                        }
+                    }
+                    @media (max-width: 576px) {
+                        .product-detail-title {
+                            font-size: 1.6rem;
+                        }
+                        .product-detail-price {
+                            font-size: 1.5rem;
+                        }
+                        .product-main-image, .product-main-image-placeholder {
+                            height: 180px;
+                        }
+                        .product-thumbnails {
+                            grid-template-columns: repeat(2, 1fr);
+                        }
+                    }
+                </style>
+                <!--
                 <div id="live-user-count" style="margin-bottom: 1rem; color: #3182ce; font-weight: bold;">
                     <span>Live viewers: <span id="live-count">1</span></span>
                 </div>
@@ -65,6 +180,7 @@
                 {% endblock %}
                 <strong>Category:</strong> {{ product.category.name }}
             </div>
+        -->
             
             {% if product.material %}
             <div style="margin-bottom: 1.5rem;">

@@ -6,11 +6,8 @@ import aioredis
 import os
 from django.conf import settings
 
-# Use REDIS_URL if set, otherwise fallback to local Redis
-REDIS_URL = os.environ.get(
-    'REDIS_URL',
-    'redis://localhost:6379/0'
-)
+REDIS_HOST = os.environ.get('REDIS_HOST', '127.0.0.1')
+REDIS_PORT = int(os.environ.get('REDIS_PORT', 6379))
 
 class ProductLiveViewConsumer(AsyncWebsocketConsumer):
     async def connect(self):
@@ -60,7 +57,7 @@ class ProductLiveViewConsumer(AsyncWebsocketConsumer):
         return self.scope['session'].session_key
 
     async def _add_viewer(self):
-        redis = await aioredis.create_redis_pool(REDIS_URL, encoding=None, ssl=REDIS_URL.startswith('rediss://') or REDIS_URL.startswith('redis://') and 'upstash' in REDIS_URL)
+        redis = await aioredis.create_redis_pool((REDIS_HOST, REDIS_PORT))
         key = f'product_live_users:{self.product_id}'
         # Use session_key or user_id to avoid duplicates
         unique_id = self.user_id or self.session_key
@@ -70,7 +67,7 @@ class ProductLiveViewConsumer(AsyncWebsocketConsumer):
         await redis.wait_closed()
 
     async def _remove_viewer(self):
-        redis = await aioredis.create_redis_pool(REDIS_URL, encoding=None, ssl=REDIS_URL.startswith('rediss://') or REDIS_URL.startswith('redis://') and 'upstash' in REDIS_URL)
+        redis = await aioredis.create_redis_pool((REDIS_HOST, REDIS_PORT))
         key = f'product_live_users:{self.product_id}'
         unique_id = self.user_id or self.session_key
         await redis.srem(key, unique_id)
@@ -78,7 +75,7 @@ class ProductLiveViewConsumer(AsyncWebsocketConsumer):
         await redis.wait_closed()
 
     async def _get_count(self):
-        redis = await aioredis.create_redis_pool(REDIS_URL, encoding=None, ssl=REDIS_URL.startswith('rediss://') or REDIS_URL.startswith('redis://') and 'upstash' in REDIS_URL)
+        redis = await aioredis.create_redis_pool((REDIS_HOST, REDIS_PORT))
         key = f'product_live_users:{self.product_id}'
         count = await redis.scard(key)
         redis.close()

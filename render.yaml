@@ -16,10 +16,6 @@ services:
       - key: DEBUG
         value: False
 
-      # Add your Upstash Redis URL here for production
-      - key: REDIS_URL
-        value: redis://default:AcUhAAIncDFiOWFkNzFiM2MwMDg0MWQ5OGRkOGIzOWZiYWMzNDAwOXAxNTA0NjU@patient-wahoo-50465.upstash.io:6379
-
 databases:
   - name: clothing_store_77x2
     databaseName: clothing_store_77x2

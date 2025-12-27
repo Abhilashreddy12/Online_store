@@ -13,18 +13,7 @@ This feature shows a real-time count of users currently viewing a product page.
    pip install -r requirements.txt
 
 2. Ensure Redis is running (default: 127.0.0.1:6379).
-    - For both local and production, set the `REDIS_URL` environment variable.
-    - For Upstash/Render, use the provided Redis URL (with TLS):
-     
-       Example:
-       ```
-       REDIS_URL=redis://default:AcUhAAIncDFiOWFkNzFiM2MwMDg0MWQ5OGRkOGIzOWZiYWMzNDAwOXAxNTA0NjU@patient-wahoo-50465.upstash.io:6379
-       ```
-    - For local development, you can use:
-       ```
-       REDIS_URL=redis://localhost:6379/0
-       ```
-    - The app will auto-detect and use the correct Redis connection for both environments.
+   - For production, set REDIS_HOST and REDIS_PORT in your environment or .env file.
 
 3. Run Django with Channels (ASGI):
    daphne shopping_store.asgi:application
