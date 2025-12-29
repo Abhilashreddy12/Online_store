@@ -1,5 +1,7 @@
+
 from django.db import models
 from django.contrib.auth.models import User
+from cloudinary.models import CloudinaryField
 
 
 class Customer(models.Model):
@@ -15,7 +17,7 @@ class Customer(models.Model):
     ]
     gender = models.CharField(max_length=1, choices=GENDER_CHOICES, blank=True)
     
-    profile_picture = models.ImageField(upload_to='customers/', blank=True, null=True)
+    profile_picture = CloudinaryField('profile_picture', blank=True, null=True)
     
     # Newsletter and marketing
     
