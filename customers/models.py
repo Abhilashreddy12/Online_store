@@ -9,25 +9,28 @@ class Customer(models.Model):
     user = models.OneToOneField(User, on_delete=models.CASCADE, related_name='customer_profile')
     phone = models.CharField(max_length=20, blank=True)
     date_of_birth = models.DateField(null=True, blank=True)
-    
+
     GENDER_CHOICES = [
         ('M', 'Male'),
         ('F', 'Female'),
         ('O', 'Other'),
     ]
     gender = models.CharField(max_length=1, choices=GENDER_CHOICES, blank=True)
-    
+
     profile_picture = CloudinaryField('profile_picture', blank=True, null=True)
-    
+
+    # Activity tracking
+    last_activity = models.DateTimeField(null=True, blank=True)
+    last_ip = models.GenericIPAddressField(null=True, blank=True)
+
     # Newsletter and marketing
-    
     newsletter_subscribed = models.BooleanField(default=False)
     sms_notifications = models.BooleanField(default=False)
-    
+
     # Customer segmentation
     is_vip = models.BooleanField(default=False)
     loyalty_points = models.PositiveIntegerField(default=0)
-    
+
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
 

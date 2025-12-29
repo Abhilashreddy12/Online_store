@@ -14,12 +14,14 @@ Including another URLconf
     1. Import the include() function: from django.urls import include, path
     2. Add a URL to urlpatterns:  path('blog/', include('blog.urls'))
 """
+
 from django.contrib import admin
 from django.urls import path, include
 from django.conf.urls.i18n import set_language
 from django.contrib.auth import views as auth_views
 from django.conf import settings
 from django.conf.urls.static import static
+from dashboard.views import dashboard_stats
 
 urlpatterns = [
     path('admin/', admin.site.urls),
@@ -27,17 +29,19 @@ urlpatterns = [
     path('cart/', include('cart.urls')),
     path('orders/', include('orders.urls')),
     path('account/', include('customers.urls')),
+    # Dashboard stats demo
+    path('dashboard/stats/', dashboard_stats, name='dashboard_stats'),
     # Password reset URLs
     path(
-    'account/password_reset/',
-    auth_views.PasswordResetView.as_view(
-        template_name='customers/password_reset_form.html',
-        email_template_name='customers/password_reset_email.html',
-        subject_template_name='customers/password_reset_subject.txt',
-        success_url='/account/password_reset/done/'
+        'account/password_reset/',
+        auth_views.PasswordResetView.as_view(
+            template_name='customers/password_reset_form.html',
+            email_template_name='customers/password_reset_email.html',
+            subject_template_name='customers/password_reset_subject.txt',
+            success_url='/account/password_reset/done/'
+        ),
+        name='password_reset'
     ),
-    name='password_reset'
-),
     path('account/password_reset/done/', auth_views.PasswordResetDoneView.as_view(template_name='customers/password_reset_done.html'), name='password_reset_done'),
     path('account/reset/<uidb64>/<token>/', auth_views.PasswordResetConfirmView.as_view(template_name='customers/password_reset_confirm.html'), name='password_reset_confirm'),
     path('account/reset/done/', auth_views.PasswordResetCompleteView.as_view(template_name='customers/password_reset_complete.html'), name='password_reset_complete'),
