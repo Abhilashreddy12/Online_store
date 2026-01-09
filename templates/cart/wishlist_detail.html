@@ -1,48 +1,279 @@
 {% extends 'base.html' %}
+{% load static %}
 
 {% block title %}Wishlist - Fashion Store{% endblock %}
 
+{% block extra_css %}
+<style>
+    /* Page Header */
+    .page-header {
+        margin-bottom: var(--space-8);
+    }
+    
+    .page-title {
+        font-size: clamp(1.75rem, 3vw, 2.5rem);
+        font-weight: 700;
+        color: var(--gray-900);
+        margin-bottom: var(--space-2);
+    }
+    
+    .page-subtitle {
+        color: var(--gray-500);
+    }
+    
+    /* Wishlist Grid */
+    .wishlist-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+        gap: var(--space-6);
+    }
+    
+    /* Wishlist Card */
+    .wishlist-card {
+        background: white;
+        border-radius: var(--radius-xl);
+        overflow: hidden;
+        box-shadow: var(--shadow-sm);
+        transition: all var(--transition-base);
+    }
+    
+    .wishlist-card:hover {
+        transform: translateY(-5px);
+        box-shadow: var(--shadow-lg);
+    }
+    
+    .wishlist-card-image {
+        position: relative;
+        aspect-ratio: 1;
+        overflow: hidden;
+        background: var(--gray-100);
+    }
+    
+    .wishlist-card-image img {
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+        transition: transform var(--transition-slow);
+    }
+    
+    .wishlist-card:hover .wishlist-card-image img {
+        transform: scale(1.05);
+    }
+    
+    .wishlist-card-placeholder {
+        width: 100%;
+        height: 100%;
+        background: var(--gradient-primary);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 4rem;
+        color: white;
+    }
+    
+    .wishlist-heart {
+        position: absolute;
+        top: var(--space-3);
+        right: var(--space-3);
+        width: 40px;
+        height: 40px;
+        background: white;
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 1.25rem;
+        box-shadow: var(--shadow-md);
+    }
+    
+    .wishlist-card-info {
+        padding: var(--space-4);
+    }
+    
+    .wishlist-card-category {
+        font-size: var(--text-xs);
+        color: var(--gray-500);
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+        margin-bottom: var(--space-1);
+    }
+    
+    .wishlist-card-title {
+        font-size: var(--text-lg);
+        font-weight: 600;
+        color: var(--gray-800);
+        margin-bottom: var(--space-3);
+        display: -webkit-box;
+        -webkit-line-clamp: 2;
+        -webkit-box-orient: vertical;
+        overflow: hidden;
+    }
+    
+    .wishlist-card-title a {
+        color: inherit;
+        text-decoration: none;
+    }
+    
+    .wishlist-card-title a:hover {
+        color: var(--primary-600);
+    }
+    
+    .wishlist-card-price {
+        font-size: var(--text-xl);
+        font-weight: 700;
+        color: var(--primary-600);
+        margin-bottom: var(--space-4);
+    }
+    
+    .wishlist-card-stock {
+        font-size: var(--text-sm);
+        margin-bottom: var(--space-4);
+    }
+    
+    .in-stock {
+        color: var(--success-600);
+    }
+    
+    .out-of-stock {
+        color: var(--error-500);
+    }
+    
+    .wishlist-card-actions {
+        display: flex;
+        flex-direction: column;
+        gap: var(--space-2);
+    }
+    
+    .btn-add-cart {
+        padding: var(--space-3);
+        font-weight: 600;
+    }
+    
+    .btn-remove {
+        padding: var(--space-3);
+        background: transparent;
+        color: var(--error-500);
+        border: 1px solid var(--error-200);
+    }
+    
+    .btn-remove:hover {
+        background: var(--error-500);
+        color: white;
+        border-color: var(--error-500);
+    }
+    
+    /* Empty Wishlist */
+    .empty-wishlist {
+        text-align: center;
+        padding: var(--space-16);
+        background: white;
+        border-radius: var(--radius-xl);
+        box-shadow: var(--shadow-sm);
+    }
+    
+    .empty-icon {
+        font-size: 6rem;
+        margin-bottom: var(--space-4);
+    }
+    
+    .empty-title {
+        font-size: var(--text-2xl);
+        font-weight: 600;
+        color: var(--gray-800);
+        margin-bottom: var(--space-2);
+    }
+    
+    .empty-text {
+        color: var(--gray-500);
+        margin-bottom: var(--space-6);
+        max-width: 400px;
+        margin-left: auto;
+        margin-right: auto;
+    }
+    
+    /* Responsive */
+    @media (max-width: 576px) {
+        .wishlist-grid {
+            grid-template-columns: repeat(2, 1fr);
+            gap: var(--space-3);
+        }
+        
+        .wishlist-card-info {
+            padding: var(--space-3);
+        }
+        
+        .wishlist-card-title {
+            font-size: var(--text-base);
+        }
+        
+        .wishlist-card-price {
+            font-size: var(--text-lg);
+        }
+    }
+</style>
+{% endblock %}
+
 {% block content %}
 <div class="container">
-    <h1 style="font-size: 2.5rem; margin-bottom: 2rem;">My Wishlist</h1>
+    <div class="page-header">
+        <h1 class="page-title">❤️ My Wishlist</h1>
+        {% if wishlist.items.exists %}
+        <p class="page-subtitle">{{ wishlist.items.count }} item{% if wishlist.items.count != 1 %}s{% endif %} saved for later</p>
+        {% endif %}
+    </div>
     
     {% if wishlist.items.exists %}
-    <div class="product-grid">
+    <div class="wishlist-grid">
         {% for item in wishlist.items.all %}
-        <div class="product-card">
-            <a href="{% url 'catalog:product_detail' item.product.slug %}" style="text-decoration: none; color: inherit;">
-                {% if item.product.images.first %}
-                <img src="{{ item.product.images.first.image.url }}" alt="{{ item.product.name }}" class="product-image">
-                {% else %}
-                <div class="product-image" style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); display: flex; align-items: center; justify-content: center; color: white; font-size: 3rem;">👕</div>
-                {% endif %}
-            </a>
-            <div class="product-info">
-                <h3 class="product-title">{{ item.product.name }}</h3>
-                <p style="color: #718096; margin-bottom: 1rem;">{{ item.product.category.name }}</p>
-                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem;">
-                    <span class="product-price">₹{{ item.product.price }}</span>
+        <article class="wishlist-card">
+            <a href="{% url 'catalog:product_detail' item.product.slug %}">
+                <div class="wishlist-card-image">
+                    {% if item.product.images.first %}
+                    <img src="{{ item.product.images.first.image.url }}" alt="{{ item.product.name }}">
+                    {% else %}
+                    <div class="wishlist-card-placeholder">👕</div>
+                    {% endif %}
+                    <div class="wishlist-heart">❤️</div>
                 </div>
+            </a>
+            
+            <div class="wishlist-card-info">
+                <span class="wishlist-card-category">{{ item.product.category.name }}</span>
+                <h3 class="wishlist-card-title">
+                    <a href="{% url 'catalog:product_detail' item.product.slug %}">{{ item.product.name }}</a>
+                </h3>
+                <div class="wishlist-card-price">₹{{ item.product.price }}</div>
                 
-                <form method="post" action="{% url 'cart:add_to_cart' item.product.id %}" style="margin-bottom: 0.5rem;">
-                    {% csrf_token %}
-                    <input type="hidden" name="quantity" value="1">
-                    <button type="submit" class="btn" style="width: 100%; padding: 0.6rem;">Add to Cart</button>
-                </form>
+                <p class="wishlist-card-stock {% if item.product.stock_quantity > 0 %}in-stock{% else %}out-of-stock{% endif %}">
+                    {% if item.product.stock_quantity > 0 %}✓ In Stock{% else %}✗ Out of Stock{% endif %}
+                </p>
                 
-                <form method="post" action="{% url 'cart:remove_from_wishlist' item.id %}">
-                    {% csrf_token %}
-                    <button type="submit" class="btn btn-danger" style="width: 100%; padding: 0.6rem;">Remove</button>
-                </form>
+                <div class="wishlist-card-actions">
+                    {% if item.product.stock_quantity > 0 %}
+                    <form method="post" action="{% url 'cart:add_to_cart' item.product.id %}">
+                        {% csrf_token %}
+                        <input type="hidden" name="quantity" value="1">
+                        <button type="submit" class="btn btn-add-cart" style="width: 100%;">🛒 Add to Cart</button>
+                    </form>
+                    {% else %}
+                    <button type="button" class="btn btn-secondary btn-add-cart" disabled style="width: 100%;">Out of Stock</button>
+                    {% endif %}
+                    
+                    <form method="post" action="{% url 'cart:remove_from_wishlist' item.id %}">
+                        {% csrf_token %}
+                        <button type="submit" class="btn btn-remove" style="width: 100%;">🗑️ Remove from Wishlist</button>
+                    </form>
+                </div>
             </div>
-        </div>
+        </article>
         {% endfor %}
     </div>
     {% else %}
-    <div class="card" style="text-align: center; padding: 4rem 2rem;">
-        <div style="font-size: 5rem; margin-bottom: 1rem;">❤️</div>
-        <h2 style="margin-bottom: 1rem;">Your wishlist is empty</h2>
-        <p style="color: #718096; margin-bottom: 2rem;">Save items you love for later!</p>
+    <!-- Empty Wishlist -->
+    <div class="empty-wishlist">
+        <div class="empty-icon">❤️</div>
+        <h2 class="empty-title">Your wishlist is empty</h2>
+        <p class="empty-text">Save items you love by clicking the heart icon on any product. They'll be waiting here for you!</p>
         <a href="{% url 'catalog:product_list' %}" class="btn">Browse Products</a>
     </div>
     {% endif %}

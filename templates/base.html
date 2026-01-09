@@ -4,462 +4,32 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>{% block title %}Clothing Store{% endblock %}</title>
-    {% load static %}
-    <style>
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-        }
-        
-        body {
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            line-height: 1.6;
-            color: #333;
-        }
-        
-        .header {
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            color: white;
-            padding: 1rem 0;
-            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
-            position: sticky;
-            top: 0;
-            z-index: 100;
-        }
-        
-        .container {
-            max-width: 1200px;
-            margin: 0 auto;
-            padding: 0 20px;
-        }
-        
-        .nav {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            position: relative;
-        }
-
-        .hamburger {
-            display: none;
-            flex-direction: column;
-            cursor: pointer;
-            width: 32px;
-            height: 32px;
-            justify-content: center;
-            align-items: center;
-            z-index: 200;
-        }
-        .hamburger span {
-            height: 4px;
-            width: 28px;
-            background: white;
-            margin: 3px 0;
-            border-radius: 2px;
-            transition: 0.4s;
-        }
-        
-        .logo {
-            font-size: 1.8rem;
-            font-weight: bold;
-            text-decoration: none;
-            color: white;
-        }
-        
-        .nav-links {
-            display: flex;
-            list-style: none;
-            gap: 2rem;
-            align-items: center;
-            transition: right 0.4s cubic-bezier(0.4,0,0.2,1);
-        }
-        .nav-links.mobile {
-            flex-direction: column;
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            position: fixed;
-            top: 0;
-            right: -100vw;
-            width: 70vw;
-            height: 100vh;
-            padding-top: 5rem;
-            gap: 2rem;
-            box-shadow: -2px 0 12px rgba(0,0,0,0.08);
-            z-index: 150;
-        }
-        .nav-links.mobile.open {
-            right: 0;
-        }
-                @media (max-width: 992px) {
-                    .container {
-                        max-width: 100%;
-                        padding: 0 10px;
-                    }
-                    .product-grid {
-                        grid-template-columns: repeat(2, 1fr);
-                    }
-                }
-                @media (max-width: 768px) {
-                    .nav-links {
-                        display: none;
-                    }
-                    .hamburger {
-                        display: flex;
-                    }
-                    .product-grid {
-                        grid-template-columns: 1fr;
-                    }
-                }
-                @media (max-width: 768px) {
-                    .nav-links.mobile {
-                        display: flex;
-                    }
-                }
-                @media (max-width: 576px) {
-                    .hero-section {
-                        min-height: 350px;
-                    }
-                    .hero-content {
-                        padding: 1.5rem 0.5rem;
-                    }
-                    .hero-headline {
-                        font-size: 2rem;
-                    }
-                    .hero-tagline {
-                        font-size: 1.1rem;
-                    }
-                    .hero-cta {
-                        width: 100%;
-                        font-size: 1.1rem;
-                        padding: 1rem 0;
-                    }
-                    .product-grid {
-                        grid-template-columns: 1fr;
-                    }
-                }
-
-                /* Hero Section Styles */
-                .hero-section {
-                    position: relative;
-                    width: 100%;
-                    min-height: 500px;
-                    margin-bottom: 3rem;
-                    display: flex;
-                    align-items: center;
-                    justify-content: center;
-                }
-                .hero-image-wrapper {
-                    width: 100%;
-                    height: 420px;
-                    position: relative;
-                    overflow: hidden;
-                    border-radius: 18px;
-                    box-shadow: 0 8px 32px rgba(102,126,234,0.12);
-                }
-                .hero-image {
-                    width: 100%;
-                    height: 100%;
-                    object-fit: cover;
-                    display: block;
-                    border-radius: 18px;
-                    filter: brightness(0.85);
-                    transition: filter 0.3s;
-                }
-                .hero-image-wrapper:hover .hero-image {
-                    filter: brightness(1);
-                }
-                .hero-overlay {
-                    position: absolute;
-                    top: 0; left: 0; right: 0; bottom: 0;
-                    background: linear-gradient(120deg, rgba(102,126,234,0.25) 0%, rgba(118,75,162,0.25) 100%);
-                    display: flex;
-                    align-items: center;
-                    justify-content: center;
-                }
-                .hero-content {
-                    text-align: center;
-                    color: #fff;
-                    padding: 2.5rem 1rem;
-                    width: 100%;
-                }
-                .hero-headline {
-                    font-size: 2.8rem;
-                    font-weight: 700;
-                    margin-bottom: 1rem;
-                    text-shadow: 0 2px 8px rgba(0,0,0,0.08);
-                }
-                .hero-tagline {
-                    font-size: 1.3rem;
-                    margin-bottom: 2rem;
-                    font-weight: 400;
-                }
-                .hero-cta {
-                    font-size: 1.2rem;
-                    padding: 1rem 2.5rem;
-                    border-radius: 30px;
-                    box-shadow: 0 2px 8px rgba(102,126,234,0.15);
-                }
-        
-        .nav-links a {
-            color: white;
-            text-decoration: none;
-            font-weight: 500;
-            transition: opacity 0.3s;
-            position: relative;
-        }
-        
-        .nav-links a:hover {
-            opacity: 0.8;
-        }
-        
-        .cart-badge {
-            position: absolute;
-            top: -8px;
-            right: -12px;
-            background: #f56565;
-            color: white;
-            border-radius: 50%;
-            padding: 2px 6px;
-            font-size: 0.7rem;
-            font-weight: bold;
-        }
-        
-        .main-content {
-            min-height: calc(100vh - 200px);
-            padding: 2rem 0;
-        }
-        
-        .footer {
-            background: #2d3748;
-            color: white;
-            padding: 2rem 0;
-            text-align: center;
-            margin-top: 3rem;
-        }
-        
-        .product-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
-            gap: 2rem;
-            margin-top: 2rem;
-        }
-        
-        .product-card {
-            background: white;
-            border-radius: 10px;
-            overflow: hidden;
-            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
-            transition: transform 0.3s, box-shadow 0.3s;
-            position: relative;
-        }
-        
-        .product-card:hover {
-            transform: translateY(-5px);
-            box-shadow: 0 8px 15px rgba(0,0,0,0.2);
-        }
-        
-        .product-image {
-            width: 100%;
-            height: 300px;
-            object-fit: cover;
-        }
-        
-        .product-info {
-            padding: 1.5rem;
-        }
-        
-        .product-title {
-            font-size: 1.2rem;
-            font-weight: 600;
-            margin-bottom: 0.5rem;
-            color: #2d3748;
-        }
-        
-        .product-price {
-            font-size: 1.5rem;
-            color: #667eea;
-            font-weight: bold;
-        }
-        
-        .btn {
-            display: inline-block;
-            padding: 0.8rem 2rem;
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            color: white;
-            text-decoration: none;
-            border-radius: 25px;
-            font-weight: 600;
-            transition: transform 0.3s;
-            border: none;
-            cursor: pointer;
-        }
-        
-        .btn:hover {
-            transform: scale(1.05);
-        }
-        
-        .btn-secondary {
-            background: #718096;
-        }
-        
-        .btn-danger {
-            background: #f56565;
-        }
-        
-        .btn-success {
-            background: #48bb78;
-        }
-        
-        .hero {
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            color: white;
-            padding: 4rem 0;
-            text-align: center;
-            margin-bottom: 3rem;
-        }
-        
-        .hero h1 {
-            font-size: 3rem;
-            margin-bottom: 1rem;
-        }
-        
-        .messages {
-            position: fixed;
-            top: 80px;
-            right: 20px;
-            z-index: 1000;
-            max-width: 400px;
-        }
-        
-        .alert {
-            padding: 1rem 1.5rem;
-            margin-bottom: 1rem;
-            border-radius: 8px;
-            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
-            animation: slideIn 0.3s ease-out;
-        }
-        
-        @keyframes slideIn {
-            from {
-                transform: translateX(400px);
-                opacity: 0;
-            }
-            to {
-                transform: translateX(0);
-                opacity: 1;
-            }
-        }
-        
-        .alert-success {
-            background: #c6f6d5;
-            color: #22543d;
-            border-left: 4px solid #48bb78;
-        }
-        
-        .alert-error {
-            background: #fed7d7;
-            color: #742a2a;
-            border-left: 4px solid #f56565;
-        }
-        
-        .alert-warning {
-            background: #feebc8;
-            color: #744210;
-            border-left: 4px solid #ed8936;
-        }
-        
-        .alert-info {
-            background: #bee3f8;
-            color: #2c5282;
-            border-left: 4px solid #4299e1;
-        }
-        
-        .badge {
-            display: inline-block;
-            padding: 0.3rem 0.8rem;
-            border-radius: 12px;
-            font-size: 0.85rem;
-            font-weight: 600;
-        }
-        
-        .badge-success { background: #c6f6d5; color: #22543d; }
-        .badge-warning { background: #feebc8; color: #744210; }
-        .badge-danger { background: #fed7d7; color: #742a2a; }
-        .badge-info { background: #bee3f8; color: #2c5282; }
-        
-        .card {
-            background: white;
-            border-radius: 10px;
-            padding: 2rem;
-            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
-            margin-bottom: 2rem;
-        }
-        
-        .form-group {
-            margin-bottom: 1.5rem;
-        }
-        
-        .form-group label {
-            display: block;
-            margin-bottom: 0.5rem;
-            font-weight: 600;
-            color: #2d3748;
-        }
-        
-        .form-control {
-            width: 100%;
-            padding: 0.8rem;
-            border: 2px solid #e2e8f0;
-            border-radius: 8px;
-            font-size: 1rem;
-            transition: border-color 0.3s;
-        }
-        
-        .form-control:focus {
-            outline: none;
-            border-color: #667eea;
-        }
-        
-        table {
-            width: 100%;
-            border-collapse: collapse;
-            background: white;
-            border-radius: 10px;
-            overflow: hidden;
-            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
-        }
-        
-        th {
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            color: white;
-            padding: 1rem;
-            text-align: left;
-        }
-        
-        td {
-            padding: 1rem;
-            border-bottom: 1px solid #e2e8f0;
-        }
-        
-        tr:hover {
-            background: #f7fafc;
-        }
-    </style>
+    <meta name="description" content="Fashion Store - Discover the latest trends in fashion. Shop quality clothing, accessories, and more.">
+    <meta name="theme-color" content="#667eea">
+    <title>{% block title %}Fashion Store{% endblock %}</title>
+    
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Poppins:wght@500;600;700&display=swap" rel="stylesheet">
+    
+    <!-- Main CSS -->
+    <link rel="stylesheet" href="{% static 'css/main.css' %}">
+    
     {% block extra_css %}{% endblock %}
 </head>
 <body>
-    <!-- Promotional Banners Section -->
+    <!-- Promotional Banners -->
     {% if active_banners %}
         {% for banner in active_banners %}
-        <div style="background-color: {{ banner.background_color }}; color: {{ banner.text_color }}; padding: 12px 0; text-align: center; border-bottom: 1px solid rgba(0,0,0,0.1);">
+        <div class="promo-banner" style="background-color: {{ banner.background_color }}; color: {{ banner.text_color }};">
             <div class="container">
-                <strong style="font-size: 1.1rem;">{{ banner.title }}</strong>
+                <strong>{{ banner.title }}</strong>
                 <span style="margin: 0 8px;">•</span>
                 <span>{{ banner.message }}</span>
                 {% if banner.link_url %}
-                    <a href="{{ banner.link_url }}" style="color: {{ banner.text_color }}; text-decoration: underline; margin-left: 12px; font-weight: 500;">
-                        {{ banner.link_text }}
+                    <a href="{{ banner.link_url }}" style="color: {{ banner.text_color }};">
+                        {{ banner.link_text }} →
                     </a>
                 {% endif %}
             </div>
@@ -467,125 +37,236 @@
         {% endfor %}
     {% endif %}
     
+    <!-- Header -->
     <header class="header">
         <div class="container">
-            <nav class="nav">
-                <a href="{% url 'catalog:home' %}" class="logo">🛍️ Fashion Store</a>
-                <div class="hamburger" id="hamburger-menu" aria-label="Open navigation" tabindex="0">
-                    <span></span>
-                    <span></span>
-                    <span></span>
-                </div>
-                <ul class="nav-links" id="nav-links">
-                    <li><a href="{% url 'catalog:home' %}">Home</a></li>
-                    <li><a href="{% url 'catalog:product_list' %}">Shop</a></li>
-                    {% if user.is_authenticated %}
-                        <li><a href="{% url 'cart:wishlist_detail' %}">❤️ Wishlist</a></li>
-                        <li>
-                            <a href="{% url 'cart:cart_detail' %}">
-                                🛒 Cart
-                                {% if cart_count > 0 %}
-                                <span class="cart-badge">{{ cart_count }}</span>
-                                {% endif %}
-                            </a>
-                        </li>
-                        <li><a href="{% url 'orders:order_list' %}">My Orders</a></li>
-                        <li><a href="{% url 'customers:profile' %}">Profile</a></li>
-                        {% if user.is_staff %}
-                            <li><a href="{% url 'catalog:admin_dashboard' %}">📊 Dashboard</a></li>
+            <div class="header-content">
+                <nav class="nav">
+                    <!-- Logo -->
+                    <a href="{% url 'catalog:home' %}" class="logo">
+                        <span class="logo-icon">🛍️</span>
+                        <span>Fashion Store</span>
+                    </a>
+                    
+                    <!-- Desktop Navigation -->
+                    <ul class="nav-links">
+                        <li><a href="{% url 'catalog:home' %}">🏠 Home</a></li>
+                        <li><a href="{% url 'catalog:product_list' %}">🛒 Shop</a></li>
+                        {% if user.is_authenticated %}
+                            <li>
+                                <a href="{% url 'cart:wishlist_detail' %}">❤️ Wishlist</a>
+                            </li>
+                            <li>
+                                <a href="{% url 'cart:cart_detail' %}" class="cart-link">
+                                    🛒 Cart
+                                    {% if cart_count > 0 %}
+                                    <span class="cart-badge">{{ cart_count }}</span>
+                                    {% endif %}
+                                </a>
+                            </li>
+                            <li><a href="{% url 'orders:order_list' %}">📦 Orders</a></li>
+                            <li><a href="{% url 'customers:profile' %}">👤 Profile</a></li>
+                            {% if user.is_staff %}
+                                <li><a href="{% url 'catalog:admin_dashboard' %}">📊 Dashboard</a></li>
+                                <li><a href="/admin/">⚙️ Admin</a></li>
+                            {% endif %}
+                            <li><a href="{% url 'customers:logout' %}">🚪 Logout</a></li>
+                        {% else %}
+                            <li><a href="{% url 'customers:login' %}">🔐 Login</a></li>
+                            <li><a href="{% url 'customers:register' %}" class="btn btn-primary" style="background: rgba(255,255,255,0.2); padding: 8px 20px;">Register</a></li>
                         {% endif %}
-                        <li><a href="{% url 'customers:logout' %}">Logout</a></li>
-                    {% else %}
-                        <li><a href="{% url 'customers:login' %}">Login</a></li>
-                        <li><a href="{% url 'customers:register' %}">Register</a></li>
-                    {% endif %}
-                    {% if user.is_staff %}
-                        <li><a href="/admin/">Admin Panel</a></li>
-                    {% endif %}
-                </ul>
-                <ul class="nav-links mobile" id="nav-links-mobile">
-                    <li><a href="{% url 'catalog:home' %}">Home</a></li>
-                    <li><a href="{% url 'catalog:product_list' %}">Shop</a></li>
-                    {% if user.is_authenticated %}
-                        <li><a href="{% url 'cart:wishlist_detail' %}">❤️ Wishlist</a></li>
-                        <li>
-                            <a href="{% url 'cart:cart_detail' %}">
-                                🛒 Cart
-                                {% if cart_count > 0 %}
-                                <span class="cart-badge">{{ cart_count }}</span>
-                                {% endif %}
-                            </a>
-                        </li>
-                        <li><a href="{% url 'orders:order_list' %}">My Orders</a></li>
-                        <li><a href="{% url 'customers:profile' %}">Profile</a></li>
-                        {% if user.is_staff %}
-                            <li><a href="{% url 'catalog:admin_dashboard' %}">📊 Dashboard</a></li>
-                        {% endif %}
-                        <li><a href="{% url 'customers:logout' %}">Logout</a></li>
-                    {% else %}
-                        <li><a href="{% url 'customers:login' %}">Login</a></li>
-                        <li><a href="{% url 'customers:register' %}">Register</a></li>
-                    {% endif %}
-                    {% if user.is_staff %}
-                        <li><a href="/admin/">Admin Panel</a></li>
-                    {% endif %}
-                </ul>
-            </nav>
+                    </ul>
+                    
+                    <!-- Hamburger Menu Button -->
+                    <button class="hamburger" id="hamburger-btn" aria-label="Toggle navigation" aria-expanded="false">
+                        <span></span>
+                        <span></span>
+                        <span></span>
+                    </button>
+                </nav>
+            </div>
         </div>
     </header>
+    
+    <!-- Mobile Navigation Overlay -->
+    <div class="mobile-nav-overlay" id="mobile-nav-overlay"></div>
+    
+    <!-- Mobile Navigation -->
+    <nav class="mobile-nav" id="mobile-nav">
+        <ul>
+            <li><a href="{% url 'catalog:home' %}">🏠 Home</a></li>
+            <li><a href="{% url 'catalog:product_list' %}">🛒 Shop</a></li>
+            {% if user.is_authenticated %}
+                <li><a href="{% url 'cart:wishlist_detail' %}">❤️ Wishlist</a></li>
+                <li>
+                    <a href="{% url 'cart:cart_detail' %}">
+                        🛒 Cart
+                        {% if cart_count > 0 %}
+                        <span class="badge badge-danger">{{ cart_count }}</span>
+                        {% endif %}
+                    </a>
+                </li>
+                <li><a href="{% url 'orders:order_list' %}">📦 My Orders</a></li>
+                <li><a href="{% url 'customers:profile' %}">👤 Profile</a></li>
+                {% if user.is_staff %}
+                    <li><a href="{% url 'catalog:admin_dashboard' %}">📊 Dashboard</a></li>
+                    <li><a href="/admin/">⚙️ Admin Panel</a></li>
+                {% endif %}
+                <li><a href="{% url 'customers:logout' %}">🚪 Logout</a></li>
+            {% else %}
+                <li><a href="{% url 'customers:login' %}">🔐 Login</a></li>
+                <li><a href="{% url 'customers:register' %}">📝 Register</a></li>
+            {% endif %}
+        </ul>
+    </nav>
 
+    <!-- Messages / Alerts -->
     {% if messages %}
-    <div class="messages">
+    <div class="messages" id="messages">
         {% for message in messages %}
-        <div class="alert alert-{{ message.tags }}">
-            {{ message }}
+        <div class="alert alert-{{ message.tags }}" role="alert">
+            {% if message.tags == 'success' %}✓{% elif message.tags == 'error' %}✕{% elif message.tags == 'warning' %}⚠{% else %}ℹ{% endif %}
+            <span>{{ message }}</span>
         </div>
         {% endfor %}
     </div>
     {% endif %}
 
+    <!-- Main Content -->
     <main class="main-content">
         {% block content %}{% endblock %}
     </main>
 
+    <!-- Footer -->
     <footer class="footer">
         <div class="container">
-            <p>&copy; 2024 Fashion Store. Professional Enterprise Clothing Store.</p>
-            <p>Built with Django & PostgreSQL</p>
+            <div class="footer-content">
+                <div class="footer-section">
+                    <h3>🛍️ Fashion Store</h3>
+                    <p style="color: var(--gray-400); margin-top: var(--space-2);">
+                        Your one-stop destination for trendy, high-quality fashion. 
+                        Shop the latest styles at unbeatable prices.
+                    </p>
+                </div>
+                
+                <div class="footer-section">
+                    <h3>Quick Links</h3>
+                    <ul>
+                        <li><a href="{% url 'catalog:home' %}">Home</a></li>
+                        <li><a href="{% url 'catalog:product_list' %}">Shop All</a></li>
+                        {% if user.is_authenticated %}
+                        <li><a href="{% url 'orders:order_list' %}">My Orders</a></li>
+                        <li><a href="{% url 'customers:profile' %}">My Account</a></li>
+                        {% endif %}
+                    </ul>
+                </div>
+                
+                <div class="footer-section">
+                    <h3>Customer Service</h3>
+                    <ul>
+                        <li><a href="#">Contact Us</a></li>
+                        <li><a href="#">Shipping Info</a></li>
+                        <li><a href="#">Returns & Exchanges</a></li>
+                        <li><a href="#">FAQs</a></li>
+                    </ul>
+                </div>
+                
+                <div class="footer-section">
+                    <h3>Connect With Us</h3>
+                    <ul>
+                        <li><a href="#">📘 Facebook</a></li>
+                        <li><a href="#">📸 Instagram</a></li>
+                        <li><a href="#">🐦 Twitter</a></li>
+                        <li><a href="#">📧 Newsletter</a></li>
+                    </ul>
+                </div>
+            </div>
+            
+            <div class="footer-bottom">
+                <p>&copy; {% now "Y" %} Fashion Store. All rights reserved.</p>
+                <p style="margin-top: var(--space-2);">Built with Django • Deployed on Render</p>
+            </div>
         </div>
     </footer>
 
+    <!-- JavaScript -->
     <script>
-    // Hamburger menu toggle
-    const hamburger = document.getElementById('hamburger-menu');
-    const navLinks = document.getElementById('nav-links');
-    const navLinksMobile = document.getElementById('nav-links-mobile');
-    function closeMobileMenu() {
-        navLinksMobile.classList.remove('open');
-        document.body.style.overflow = '';
-    }
-    function openMobileMenu() {
-        navLinksMobile.classList.add('open');
-        document.body.style.overflow = 'hidden';
-    }
-    hamburger.addEventListener('click', function() {
-        if (navLinksMobile.classList.contains('open')) {
-            closeMobileMenu();
-        } else {
-            openMobileMenu();
+    (function() {
+        // Mobile Navigation Toggle
+        const hamburger = document.getElementById('hamburger-btn');
+        const mobileNav = document.getElementById('mobile-nav');
+        const mobileNavOverlay = document.getElementById('mobile-nav-overlay');
+        
+        function toggleMobileNav() {
+            const isOpen = mobileNav.classList.contains('open');
+            
+            if (isOpen) {
+                closeMobileNav();
+            } else {
+                openMobileNav();
+            }
         }
-    });
-    navLinksMobile.addEventListener('click', function(e) {
-        if (e.target.tagName === 'A') {
-            closeMobileMenu();
+        
+        function openMobileNav() {
+            mobileNav.classList.add('open');
+            mobileNavOverlay.classList.add('open');
+            hamburger.classList.add('active');
+            hamburger.setAttribute('aria-expanded', 'true');
+            document.body.style.overflow = 'hidden';
         }
-    });
-    window.addEventListener('resize', function() {
-        if (window.innerWidth > 768) {
-            closeMobileMenu();
+        
+        function closeMobileNav() {
+            mobileNav.classList.remove('open');
+            mobileNavOverlay.classList.remove('open');
+            hamburger.classList.remove('active');
+            hamburger.setAttribute('aria-expanded', 'false');
+            document.body.style.overflow = '';
         }
-    });
+        
+        hamburger.addEventListener('click', toggleMobileNav);
+        mobileNavOverlay.addEventListener('click', closeMobileNav);
+        
+        // Close mobile nav when clicking a link
+        mobileNav.querySelectorAll('a').forEach(link => {
+            link.addEventListener('click', closeMobileNav);
+        });
+        
+        // Close mobile nav on window resize
+        window.addEventListener('resize', () => {
+            if (window.innerWidth > 992) {
+                closeMobileNav();
+            }
+        });
+        
+        // Auto-hide messages after 5 seconds
+        const messages = document.getElementById('messages');
+        if (messages) {
+            setTimeout(() => {
+                messages.style.transition = 'opacity 0.3s ease';
+                messages.style.opacity = '0';
+                setTimeout(() => {
+                    messages.remove();
+                }, 300);
+            }, 5000);
+        }
+        
+        // Keyboard navigation for hamburger
+        hamburger.addEventListener('keydown', (e) => {
+            if (e.key === 'Enter' || e.key === ' ') {
+                e.preventDefault();
+                toggleMobileNav();
+            }
+        });
+        
+        // Close mobile nav on Escape key
+        document.addEventListener('keydown', (e) => {
+            if (e.key === 'Escape' && mobileNav.classList.contains('open')) {
+                closeMobileNav();
+            }
+        });
+    })();
     </script>
+    
     {% block extra_js %}{% endblock %}
 </body>
 </html>

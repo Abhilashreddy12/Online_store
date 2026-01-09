@@ -1,95 +1,394 @@
 {% extends 'base.html' %}
+{% load static %}
 
 {% block title %}Shopping Cart - Fashion Store{% endblock %}
 
+{% block extra_css %}
+<style>
+    /* Page Header */
+    .page-header {
+        margin-bottom: var(--space-8);
+    }
+    
+    .page-title {
+        font-size: clamp(1.75rem, 3vw, 2.5rem);
+        font-weight: 700;
+        color: var(--gray-900);
+        margin-bottom: var(--space-2);
+    }
+    
+    .page-subtitle {
+        color: var(--gray-500);
+    }
+    
+    /* Cart Layout */
+    .cart-layout {
+        display: grid;
+        grid-template-columns: 1fr 380px;
+        gap: var(--space-8);
+        align-items: start;
+    }
+    
+    /* Cart Items */
+    .cart-items {
+        background: white;
+        border-radius: var(--radius-xl);
+        box-shadow: var(--shadow-sm);
+        overflow: hidden;
+    }
+    
+    .cart-item {
+        display: grid;
+        grid-template-columns: auto 1fr auto;
+        gap: var(--space-4);
+        padding: var(--space-6);
+        border-bottom: 1px solid var(--gray-100);
+        transition: background var(--transition-fast);
+    }
+    
+    .cart-item:last-child {
+        border-bottom: none;
+    }
+    
+    .cart-item:hover {
+        background: var(--gray-50);
+    }
+    
+    .cart-item-image {
+        width: 100px;
+        height: 100px;
+        border-radius: var(--radius-lg);
+        overflow: hidden;
+        background: var(--gray-100);
+    }
+    
+    .cart-item-image img {
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+    }
+    
+    .cart-item-image-placeholder {
+        width: 100%;
+        height: 100%;
+        background: var(--gradient-primary);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 2rem;
+        color: white;
+    }
+    
+    .cart-item-info {
+        display: flex;
+        flex-direction: column;
+        gap: var(--space-1);
+    }
+    
+    .cart-item-title {
+        font-weight: 600;
+        color: var(--gray-800);
+        font-size: var(--text-base);
+    }
+    
+    .cart-item-variant {
+        font-size: var(--text-sm);
+        color: var(--gray-500);
+    }
+    
+    .cart-item-price {
+        font-size: var(--text-lg);
+        font-weight: 700;
+        color: var(--primary-600);
+        margin-top: auto;
+    }
+    
+    .cart-item-actions {
+        display: flex;
+        flex-direction: column;
+        align-items: flex-end;
+        gap: var(--space-3);
+    }
+    
+    .quantity-control {
+        display: flex;
+        align-items: center;
+        gap: var(--space-2);
+    }
+    
+    .quantity-input {
+        width: 70px;
+        padding: var(--space-2);
+        border: 2px solid var(--gray-200);
+        border-radius: var(--radius-md);
+        text-align: center;
+        font-weight: 500;
+    }
+    
+    .quantity-input:focus {
+        border-color: var(--primary-500);
+        outline: none;
+    }
+    
+    .btn-update {
+        padding: var(--space-2) var(--space-3);
+        font-size: var(--text-sm);
+    }
+    
+    .btn-remove {
+        padding: var(--space-2) var(--space-3);
+        background: transparent;
+        color: var(--error-500);
+        border: 1px solid var(--error-200);
+        font-size: var(--text-sm);
+    }
+    
+    .btn-remove:hover {
+        background: var(--error-500);
+        color: white;
+        border-color: var(--error-500);
+    }
+    
+    .cart-item-total {
+        font-size: var(--text-xl);
+        font-weight: 700;
+        color: var(--primary-600);
+        text-align: right;
+    }
+    
+    /* Order Summary */
+    .order-summary {
+        background: white;
+        border-radius: var(--radius-xl);
+        box-shadow: var(--shadow-md);
+        padding: var(--space-6);
+        position: sticky;
+        top: var(--space-24);
+    }
+    
+    .summary-title {
+        font-size: var(--text-xl);
+        font-weight: 700;
+        color: var(--gray-800);
+        margin-bottom: var(--space-6);
+        padding-bottom: var(--space-4);
+        border-bottom: 2px solid var(--gray-100);
+    }
+    
+    .summary-row {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        padding: var(--space-3) 0;
+    }
+    
+    .summary-row.total {
+        margin-top: var(--space-4);
+        padding-top: var(--space-4);
+        border-top: 2px solid var(--gray-200);
+        font-size: var(--text-xl);
+    }
+    
+    .summary-label {
+        color: var(--gray-600);
+    }
+    
+    .summary-value {
+        font-weight: 600;
+        color: var(--gray-800);
+    }
+    
+    .summary-row.total .summary-value {
+        color: var(--primary-600);
+        font-size: var(--text-2xl);
+    }
+    
+    .summary-actions {
+        margin-top: var(--space-6);
+        display: flex;
+        flex-direction: column;
+        gap: var(--space-3);
+    }
+    
+    .btn-checkout {
+        padding: var(--space-4);
+        font-size: var(--text-lg);
+        font-weight: 700;
+    }
+    
+    .btn-continue {
+        padding: var(--space-3);
+    }
+    
+    /* Secure Badge */
+    .secure-badge {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: var(--space-2);
+        margin-top: var(--space-4);
+        padding: var(--space-3);
+        background: var(--gray-50);
+        border-radius: var(--radius-md);
+        color: var(--gray-500);
+        font-size: var(--text-sm);
+    }
+    
+    /* Empty Cart */
+    .empty-cart {
+        text-align: center;
+        padding: var(--space-16);
+        background: white;
+        border-radius: var(--radius-xl);
+        box-shadow: var(--shadow-sm);
+    }
+    
+    .empty-icon {
+        font-size: 6rem;
+        margin-bottom: var(--space-4);
+    }
+    
+    .empty-title {
+        font-size: var(--text-2xl);
+        font-weight: 600;
+        color: var(--gray-800);
+        margin-bottom: var(--space-2);
+    }
+    
+    .empty-text {
+        color: var(--gray-500);
+        margin-bottom: var(--space-6);
+    }
+    
+    /* Responsive */
+    @media (max-width: 992px) {
+        .cart-layout {
+            grid-template-columns: 1fr;
+        }
+        
+        .order-summary {
+            position: static;
+        }
+    }
+    
+    @media (max-width: 576px) {
+        .cart-item {
+            grid-template-columns: 1fr;
+            gap: var(--space-4);
+        }
+        
+        .cart-item-image {
+            width: 100%;
+            height: 150px;
+        }
+        
+        .cart-item-actions {
+            flex-direction: row;
+            flex-wrap: wrap;
+            justify-content: space-between;
+            align-items: center;
+        }
+        
+        .cart-item-total {
+            text-align: left;
+            width: 100%;
+            margin-top: var(--space-2);
+            padding-top: var(--space-2);
+            border-top: 1px dashed var(--gray-200);
+        }
+    }
+</style>
+{% endblock %}
+
 {% block content %}
 <div class="container">
-    <h1 style="font-size: 2.5rem; margin-bottom: 2rem;">Shopping Cart</h1>
+    <div class="page-header">
+        <h1 class="page-title">Shopping Cart</h1>
+        {% if cart.items.exists %}
+        <p class="page-subtitle">{{ cart.total_items }} item{% if cart.total_items != 1 %}s{% endif %} in your cart</p>
+        {% endif %}
+    </div>
     
     {% if cart.items.exists %}
-    <div style="display: grid; grid-template-columns: 2fr 1fr; gap: 2rem;">
-        <div>
-            <table>
-                <thead>
-                    <tr>
-                        <th>Product</th>
-                        <th>Price</th>
-                        <th>Quantity</th>
-                        <th>Total</th>
-                        <th>Action</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    {% for item in cart.items.all %}
-                    <tr>
-                        <td>
-                            <div style="display: flex; align-items: center; gap: 1rem;">
-                                {% if item.product.images.first %}
-                                <img src="{{ item.product.images.first.image.url }}" alt="{{ item.product.name }}" style="width: 80px; height: 80px; object-fit: cover; border-radius: 8px;">
-                                {% endif %}
-                                <div>
-                                    <strong>{{ item.product.name }}</strong>
-                                    {% if item.variant %}
-                                    <br><small style="color: #718096;">{{ item.variant.size.name }} - {{ item.variant.color.name }}</small>
-                                    {% endif %}
-                                </div>
-                            </div>
-                        </td>
-                        <td><strong>₹{{ item.unit_price }}</strong></td>
-                        <td>
-                            <form method="post" action="{% url 'cart:update_cart_item' item.id %}" style="display: flex; gap: 0.5rem;">
-                                {% csrf_token %}
-                                <input type="number" name="quantity" value="{{ item.quantity }}" min="1" style="width: 70px; padding: 0.5rem; border: 2px solid #e2e8f0; border-radius: 5px;">
-                                <button type="submit" class="btn" style="padding: 0.5rem 1rem;">Update</button>
-                            </form>
-                        </td>
-                        <td><strong style="color: #667eea;">₹{{ item.line_total }}</strong></td>
-                        <td>
-                            <form method="post" action="{% url 'cart:remove_from_cart' item.id %}">
-                                {% csrf_token %}
-                                <button type="submit" class="btn btn-danger" style="padding: 0.5rem 1rem;">Remove</button>
-                            </form>
-                        </td>
-                    </tr>
-                    {% endfor %}
-                </tbody>
-            </table>
+    <div class="cart-layout">
+        <!-- Cart Items -->
+        <div class="cart-items">
+            {% for item in cart.items.all %}
+            <div class="cart-item">
+                <div class="cart-item-image">
+                    {% if item.product.images.first %}
+                    <img src="{{ item.product.images.first.image.url }}" alt="{{ item.product.name }}">
+                    {% else %}
+                    <div class="cart-item-image-placeholder">👕</div>
+                    {% endif %}
+                </div>
+                
+                <div class="cart-item-info">
+                    <a href="{% url 'catalog:product_detail' item.product.slug %}" class="cart-item-title">{{ item.product.name }}</a>
+                    {% if item.variant %}
+                    <span class="cart-item-variant">{{ item.variant.size.name }} - {{ item.variant.color.name }}</span>
+                    {% endif %}
+                    <span class="cart-item-price">₹{{ item.unit_price }}</span>
+                </div>
+                
+                <div class="cart-item-actions">
+                    <form method="post" action="{% url 'cart:update_cart_item' item.id %}" class="quantity-control">
+                        {% csrf_token %}
+                        <input type="number" name="quantity" value="{{ item.quantity }}" min="1" class="quantity-input">
+                        <button type="submit" class="btn btn-secondary btn-update">Update</button>
+                    </form>
+                    
+                    <form method="post" action="{% url 'cart:remove_from_cart' item.id %}">
+                        {% csrf_token %}
+                        <button type="submit" class="btn btn-remove">🗑️ Remove</button>
+                    </form>
+                    
+                    <div class="cart-item-total">₹{{ item.line_total }}</div>
+                </div>
+            </div>
+            {% endfor %}
         </div>
         
-        <div>
-            <div class="card">
-                <h3 style="margin-bottom: 1.5rem; font-size: 1.5rem;">Order Summary</h3>
-                
-                <div style="display: flex; justify-content: space-between; margin-bottom: 1rem; padding-bottom: 1rem; border-bottom: 2px solid #e2e8f0;">
-                    <span>Subtotal ({{ cart.total_items }} items):</span>
-                    <strong>₹{{ cart.subtotal }}</strong>
-                </div>
-                
-                <div style="display: flex; justify-content: space-between; margin-bottom: 1rem; padding-bottom: 1rem; border-bottom: 2px solid #e2e8f0;">
-                    <span>Shipping:</span>
-                    <strong>₹10.00</strong>
-                </div>
-                
-                <div style="display: flex; justify-content: space-between; margin-bottom: 1rem; padding-bottom: 1rem; border-bottom: 2px solid #e2e8f0;">
-                    <span>Tax (10%):</span>
-                    <strong>₹{{ cart.subtotal|floatformat:2|add:"0"|floatformat:2 }}</strong>
-                </div>
-                
-                <div style="display: flex; justify-content: space-between; margin-bottom: 2rem; font-size: 1.3rem;">
-                    <strong>Total:</strong>
-                    <strong style="color: #667eea;">₹{{ cart.subtotal|add:"10"|floatformat:2 }}</strong>
-                </div>
-                
-                <a href="{% url 'orders:checkout' %}" class="btn" style="width: 100%; text-align: center; display: block; margin-bottom: 1rem;">Proceed to Checkout</a>
-                <a href="{% url 'catalog:product_list' %}" class="btn btn-secondary" style="width: 100%; text-align: center; display: block;">Continue Shopping</a>
+        <!-- Order Summary -->
+        <div class="order-summary">
+            <h2 class="summary-title">Order Summary</h2>
+            
+            <div class="summary-row">
+                <span class="summary-label">Subtotal ({{ cart.total_items }} items)</span>
+                <span class="summary-value">₹{{ cart.subtotal }}</span>
+            </div>
+            
+            <div class="summary-row">
+                <span class="summary-label">Shipping</span>
+                <span class="summary-value">₹10.00</span>
+            </div>
+            
+            <div class="summary-row">
+                <span class="summary-label">Tax (10%)</span>
+                <span class="summary-value">₹{{ cart.tax|floatformat:2 }}</span>
+            </div>
+            
+            <div class="summary-row total">
+                <span class="summary-label">Total</span>
+                <span class="summary-value">₹{{ cart.total|floatformat:2 }}</span>
+            </div>
+            
+            <div class="summary-actions">
+                <a href="{% url 'orders:checkout' %}" class="btn btn-checkout">Proceed to Checkout →</a>
+                <a href="{% url 'catalog:product_list' %}" class="btn btn-secondary btn-continue">Continue Shopping</a>
+            </div>
+            
+            <div class="secure-badge">
+                🔒 Secure checkout powered by trusted payment providers
             </div>
         </div>
     </div>
     {% else %}
-    <div class="card" style="text-align: center; padding: 4rem 2rem;">
-        <div style="font-size: 5rem; margin-bottom: 1rem;">🛒</div>
-        <h2 style="margin-bottom: 1rem;">Your cart is empty</h2>
-        <p style="color: #718096; margin-bottom: 2rem;">Add some products to your cart to get started!</p>
+    <!-- Empty Cart -->
+    <div class="empty-cart">
+        <div class="empty-icon">🛒</div>
+        <h2 class="empty-title">Your cart is empty</h2>
+        <p class="empty-text">Looks like you haven't added any items to your cart yet. Start shopping and find something you'll love!</p>
         <a href="{% url 'catalog:product_list' %}" class="btn">Start Shopping</a>
     </div>
     {% endif %}

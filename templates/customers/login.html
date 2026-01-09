@@ -1,36 +1,251 @@
 {% extends 'base.html' %}
+{% load static %}
 
 {% block title %}Login - Fashion Store{% endblock %}
 
+{% block extra_css %}
+<style>
+    .login-container {
+        max-width: 450px;
+        margin: var(--space-12) auto;
+        padding: 0 var(--space-4);
+    }
+    
+    .login-card {
+        background: white;
+        border-radius: var(--radius-2xl);
+        box-shadow: var(--shadow-xl);
+        padding: var(--space-10);
+    }
+    
+    .login-header {
+        text-align: center;
+        margin-bottom: var(--space-8);
+    }
+    
+    .login-icon {
+        width: 70px;
+        height: 70px;
+        background: var(--gradient-primary);
+        border-radius: var(--radius-xl);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        margin: 0 auto var(--space-5);
+        font-size: 2rem;
+    }
+    
+    .login-title {
+        font-size: var(--text-2xl);
+        font-weight: 700;
+        color: var(--gray-900);
+        margin-bottom: var(--space-2);
+    }
+    
+    .login-subtitle {
+        color: var(--gray-500);
+    }
+    
+    .login-form .form-group {
+        margin-bottom: var(--space-5);
+    }
+    
+    .login-form .form-label {
+        display: block;
+        font-weight: 600;
+        color: var(--gray-700);
+        margin-bottom: var(--space-2);
+        font-size: var(--text-sm);
+    }
+    
+    .login-form .form-control {
+        width: 100%;
+        padding: var(--space-4);
+        font-size: var(--text-base);
+        border: 2px solid var(--gray-200);
+        border-radius: var(--radius-lg);
+        transition: all var(--transition-fast);
+    }
+    
+    .login-form .form-control:focus {
+        outline: none;
+        border-color: var(--primary-500);
+        box-shadow: 0 0 0 3px var(--primary-100);
+    }
+    
+    .login-form .form-control::placeholder {
+        color: var(--gray-400);
+    }
+    
+    .form-row {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: var(--space-4);
+    }
+    
+    .remember-me {
+        display: flex;
+        align-items: center;
+        gap: var(--space-2);
+        font-size: var(--text-sm);
+        color: var(--gray-600);
+    }
+    
+    .remember-me input {
+        width: 18px;
+        height: 18px;
+        accent-color: var(--primary-500);
+    }
+    
+    .forgot-link {
+        font-size: var(--text-sm);
+        color: var(--primary-600);
+        font-weight: 500;
+        text-decoration: none;
+    }
+    
+    .forgot-link:hover {
+        text-decoration: underline;
+    }
+    
+    .login-btn {
+        width: 100%;
+        padding: var(--space-4);
+        background: var(--gradient-primary);
+        color: white;
+        font-size: var(--text-base);
+        font-weight: 600;
+        border: none;
+        border-radius: var(--radius-lg);
+        cursor: pointer;
+        transition: all var(--transition-fast);
+    }
+    
+    .login-btn:hover {
+        transform: translateY(-2px);
+        box-shadow: var(--shadow-lg);
+    }
+    
+    .login-footer {
+        text-align: center;
+        margin-top: var(--space-6);
+        padding-top: var(--space-6);
+        border-top: 1px solid var(--gray-100);
+        color: var(--gray-500);
+    }
+    
+    .login-footer a {
+        color: var(--primary-600);
+        font-weight: 600;
+        text-decoration: none;
+    }
+    
+    .login-footer a:hover {
+        text-decoration: underline;
+    }
+    
+    .social-login {
+        margin-top: var(--space-6);
+    }
+    
+    .social-divider {
+        display: flex;
+        align-items: center;
+        margin-bottom: var(--space-5);
+    }
+    
+    .social-divider::before,
+    .social-divider::after {
+        content: '';
+        flex: 1;
+        height: 1px;
+        background: var(--gray-200);
+    }
+    
+    .social-divider span {
+        padding: 0 var(--space-4);
+        color: var(--gray-400);
+        font-size: var(--text-sm);
+    }
+    
+    .error-message {
+        background: var(--error-50);
+        border: 1px solid var(--error-100);
+        border-radius: var(--radius-lg);
+        padding: var(--space-4);
+        margin-bottom: var(--space-5);
+        color: var(--error-600);
+        font-size: var(--text-sm);
+    }
+    
+    @media (max-width: 576px) {
+        .login-container {
+            margin: var(--space-6) auto;
+        }
+        
+        .login-card {
+            padding: var(--space-6);
+        }
+        
+        .login-icon {
+            width: 60px;
+            height: 60px;
+            font-size: 1.75rem;
+        }
+        
+        .form-row {
+            flex-direction: column;
+            align-items: flex-start;
+            gap: var(--space-3);
+        }
+    }
+</style>
+{% endblock %}
+
 {% block content %}
-<div class="container">
-    <div style="max-width: 450px; margin: 3rem auto;">
-        <div class="card">
-            <h1 style="font-size: 2rem; margin-bottom: 2rem; text-align: center;">Welcome Back!</h1>
+<div class="login-container">
+    <div class="login-card">
+        <div class="login-header">
+            <div class="login-icon">👋</div>
+            <h1 class="login-title">Welcome Back!</h1>
+            <p class="login-subtitle">Sign in to continue shopping</p>
+        </div>
+        
+        {% if error %}
+        <div class="error-message">
+            {{ error }}
+        </div>
+        {% endif %}
+        
+        <form method="post" class="login-form">
+            {% csrf_token %}
             
-            <form method="post">
-                {% csrf_token %}
-                
-                <div class="form-group">
-                    <label>Username</label>
-                    <input type="text" name="username" class="form-control" required autofocus placeholder="Enter your username">
-                </div>
-                
-                <div class="form-group">
-                    <label>Password</label>
-                    <input type="password" name="password" class="form-control" required placeholder="Enter your password">
-                </div>
-                <div style="text-align: right; margin-bottom: 1rem;">
-                    <a href="{% url 'password_reset' %}" style="color: #667eea; font-size: 0.98rem;">Forgot password?</a>
-                </div>
-                
-                <button type="submit" class="btn" style="width: 100%; padding: 1rem; margin-top: 1rem;">Sign In</button>
-                
-                <p style="text-align: center; margin-top: 1.5rem; color: #718096;">
-                    Don't have an account? 
-                    <a href="{% url 'customers:register' %}" style="color: #667eea; font-weight: 600;">Create one</a>
-                </p>
-            </form>
+            <div class="form-group">
+                <label for="username" class="form-label">Username</label>
+                <input type="text" name="username" id="username" class="form-control" 
+                       required autofocus placeholder="Enter your username" autocomplete="username">
+            </div>
+            
+            <div class="form-group">
+                <label for="password" class="form-label">Password</label>
+                <input type="password" name="password" id="password" class="form-control" 
+                       required placeholder="Enter your password" autocomplete="current-password">
+            </div>
+            
+            <div class="form-row">
+                <label class="remember-me">
+                    <input type="checkbox" name="remember_me">
+                    <span>Remember me</span>
+                </label>
+                <a href="{% url 'password_reset' %}" class="forgot-link">Forgot password?</a>
+            </div>
+            
+            <button type="submit" class="login-btn">Sign In</button>
+        </form>
+        
+        <div class="login-footer">
+            <p>Don't have an account? <a href="{% url 'customers:register' %}">Create one</a></p>
         </div>
     </div>
 </div>

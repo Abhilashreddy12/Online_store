@@ -21,7 +21,7 @@ class Category(models.Model):
         ordering = ['name']
 
     def save(self, *args, **kwargs):
-        if not self.slug:
+        if not self.slug: 
             self.slug = slugify(self.name)
         super().save(*args, **kwargs)
 

@@ -1,60 +1,329 @@
 {% extends 'base.html' %}
+{% load static %}
 
-{% block title %}Register - Fashion Store{% endblock %}
+{% block title %}Create Account - Fashion Store{% endblock %}
+
+{% block extra_css %}
+<style>
+    .register-container {
+        display: flex;
+        min-height: calc(100vh - 200px);
+        align-items: center;
+        justify-content: center;
+        padding: var(--space-8) var(--space-4);
+    }
+    
+    .register-card {
+        width: 100%;
+        max-width: 480px;
+        background: white;
+        border-radius: var(--radius-2xl);
+        box-shadow: var(--shadow-xl);
+        padding: var(--space-10);
+    }
+    
+    .register-header {
+        text-align: center;
+        margin-bottom: var(--space-8);
+    }
+    
+    .register-icon {
+        width: 80px;
+        height: 80px;
+        background: var(--gradient-primary);
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        margin: 0 auto var(--space-4);
+        font-size: 2.5rem;
+    }
+    
+    .register-title {
+        font-size: var(--text-2xl);
+        font-weight: 700;
+        color: var(--gray-800);
+        margin-bottom: var(--space-2);
+    }
+    
+    .register-subtitle {
+        color: var(--gray-500);
+    }
+    
+    .form-row {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: var(--space-4);
+    }
+    
+    .form-group {
+        margin-bottom: var(--space-4);
+    }
+    
+    .form-label {
+        display: block;
+        font-weight: 600;
+        color: var(--gray-700);
+        margin-bottom: var(--space-2);
+        font-size: var(--text-sm);
+    }
+    
+    .form-label .required {
+        color: var(--error-500);
+    }
+    
+    .form-input {
+        width: 100%;
+        padding: var(--space-3) var(--space-4);
+        border: 2px solid var(--gray-200);
+        border-radius: var(--radius-lg);
+        font-size: var(--text-base);
+        transition: all var(--transition-fast);
+    }
+    
+    .form-input:focus {
+        border-color: var(--primary-500);
+        outline: none;
+        box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+    }
+    
+    .form-input::placeholder {
+        color: var(--gray-400);
+    }
+    
+    .form-hint {
+        font-size: var(--text-xs);
+        color: var(--gray-500);
+        margin-top: var(--space-1);
+    }
+    
+    .password-requirements {
+        margin-top: var(--space-2);
+        padding: var(--space-3);
+        background: var(--gray-50);
+        border-radius: var(--radius-md);
+        font-size: var(--text-xs);
+    }
+    
+    .password-requirements p {
+        color: var(--gray-600);
+        margin-bottom: var(--space-2);
+        font-weight: 500;
+    }
+    
+    .password-requirements ul {
+        list-style: none;
+        margin: 0;
+        padding: 0;
+    }
+    
+    .password-requirements li {
+        color: var(--gray-500);
+        padding: var(--space-1) 0;
+        display: flex;
+        align-items: center;
+        gap: var(--space-2);
+    }
+    
+    .password-requirements li::before {
+        content: '○';
+        color: var(--gray-400);
+    }
+    
+    .password-requirements li.valid::before {
+        content: '✓';
+        color: var(--success-500);
+    }
+    
+    .btn-register {
+        width: 100%;
+        padding: var(--space-4);
+        font-size: var(--text-lg);
+        font-weight: 700;
+        margin-top: var(--space-4);
+    }
+    
+    .register-footer {
+        text-align: center;
+        margin-top: var(--space-6);
+        padding-top: var(--space-6);
+        border-top: 1px solid var(--gray-200);
+    }
+    
+    .register-footer p {
+        color: var(--gray-500);
+    }
+    
+    .register-footer a {
+        color: var(--primary-600);
+        font-weight: 600;
+        text-decoration: none;
+    }
+    
+    .register-footer a:hover {
+        text-decoration: underline;
+    }
+    
+    .form-errors {
+        background: var(--error-100);
+        border: 1px solid var(--error-200);
+        border-radius: var(--radius-lg);
+        padding: var(--space-4);
+        margin-bottom: var(--space-6);
+    }
+    
+    .form-errors ul {
+        list-style: none;
+        margin: 0;
+        padding: 0;
+    }
+    
+    .form-errors li {
+        color: var(--error-700);
+        font-size: var(--text-sm);
+        padding: var(--space-1) 0;
+    }
+    
+    @media (max-width: 576px) {
+        .register-card {
+            padding: var(--space-6);
+        }
+        
+        .form-row {
+            grid-template-columns: 1fr;
+        }
+    }
+</style>
+{% endblock %}
 
 {% block content %}
-<div class="container">
-    <div style="max-width: 500px; margin: 3rem auto;">
-        <div class="card">
-            <h1 style="font-size: 2rem; margin-bottom: 2rem; text-align: center;">Create Account</h1>
-            <form method="post" id="registration-form" novalidate>
-                {% csrf_token %}
-                <ul id="registration-warnings"></ul>
+<div class="register-container">
+    <div class="register-card">
+        <div class="register-header">
+            <div class="register-icon">👤</div>
+            <h1 class="register-title">Create Account</h1>
+            <p class="register-subtitle">Join us and start shopping today</p>
+        </div>
+        
+        {% if messages %}
+        <div class="form-errors">
+            <ul>
+                {% for message in messages %}
+                <li>{{ message }}</li>
+                {% endfor %}
+            </ul>
+        </div>
+        {% endif %}
+        
+        <form method="post" id="registration-form" novalidate>
+            {% csrf_token %}
+            
+            <div class="form-group">
+                <label class="form-label">Username <span class="required">*</span></label>
+                <input type="text" name="username" class="form-input" required minlength="3" 
+                       value="{{ username }}" placeholder="Choose a username" autocomplete="username">
+                <p class="form-hint">At least 3 characters, letters and numbers only</p>
+            </div>
+            
+            <div class="form-group">
+                <label class="form-label">Email <span class="required">*</span></label>
+                <input type="email" name="email" class="form-input" required 
+                       value="{{ email }}" placeholder="your@email.com" autocomplete="email">
+            </div>
+            
+            <div class="form-row">
                 <div class="form-group">
-                    <label>Username *</label>
-                    <input type="text" name="username" class="form-control" required minlength="3" 
-                           value="{{ username }}" placeholder="Choose a username">
-                    <small style="color: #718096;">At least 3 characters</small>
+                    <label class="form-label">First Name</label>
+                    <input type="text" name="first_name" class="form-input" 
+                           value="{{ first_name }}" placeholder="John" autocomplete="given-name">
                 </div>
                 <div class="form-group">
-                    <label>Email *</label>
-                    <input type="email" name="email" class="form-control" required 
-                           value="{{ email }}" placeholder="your@email.com">
+                    <label class="form-label">Last Name</label>
+                    <input type="text" name="last_name" class="form-input" 
+                           value="{{ last_name }}" placeholder="Doe" autocomplete="family-name">
                 </div>
-                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem;">
-                    <div class="form-group">
-                        <label>First Name</label>
-                        <input type="text" name="first_name" class="form-control" 
-                               value="{{ first_name }}" placeholder="Optional">
-                    </div>
-                    <div class="form-group">
-                        <label>Last Name</label>
-                        <input type="text" name="last_name" class="form-control" 
-                               value="{{ last_name }}" placeholder="Optional">
-                    </div>
+            </div>
+            
+            <div class="form-group">
+                <label class="form-label">Password <span class="required">*</span></label>
+                <input type="password" name="password1" class="form-input" required minlength="8" 
+                       placeholder="Create a strong password" autocomplete="new-password" id="password1">
+                <div class="password-requirements" id="password-requirements">
+                    <p>Password must contain:</p>
+                    <ul>
+                        <li id="req-length">At least 8 characters</li>
+                        <li id="req-upper">One uppercase letter</li>
+                        <li id="req-lower">One lowercase letter</li>
+                        <li id="req-number">One number</li>
+                    </ul>
                 </div>
-                <div class="form-group">
-                    <label>Password *</label>
-                    <input type="password" name="password1" class="form-control" required minlength="8" 
-                           placeholder="At least 8 characters">
-                </div>
-                <div class="form-group">
-                    <label>Confirm Password *</label>
-                    <input type="password" name="password2" class="form-control" required minlength="8" 
-                           placeholder="Re-enter password">
-                </div>
-                <button type="submit" class="btn" style="width: 100%; padding: 1rem; margin-top: 1rem;">
-                    Create Account
-                </button>
-                <p style="text-align: center; margin-top: 1.5rem; color: #718096;">
-                    Already have an account? 
-                    <a href="{% url 'customers:login' %}" style="color: #667eea; font-weight: 600;">Sign in</a>
-                </p>
-            </form>
+            </div>
+            
+            <div class="form-group">
+                <label class="form-label">Confirm Password <span class="required">*</span></label>
+                <input type="password" name="password2" class="form-input" required minlength="8" 
+                       placeholder="Re-enter your password" autocomplete="new-password" id="password2">
+            </div>
+            
+            <button type="submit" class="btn btn-register">Create Account</button>
+        </form>
+        
+        <div class="register-footer">
+            <p>Already have an account? <a href="{% url 'customers:login' %}">Sign in</a></p>
         </div>
     </div>
 </div>
-    <!-- Registration page specific CSS -->
-    <link rel="stylesheet" href="/static/css/registration.css">
-    <script src="/static/js/registration.js"></script>
+
+<script>
+const password1 = document.getElementById('password1');
+const requirements = {
+    length: document.getElementById('req-length'),
+    upper: document.getElementById('req-upper'),
+    lower: document.getElementById('req-lower'),
+    number: document.getElementById('req-number')
+};
+
+password1.addEventListener('input', function() {
+    const value = this.value;
+    
+    // Check length
+    if (value.length >= 8) {
+        requirements.length.classList.add('valid');
+    } else {
+        requirements.length.classList.remove('valid');
+    }
+    
+    // Check uppercase
+    if (/[A-Z]/.test(value)) {
+        requirements.upper.classList.add('valid');
+    } else {
+        requirements.upper.classList.remove('valid');
+    }
+    
+    // Check lowercase
+    if (/[a-z]/.test(value)) {
+        requirements.lower.classList.add('valid');
+    } else {
+        requirements.lower.classList.remove('valid');
+    }
+    
+    // Check number
+    if (/[0-9]/.test(value)) {
+        requirements.number.classList.add('valid');
+    } else {
+        requirements.number.classList.remove('valid');
+    }
+});
+
+// Form validation
+document.getElementById('registration-form').addEventListener('submit', function(e) {
+    const password1 = document.querySelector('[name="password1"]').value;
+    const password2 = document.querySelector('[name="password2"]').value;
+    
+    if (password1 !== password2) {
+        e.preventDefault();
+        alert('Passwords do not match!');
+    }
+});
+</script>
 {% endblock %}

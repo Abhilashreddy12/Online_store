@@ -1,70 +1,321 @@
 {% extends 'base.html' %}
+{% load static %}
 
 {% block title %}My Orders - Fashion Store{% endblock %}
 
+{% block extra_css %}
+<style>
+    /* Page Header */
+    .page-header {
+        margin-bottom: var(--space-8);
+    }
+    
+    .page-title {
+        font-size: clamp(1.75rem, 3vw, 2.5rem);
+        font-weight: 700;
+        color: var(--gray-900);
+        margin-bottom: var(--space-2);
+    }
+    
+    .page-subtitle {
+        color: var(--gray-500);
+    }
+    
+    /* Order Card */
+    .order-card {
+        background: white;
+        border-radius: var(--radius-xl);
+        box-shadow: var(--shadow-sm);
+        overflow: hidden;
+        margin-bottom: var(--space-6);
+        transition: all var(--transition-base);
+    }
+    
+    .order-card:hover {
+        box-shadow: var(--shadow-md);
+    }
+    
+    .order-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: flex-start;
+        padding: var(--space-6);
+        border-bottom: 1px solid var(--gray-100);
+        background: var(--gray-50);
+    }
+    
+    .order-info h3 {
+        font-size: var(--text-lg);
+        font-weight: 600;
+        color: var(--gray-800);
+        margin-bottom: var(--space-1);
+    }
+    
+    .order-date {
+        color: var(--gray-500);
+        font-size: var(--text-sm);
+    }
+    
+    .order-meta {
+        text-align: right;
+    }
+    
+    .order-status {
+        display: inline-flex;
+        align-items: center;
+        gap: var(--space-1);
+        padding: var(--space-2) var(--space-3);
+        border-radius: var(--radius-full);
+        font-size: var(--text-sm);
+        font-weight: 600;
+        margin-bottom: var(--space-2);
+    }
+    
+    .status-pending {
+        background: var(--warning-100);
+        color: var(--warning-700);
+    }
+    
+    .status-processing {
+        background: var(--primary-100);
+        color: var(--primary-700);
+    }
+    
+    .status-shipped {
+        background: var(--primary-100);
+        color: var(--primary-700);
+    }
+    
+    .status-delivered {
+        background: var(--success-100);
+        color: var(--success-700);
+    }
+    
+    .status-cancelled {
+        background: var(--error-100);
+        color: var(--error-700);
+    }
+    
+    .order-total {
+        font-size: var(--text-xl);
+        font-weight: 700;
+        color: var(--primary-600);
+    }
+    
+    /* Order Items */
+    .order-items {
+        padding: var(--space-6);
+    }
+    
+    .order-item {
+        display: flex;
+        gap: var(--space-4);
+        align-items: center;
+        padding: var(--space-3) 0;
+        border-bottom: 1px solid var(--gray-100);
+    }
+    
+    .order-item:last-child {
+        border-bottom: none;
+    }
+    
+    .order-item-image {
+        width: 80px;
+        height: 80px;
+        border-radius: var(--radius-lg);
+        overflow: hidden;
+        background: var(--gray-100);
+        flex-shrink: 0;
+    }
+    
+    .order-item-image img {
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+    }
+    
+    .order-item-placeholder {
+        width: 100%;
+        height: 100%;
+        background: var(--gradient-primary);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        color: white;
+        font-size: 1.5rem;
+    }
+    
+    .order-item-info {
+        flex: 1;
+        min-width: 0;
+    }
+    
+    .order-item-name {
+        font-weight: 600;
+        color: var(--gray-800);
+        margin-bottom: var(--space-1);
+    }
+    
+    .order-item-variant {
+        color: var(--gray-500);
+        font-size: var(--text-sm);
+    }
+    
+    .order-item-price {
+        font-weight: 600;
+        color: var(--gray-700);
+        white-space: nowrap;
+    }
+    
+    .more-items {
+        text-align: center;
+        color: var(--gray-500);
+        font-size: var(--text-sm);
+        padding: var(--space-2) 0;
+    }
+    
+    /* Order Actions */
+    .order-actions {
+        display: flex;
+        gap: var(--space-3);
+        padding: var(--space-4) var(--space-6);
+        border-top: 1px solid var(--gray-100);
+        background: var(--gray-50);
+    }
+    
+    .order-actions .btn {
+        padding: var(--space-2) var(--space-4);
+    }
+    
+    /* Empty State */
+    .empty-orders {
+        text-align: center;
+        padding: var(--space-16);
+        background: white;
+        border-radius: var(--radius-xl);
+        box-shadow: var(--shadow-sm);
+    }
+    
+    .empty-icon {
+        font-size: 6rem;
+        margin-bottom: var(--space-4);
+    }
+    
+    .empty-title {
+        font-size: var(--text-2xl);
+        font-weight: 600;
+        color: var(--gray-800);
+        margin-bottom: var(--space-2);
+    }
+    
+    .empty-text {
+        color: var(--gray-500);
+        margin-bottom: var(--space-6);
+    }
+    
+    /* Responsive */
+    @media (max-width: 576px) {
+        .order-header {
+            flex-direction: column;
+            gap: var(--space-3);
+        }
+        
+        .order-meta {
+            text-align: left;
+        }
+        
+        .order-item {
+            flex-wrap: wrap;
+        }
+        
+        .order-item-image {
+            width: 60px;
+            height: 60px;
+        }
+        
+        .order-actions {
+            flex-direction: column;
+        }
+        
+        .order-actions .btn {
+            width: 100%;
+        }
+    }
+</style>
+{% endblock %}
+
 {% block content %}
 <div class="container">
-    <h1 style="font-size: 2.5rem; margin-bottom: 2rem;">My Orders</h1>
+    <div class="page-header">
+        <h1 class="page-title">My Orders</h1>
+        {% if orders %}
+        <p class="page-subtitle">Track and manage your orders</p>
+        {% endif %}
+    </div>
     
     {% if orders %}
     {% for order in orders %}
-    <div class="card" style="margin-bottom: 2rem;">
-        <div style="display: flex; justify-content: space-between; align-items: start; margin-bottom: 1.5rem; padding-bottom: 1rem; border-bottom: 2px solid #e2e8f0;">
-            <div>
-                <h3 style="margin-bottom: 0.5rem;">Order #{{ order.order_number }}</h3>
-                <p style="color: #718096;">Placed on {{ order.created_at|date:"F d, Y" }}</p>
+    <article class="order-card">
+        <div class="order-header">
+            <div class="order-info">
+                <h3>Order #{{ order.order_number }}</h3>
+                <p class="order-date">Placed on {{ order.created_at|date:"F d, Y" }}</p>
             </div>
-            <div style="text-align: right;">
+            <div class="order-meta">
                 {% if order.status == 'PENDING' %}
-                <span class="badge badge-warning">⏳ {{ order.get_status_display }}</span>
+                <span class="order-status status-pending">⏳ {{ order.get_status_display }}</span>
                 {% elif order.status == 'PROCESSING' %}
-                <span class="badge badge-info">🔄 {{ order.get_status_display }}</span>
+                <span class="order-status status-processing">🔄 {{ order.get_status_display }}</span>
                 {% elif order.status == 'SHIPPED' %}
-                <span class="badge badge-info">📦 {{ order.get_status_display }}</span>
+                <span class="order-status status-shipped">📦 {{ order.get_status_display }}</span>
                 {% elif order.status == 'DELIVERED' %}
-                <span class="badge badge-success">✓ {{ order.get_status_display }}</span>
+                <span class="order-status status-delivered">✓ {{ order.get_status_display }}</span>
                 {% elif order.status == 'CANCELLED' %}
-                <span class="badge badge-danger">✗ {{ order.get_status_display }}</span>
+                <span class="order-status status-cancelled">✗ {{ order.get_status_display }}</span>
                 {% endif %}
-                <br>
-                <strong style="font-size: 1.5rem; color: #667eea;">₹{{ order.total_amount }}</strong>
+                <div class="order-total">₹{{ order.total_amount }}</div>
             </div>
         </div>
         
-        <div style="margin-bottom: 1.5rem;">
+        <div class="order-items">
             {% for item in order.items.all|slice:":3" %}
-            <div style="display: flex; gap: 1rem; align-items: center; margin-bottom: 1rem;">
-                {% if item.product.images.first %}
-                <img src="{{ item.product.images.first.image.url }}" alt="{{ item.product_name }}" style="width: 80px; height: 80px; object-fit: cover; border-radius: 8px;">
-                {% endif %}
-                <div style="flex: 1;">
-                    <strong>{{ item.product_name }}</strong><br>
-                    <small style="color: #718096;">{{ item.variant_details }} | Qty: {{ item.quantity }}</small>
+            <div class="order-item">
+                <div class="order-item-image">
+                    {% if item.product.images.first %}
+                    <img src="{{ item.product.images.first.image.url }}" alt="{{ item.product_name }}">
+                    {% else %}
+                    <div class="order-item-placeholder">👕</div>
+                    {% endif %}
                 </div>
-                <strong>₹{{ item.line_total }}</strong>
+                <div class="order-item-info">
+                    <div class="order-item-name">{{ item.product_name }}</div>
+                    <div class="order-item-variant">{{ item.variant_details }} | Qty: {{ item.quantity }}</div>
+                </div>
+                <div class="order-item-price">₹{{ item.line_total }}</div>
             </div>
             {% endfor %}
             {% if order.items.count > 3 %}
-            <p style="color: #718096; text-align: center;">+ {{ order.items.count|add:"-3" }} more item(s)</p>
+            <p class="more-items">+ {{ order.items.count|add:"-3" }} more item(s)</p>
             {% endif %}
         </div>
         
-        <div style="display: flex; gap: 1rem;">
+        <div class="order-actions">
             <a href="{% url 'orders:order_detail' order.order_number %}" class="btn">View Details</a>
             {% if order.status in 'PENDING,PROCESSING' %}
             <form method="post" action="{% url 'orders:cancel_order' order.order_number %}" style="display: inline;">
                 {% csrf_token %}
-                <button type="submit" class="btn btn-danger" onclick="return confirm('Are you sure you want to cancel this order?');">Cancel Order</button>
+                <button type="submit" class="btn btn-secondary" style="background: transparent; color: var(--error-500); border-color: var(--error-200);" onclick="return confirm('Are you sure you want to cancel this order?');">Cancel Order</button>
             </form>
             {% endif %}
         </div>
-    </div>
+    </article>
     {% endfor %}
     {% else %}
-    <div class="card" style="text-align: center; padding: 4rem 2rem;">
-        <div style="font-size: 5rem; margin-bottom: 1rem;">📦</div>
-        <h2 style="margin-bottom: 1rem;">No orders yet</h2>
-        <p style="color: #718096; margin-bottom: 2rem;">Start shopping to place your first order!</p>
+    <!-- Empty State -->
+    <div class="empty-orders">
+        <div class="empty-icon">📦</div>
+        <h2 class="empty-title">No orders yet</h2>
+        <p class="empty-text">Start shopping to place your first order!</p>
         <a href="{% url 'catalog:product_list' %}" class="btn">Browse Products</a>
     </div>
     {% endif %}
