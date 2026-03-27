@@ -2,7 +2,7 @@ from django.db import models
 from django.contrib.auth.models import User
 from catalog.models import Product, ProductVariant
 
-
+from decimal import Decimal
 class Cart(models.Model):
     """Shopping cart"""
     customer = models.OneToOneField(User, on_delete=models.CASCADE, related_name='cart')
@@ -19,7 +19,13 @@ class Cart(models.Model):
     @property
     def subtotal(self):
         return sum(item.line_total for item in self.items.all())
+    @property
+    def tax(self):
+        return self.subtotal * Decimal('0.1')  # Assuming a flat 10% tax rate
 
+    @property
+    def total(self):
+        return self.subtotal + self.tax
 
 class CartItem(models.Model):
     """Items in shopping cart"""

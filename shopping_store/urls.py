@@ -29,6 +29,7 @@ urlpatterns = [
     path('cart/', include('cart.urls')),
     path('orders/', include('orders.urls')),
     path('account/', include('customers.urls')),
+    path('chatbot/', include('chatbot.urls')),
     # Dashboard stats demo
     path('dashboard/stats/', dashboard_stats, name='dashboard_stats'),
     # Password reset URLs
