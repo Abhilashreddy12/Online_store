@@ -173,3 +173,92 @@ class OrderStatusHistory(models.Model):
     def __str__(self):
         return f"{self.order.order_number} - {self.status} at {self.created_at}"
 
+
+class RazorpayPayment(models.Model):
+    """
+    Secure Razorpay payment tracking model.
+    Stores payment details and verification status.
+    Never stores sensitive payment credentials on frontend.
+    """
+    PAYMENT_STATUS_CHOICES = [
+        ('PENDING', 'Pending'),
+        ('AUTHORIZED', 'Authorized'),
+        ('CAPTURED', 'Captured'),
+        ('FAILED', 'Failed'),
+        ('REFUNDED', 'Refunded'),
+    ]
+
+    order = models.OneToOneField(Order, on_delete=models.CASCADE, related_name='razorpay_payment')
+    
+    # Razorpay identifiers
+    razorpay_order_id = models.CharField(max_length=255, unique=True, db_index=True)
+    razorpay_payment_id = models.CharField(max_length=255, blank=True, null=True)
+    razorpay_signature = models.CharField(max_length=255, blank=True, null=True)
+    
+    # Payment details
+    amount_paid = models.DecimalField(max_digits=10, decimal_places=2)
+    currency = models.CharField(max_length=10, default='INR')
+    payment_status = models.CharField(max_length=20, choices=PAYMENT_STATUS_CHOICES, default='PENDING')
+    
+    # Security & verification
+    signature_verified = models.BooleanField(default=False, db_index=True)
+    idempotency_key = models.CharField(max_length=255, unique=True, help_text="Prevents duplicate payments")
+    
+    # Error tracking
+    error_message = models.TextField(blank=True)
+    error_code = models.CharField(max_length=100, blank=True)
+    
+    # Timestamps
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+    payment_captured_at = models.DateTimeField(null=True, blank=True)
+
+    class Meta:
+        ordering = ['-created_at']
+        indexes = [
+            models.Index(fields=['razorpay_order_id']),
+            models.Index(fields=['razorpay_payment_id']),
+            models.Index(fields=['signature_verified']),
+        ]
+
+    def __str__(self):
+        return f"Razorpay Payment - {self.razorpay_order_id} ({self.payment_status})"
+
+
+class Invoice(models.Model):
+    """
+    Auto-generated PDF invoices after successful payment.
+    Stores invoice reference and metadata.
+    """
+    order = models.OneToOneField(Order, on_delete=models.CASCADE, related_name='invoice')
+    
+    # Invoice details
+    invoice_number = models.CharField(max_length=100, unique=True)
+    invoice_date = models.DateField(auto_now_add=True)
+    
+    # File storage
+    pdf_file = models.FileField(upload_to='invoices/%Y/%m/%d/', null=True, blank=True)
+    pdf_url = models.URLField(max_length=500, blank=True, help_text="URL to hosted PDF if using cloud storage")
+    
+    # Metadata
+    downloaded_count = models.PositiveIntegerField(default=0)
+    
+    # Timestamps
+    generated_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+
+    class Meta:
+        ordering = ['-generated_at']
+        indexes = [
+            models.Index(fields=['invoice_number']),
+            models.Index(fields=['order']),
+        ]
+
+    def __str__(self):
+        return f"Invoice {self.invoice_number} - {self.order.order_number}"
+
+    def increment_download_count(self):
+        """Track invoice downloads"""
+        self.downloaded_count += 1
+        self.save()
+

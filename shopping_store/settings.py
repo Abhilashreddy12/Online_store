@@ -27,6 +27,10 @@ environ.Env.read_env(os.path.join(BASE_DIR, '.env'))
 # OpenAI API Key for AI Chatbot
 OPENAI_API_KEY = env('OPENAI_API_KEY')
 
+# Razorpay Payment Gateway Configuration
+# SECURITY: Keys should ONLY be set via environment variables, never hardcoded
+RAZORPAY_KEY_ID = env('RAZORPAY_KEY_ID', default='')
+RAZORPAY_KEY_SECRET = env('RAZORPAY_KEY_SECRET', default='')
 
 # Quick-start development settings - unsuitable for production
 # See https://docs.djangoproject.com/en/6.0/howto/deployment/checklist/

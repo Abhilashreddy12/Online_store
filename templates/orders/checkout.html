@@ -345,7 +345,7 @@
         <h1 class="page-title">Checkout</h1>
     </div>
     
-    <form method="post" action="{% url 'orders:place_order' %}">
+    <form method="post" action="{% url 'orders:place_order' %}" id="checkout-form">
         {% csrf_token %}
         
         <div class="checkout-layout">
@@ -396,6 +396,17 @@
                             <div class="payment-info">
                                 <div class="payment-name">Cash on Delivery</div>
                                 <div class="payment-desc">Pay when you receive your order</div>
+                            </div>
+                        </label>
+                    </div>
+                    
+                    <div class="payment-option">
+                        <label>
+                            <input type="radio" name="payment_method" value="RAZORPAY">
+                            <span class="payment-icon">💳</span>
+                            <div class="payment-info">
+                                <div class="payment-name">Razorpay Secure Payment</div>
+                                <div class="payment-desc">Credit/Debit Card, UPI, Digital Wallets</div>
                             </div>
                         </label>
                     </div>
@@ -463,7 +474,8 @@
                     <span class="summary-value">₹{{ cart.total|floatformat:2 }}</span>
                 </div>
                 
-                <button type="submit" class="btn place-order-btn">Place Order</button>
+                <input type="hidden" id="order-id" value="">
+                <button type="submit" class="btn place-order-btn" id="checkout-btn">Place Order</button>
                 
                 <div class="secure-notice">
                     🔒 Your payment information is secure
@@ -472,6 +484,9 @@
         </div>
     </form>
 </div>
+
+<!-- Razorpay Checkout Script -->
+<script src="https://checkout.razorpay.com/v1/checkout.js"></script>
 
 <script>
 // Handle address selection styling
@@ -491,5 +506,278 @@ document.querySelectorAll('.payment-option').forEach(option => {
         this.querySelector('input[type="radio"]').checked = true;
     });
 });
+
+// Handle form submission with Razorpay integration
+document.getElementById('checkout-form').addEventListener('submit', async function(e) {
+    e.preventDefault();  // CRITICAL: Stop form from submitting normally
+    
+    const paymentMethod = document.querySelector('input[name="payment_method"]:checked').value;
+    const checkoutBtn = document.getElementById('checkout-btn');
+    
+    // Disable button during processing
+    checkoutBtn.disabled = true;
+    
+    if (paymentMethod === 'RAZORPAY') {
+        // For RAZORPAY: Process via AJAX, open Razorpay modal
+        await createAndProcessRazorpayOrder();
+    } else {
+        // For COD: Submit form normally (this will redirect)
+        // Re-enable button since form is submitting
+        checkoutBtn.disabled = false;
+        this.submit();  // Standard form submission for COD
+    }
+});
+
+/**
+ * Create Razorpay order and trigger checkout.
+ * 
+ * PRODUCTION FLOW:
+ * 1. Create order in DB with status=PENDING, payment_status=PENDING
+ * 2. Create Razorpay order for payment
+ * 3. Open Razorpay modal for user to complete payment
+ * 4. Backend verifies signature after payment
+ * 5. On success: Update order status to PROCESSING, clear cart, generate invoice
+ * 
+ * SECURITY: Backend CREATE endpoint never exposes secret key (only public key_id).
+ */
+async function createAndProcessRazorpayOrder() {
+    const form = document.getElementById('checkout-form');
+    const checkoutBtn = document.getElementById('checkout-btn');
+    
+    checkoutBtn.textContent = 'Processing...';
+    
+    try {
+        // Validate form before sending
+        const shippingAddressValue = document.querySelector('input[name="shipping_address"]:checked');
+        if (!shippingAddressValue) {
+            throw new Error('Please select a shipping address');
+        }
+        
+        const paymentMethodValue = document.querySelector('input[name="payment_method"]:checked');
+        if (!paymentMethodValue || paymentMethodValue.value !== 'RAZORPAY') {
+            throw new Error('Please select Razorpay as payment method');
+        }
+        
+        // Step 1: Create order in our backend (status=PENDING, payment_status=PENDING)
+        // Cart is NOT cleared yet - will be cleared after payment verification
+        const formData = new FormData(form);
+        const createOrderResponse = await fetch('{% url "orders:place_order" %}', {
+            method: 'POST',
+            body: formData,
+            headers: {
+                'X-Requested-With': 'XMLHttpRequest'  // Tell backend this is AJAX
+            }
+        });
+        
+        // Check response status
+        if (!createOrderResponse.ok) {
+            const errorText = await createOrderResponse.text();
+            throw new Error(`Server error: ${createOrderResponse.status}`);
+        }
+        
+        // Parse response - MUST be JSON
+        const contentType = createOrderResponse.headers.get('content-type');
+        if (!contentType || !contentType.includes('application/json')) {
+            throw new Error('Invalid server response (not JSON)');
+        }
+        
+        const orderData = await createOrderResponse.json();
+        
+        // Check if order creation succeeded
+        if (!orderData.success) {
+            throw new Error(orderData.error || 'Failed to create order');
+        }
+        
+        const orderId = orderData.order_id;
+        console.log(`Order created: ${orderData.order_number}, ID: ${orderId}`);
+        
+        // Step 2: Create Razorpay order (initiates payment)
+        const razorpayResponse = await fetch('{% url "orders:create_razorpay_order" %}', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/x-www-form-urlencoded',
+                'X-CSRFToken': document.querySelector('[name=csrfmiddlewaretoken]').value
+            },
+            body: `order_id=${orderId}`
+        });
+        
+        if (!razorpayResponse.ok) {
+            throw new Error('Failed to create Razorpay order');
+        }
+        
+        const razorpayData = await razorpayResponse.json();
+        
+        if (!razorpayData.success) {
+            throw new Error(razorpayData.error || 'Failed to initiate payment');
+        }
+        
+        console.log(`Razorpay order created: ${razorpayData.razorpay_order_id}`);
+        
+        // Step 3: Open Razorpay Checkout modal
+        // User sees payment UI and completes payment
+        // After payment, backend will verify signature
+        openRazorpayCheckout(razorpayData, orderId);
+        
+    } catch (error) {
+        console.error('Checkout Error:', error);
+        
+        // Show user-friendly error message
+        let userMessage = error.message;
+        if (userMessage.includes('Server error')) {
+            userMessage = 'Unable to process order. Please try again.';
+        }
+        
+        alert('Checkout Error: ' + userMessage);
+        checkoutBtn.disabled = false;
+        checkoutBtn.textContent = 'Place Order';
+    }
+}
+
+/**
+ * Open Razorpay Checkout modal.
+ * 
+ * SECURITY CRITICAL:
+ * - Only public key_id is passed from backend
+ * - Secret key is NEVER sent to frontend
+ * - Payment signature verified EXCLUSIVELY on backend (HMAC SHA256)
+ * - Frontend cannot tamper with signature verification
+ * 
+ * FLOW:
+ * 1. User sees Razorpay modal with all payment methods
+ * 2. User completes payment
+ * 3. Razorpay returns signature to frontend
+ * 4. Frontend sends signature to backend
+ * 5. Backend verifies signature using secret key (frontend never sees it)
+ */
+function openRazorpayCheckout(razorpayData, orderId) {
+    const options = {
+        key: razorpayData.key_id,  // Public key only (NEVER secret key)
+        amount: razorpayData.amount,  // Amount in paise (smallest unit)
+        currency: razorpayData.currency,  // INR
+        name: 'Online Store',
+        description: `Order ${razorpayData.order_details.order_number}`,
+        order_id: razorpayData.razorpay_order_id,  // Razorpay-generated order ID
+        
+        // Pre-fill customer details
+        prefill: {
+            name: razorpayData.order_details.customer_name,
+            email: razorpayData.order_details.customer_email,
+            contact: ''
+        },
+        
+        // Success callback: Called after user completes payment in Razorpay UI
+        handler: async function(response) {
+            console.log('Payment success callback:', response);
+            // Send signature and payment details to backend for verification
+            await verifyPayment(
+                response.razorpay_payment_id,
+                razorpayData.razorpay_order_id,
+                response.razorpay_signature,
+                orderId
+            );
+        },
+        
+        // Error callback: Called when Razorpay payment fails or user explicitly fails it
+        error: function(error) {
+            console.error('Razorpay error:', error);
+            const errorMsg = error.description || error.message || 'Payment failed';
+            alert(`Payment failed: ${errorMsg}`);
+            
+            // Reset button so user can try again
+            const checkoutBtn = document.getElementById('checkout-btn');
+            checkoutBtn.disabled = false;
+            checkoutBtn.textContent = 'Place Order';
+        },
+        
+        // Callback when user closes modal without paying
+        modal: {
+            ondismiss: function() {
+                console.log('User closed Razorpay modal without completing payment');
+                // Reset button
+                const checkoutBtn = document.getElementById('checkout-btn');
+                checkoutBtn.disabled = false;
+                checkoutBtn.textContent = 'Place Order';
+            }
+        }
+    };
+    
+    const rzp = new Razorpay(options);
+    rzp.open();
+}
+
+/**
+ * Verify payment on backend after Razorpay checkout.
+ * 
+ * CRITICAL SECURITY:
+ * - Signature verification ONLY happens on backend
+ * - Backend has secret key, frontend never sees it
+ * - Backend uses HMAC SHA256 with compare_digest (timing-attack safe)
+ * - If signature invalid, payment is rejected regardless of what frontend says
+ * 
+ * FLOW:
+ * 1. Frontend receives signature from Razorpay
+ * 2. Frontend sends payment_id + order_id + signature to backend
+ * 3. Backend:
+ *    a. Retrieves secret key
+ *    b. Reconstructs expected signature with HMAC SHA256
+ *    c. Uses compare_digest to compare (timing-attack resistant)
+ *    d. If match: Updates order status to PAID
+ *    e. If mismatch: REJECTS payment
+ * 4. Only on success does backend clear cart and generate invoice
+ */
+async function verifyPayment(paymentId, orderId, signature, orderDbId) {
+    const checkoutBtn = document.getElementById('checkout-btn');
+    checkoutBtn.textContent = 'Verifying Payment...';
+    checkoutBtn.disabled = true;
+    
+    try {
+        const verifyResponse = await fetch('{% url "orders:verify_razorpay_payment" %}', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'X-CSRFToken': document.querySelector('[name=csrfmiddlewaretoken]').value
+            },
+            body: JSON.stringify({
+                razorpay_payment_id: paymentId,
+                razorpay_order_id: orderId,
+                razorpay_signature: signature,
+                order_id: orderDbId
+            })
+        });
+        
+        const verifyData = await verifyResponse.json();
+        
+        if (verifyData.success) {
+            // Payment verified and signature is valid
+            // Order status updated to PROCESSING
+            // Cart cleared
+            // Invoice generated
+            console.log('Payment verified successfully');
+            alert('Payment successful! Your order has been confirmed. Redirecting...');
+            
+            // Redirect to order detail page
+            setTimeout(() => {
+                window.location.href = verifyData.redirect_url;
+            }, 1500);
+        } else {
+            // Signature verification failed or other error
+            // Order remains PENDING
+            // Cart NOT cleared
+            console.error('Payment verification failed:', verifyData.error);
+            alert('Payment verification failed: ' + verifyData.error + '\nPlease contact support if you were charged.');
+            
+            // Reset button to allow retry
+            checkoutBtn.disabled = false;
+            checkoutBtn.textContent = 'Place Order';
+        }
+    } catch (error) {
+        console.error('Verification error:', error);
+        alert('Error verifying payment: ' + error.message);
+        
+        // Reset button
+        checkoutBtn.disabled = false;
+        checkoutBtn.textContent = 'Place Order';
+    }
+}
 </script>
 {% endblock %}
