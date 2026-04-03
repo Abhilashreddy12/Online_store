@@ -527,7 +527,11 @@
                     <button type="submit" class="btn btn-cancel" style="width: 100%;" onclick="return confirm('Are you sure you want to cancel this order?');">Cancel Order</button>
                 </form>
                 {% endif %}
-                
+
+                {% if order.payment_status == 'PAID' %}
+                <a href="{% url 'orders:download_invoice' order.order_number %}" class="btn btn-success" style="width: 100%; text-align: center; margin-bottom: 10px;">Download Invoice</a>
+                {% endif %}
+
                 <a href="{% url 'orders:order_list' %}" class="btn btn-secondary" style="width: 100%; text-align: center;">Back to Orders</a>
             </div>
         </div>
