@@ -346,7 +346,7 @@ class InvoiceGenerator:
         
         # Get count of invoices for this date
         count = Invoice.objects.filter(
-            invoice_date__date=timezone.now().date()
+            invoice_date=timezone.now().date()
         ).count() + 1
         
         return f"{date_prefix}{count:03d}"
