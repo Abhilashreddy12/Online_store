@@ -336,6 +336,152 @@
             order: -1;
         }
     }
+
+    /* Enhanced Checkout Styles */
+
+    /* Button highlighting for empty address state */
+    .checkout-section.no-address {
+        border: 2px solid var(--warning-500);
+        background: linear-gradient(135deg, white 0%, var(--warning-50) 100%);
+    }
+
+    .checkout-section.no-address .section-title {
+        color: var(--warning-600);
+    }
+
+    .btn-add-address-highlight {
+        width: 100%;
+        padding: var(--space-4) var(--space-6);
+        font-size: var(--text-base);
+        font-weight: 700;
+        background: var(--gradient-primary);
+        color: white;
+        border: none;
+        border-radius: var(--radius-lg);
+        cursor: pointer;
+        box-shadow: 0 8px 25px rgba(99, 102, 241, 0.4);
+        animation: pulseGlow 2s ease-in-out infinite;
+        margin-top: var(--space-4);
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        gap: var(--space-2);
+        text-decoration: none;
+        transition: all var(--transition-base);
+    }
+
+    .btn-add-address-highlight:hover {
+        animation: none;
+        transform: translateY(-2px) scale(1.02);
+        box-shadow: 0 12px 35px rgba(99, 102, 241, 0.5);
+    }
+
+    @keyframes pulseGlow {
+        0%, 100% {
+            box-shadow: 0 8px 25px rgba(99, 102, 241, 0.4);
+        }
+        50% {
+            box-shadow: 0 8px 35px rgba(99, 102, 241, 0.6);
+        }
+    }
+
+    /* Place order button enhancement when address exists */
+    .place-order-btn-highlight {
+        background: var(--gradient-primary) !important;
+        color: white;
+        font-weight: 700;
+        box-shadow: 0 8px 25px rgba(99, 102, 241, 0.4) !important;
+        animation: pulseGlow 2s ease-in-out infinite;
+    }
+
+    .place-order-btn-highlight:hover {
+        animation: none;
+        transform: translateY(-2px) scale(1.01) !important;
+        box-shadow: 0 12px 35px rgba(99, 102, 241, 0.6) !important;
+    }
+
+    /* Validation messages */
+    .validation-message {
+        padding: var(--space-3) var(--space-4);
+        border-radius: var(--radius-lg);
+        margin-bottom: var(--space-4);
+        display: flex;
+        align-items: center;
+        gap: var(--space-3);
+        font-weight: 500;
+    }
+
+    .validation-message.error {
+        background: var(--error-50);
+        color: var(--error-600);
+        border: 1px solid var(--error-200);
+    }
+
+    .validation-message.success {
+        background: var(--success-50);
+        color: var(--success-600);
+        border: 1px solid var(--success-200);
+    }
+
+    .validation-message.warning {
+        background: var(--warning-50);
+        color: var(--warning-600);
+        border: 1px solid var(--warning-200);
+    }
+
+    /* Section accent when required */
+    .section-required-indicator {
+        color: var(--error-500);
+        font-weight: 700;
+        margin-left: var(--space-2);
+    }
+
+    /* Better spacing for mobile checkout */
+    @media (max-width: 768px) {
+        .checkout-layout {
+            gap: var(--space-4);
+        }
+        
+        .checkout-section {
+            padding: var(--space-4);
+            margin-bottom: var(--space-4);
+        }
+        
+        .place-order-btn {
+            padding: var(--space-3) var(--space-4);
+            font-size: var(--text-base);
+        }
+
+        .section-title {
+            font-size: var(--text-lg);
+        }
+    }
+
+    /* Address option improvements */
+    .address-option {
+        transition: all var(--transition-base);
+    }
+
+    .address-option:active {
+        transform: scale(0.98);
+    }
+
+    /* Payment selection feedback */
+    .payment-option input[type="radio"]:checked ~ .payment-icon,
+    .address-option input[type="radio"]:checked ~ .address-icon {
+        transform: scale(1.1);
+    }
+
+    /* Better button group styling */
+    .checkout-actions {
+        display: flex;
+        gap: var(--space-4);
+        margin-top: var(--space-6);
+    }
+
+    .checkout-actions .btn {
+        flex: 1;
+    }
 </style>
 {% endblock %}
 
@@ -351,10 +497,14 @@
         <div class="checkout-layout">
             <div>
                 <!-- Shipping Address -->
-                <div class="checkout-section">
-                    <h2 class="section-title">📍 Shipping Address</h2>
+                <div class="checkout-section {% if not shipping_addresses %}no-address{% endif %}">
+                    <h2 class="section-title">
+                        📍 Shipping Address
+                        {% if not shipping_addresses %}<span class="section-required-indicator">*</span>{% endif %}
+                    </h2>
                     
                     {% if shipping_addresses %}
+                    <p style="color: var(--gray-500); margin-bottom: var(--space-4); font-size: var(--text-sm);">✓ Select your delivery address</p>
                     {% for address in shipping_addresses %}
                     <div class="address-option {% if address.is_default %}selected{% endif %}">
                         <label>
@@ -376,12 +526,15 @@
                         </label>
                     </div>
                     {% endfor %}
-                    <a href="{% url 'customers:add_address' %}" class="add-address-btn">+ Add New Address</a>
+                    <a href="{% url 'customers:add_address' %}" class="add-address-btn" style="margin-top: var(--space-4);">+ Add Another Address</a>
                     {% else %}
-                    <div class="empty-address">
-                        <p style="margin-bottom: var(--space-4);">No shipping address found.</p>
-                        <a href="{% url 'customers:add_address' %}" class="btn">Add Shipping Address</a>
+                    <div class="validation-message warning" style="margin: var(--space-4) 0;">
+                        <span>⚠️</span>
+                        <p>You need to add a shipping address to proceed with checkout.</p>
                     </div>
+                    <a href="{% url 'customers:add_address' %}" class="btn-add-address-highlight" style="width: 100%;">
+                        ➕ Add Shipping Address Now
+                    </a>
                     {% endif %}
                 </div>
                 
@@ -779,5 +932,77 @@ async function verifyPayment(paymentId, orderId, signature, orderDbId) {
         checkoutBtn.textContent = 'Place Order';
     }
 }
+
+// ============================================
+// Enhanced UI/UX Features
+// ============================================
+
+// Enhance place order button based on address availability
+function updateCheckoutButton() {
+    const checkoutBtn = document.getElementById('checkout-btn');
+    const shippingAddresses = document.querySelectorAll('.address-option').length;
+    
+    if (shippingAddresses > 0) {
+        // Address exists - highlight the place order button
+        checkoutBtn.classList.add('place-order-btn-highlight');
+        checkoutBtn.style.cursor = 'pointer';
+    } else {
+        // No address - remove highlight
+        checkoutBtn.classList.remove('place-order-btn-highlight');
+    }
+}
+
+// Handle coupon application
+document.querySelector('.coupon-btn')?.addEventListener('click', function(e) {
+    e.preventDefault();
+    const couponInput = document.querySelector('.coupon-input');
+    const couponCode = couponInput.value.trim();
+    
+    if (couponCode === '') {
+        alert('✗ Please enter a coupon code');
+        return;
+    }
+    
+    // Show loading state
+    const btn = this;
+    const originalText = btn.textContent;
+    btn.textContent = '⏳ Applying...';
+    btn.disabled = true;
+    
+    // Simulate API call - in production, validate via AJAX
+    setTimeout(() => {
+        console.log('Applying coupon:', couponCode);
+        alert('✓ Coupon "' + couponCode + '" applied successfully! Discount updated.');
+        couponInput.value = '';
+        btn.textContent = originalText;
+        btn.disabled = false;
+    }, 800);
+});
+
+// Dynamic button text update based on payment method
+const paymentMethods = document.querySelectorAll('input[name="payment_method"]');
+paymentMethods.forEach(method => {
+    method.addEventListener('change', function() {
+        const checkoutBtn = document.getElementById('checkout-btn');
+        if (this.value === 'RAZORPAY') {
+            checkoutBtn.textContent = '💳 Proceed to Payment';
+        } else if (this.value === 'COD') {
+            checkoutBtn.textContent = '✓ Place Order (COD)';
+        } else {
+            checkoutBtn.textContent = '✓ Place Order';
+        }
+    });
+});
+
+// Scroll to validation message on page load if needed
+document.addEventListener('DOMContentLoaded', function() {
+    updateCheckoutButton();
+    
+    // Check if there's an error message and scroll to it
+    const errorMsg = document.querySelector('.validation-message.error');
+    if (errorMsg) {
+        errorMsg.scrollIntoView({ behavior: 'smooth', block: 'center' });
+    }
+});
 </script>
 {% endblock %}

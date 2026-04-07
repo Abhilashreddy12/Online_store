@@ -24,8 +24,8 @@ env = environ.Env(
 )
 environ.Env.read_env(os.path.join(BASE_DIR, '.env'))
 
-# OpenAI API Key for AI Chatbot
-OPENAI_API_KEY = env('OPENAI_API_KEY')
+# DeepSeek API Key for AI Chatbot
+DEEPSEEK_API_KEY = env('DEEPSEEK_API_KEY', default='')
 
 # Razorpay Payment Gateway Configuration
 # SECURITY: Keys should ONLY be set via environment variables, never hardcoded

@@ -200,6 +200,177 @@
             gap: var(--space-3);
         }
     }
+
+    /* Enhanced Login Page Styling */
+
+    .login-container {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        min-height: calc(100vh - 200px);
+    }
+
+    .login-card {
+        background: white;
+        border: 1px solid var(--gray-200);
+        animation: fadeInUp 0.6s ease-out;
+    }
+
+    @keyframes fadeInUp {
+        from {
+            opacity: 0;
+            transform: translateY(30px);
+        }
+        to {
+            opacity: 1;
+            transform: translateY(0);
+        }
+    }
+
+    .login-icon {
+        animation: float 3s ease-in-out infinite;
+    }
+
+    @keyframes float {
+        0%, 100% {
+            transform: translateY(0px);
+        }
+        50% {
+            transform: translateY(-10px);
+        }
+    }
+
+    .login-title {
+        letter-spacing: -0.5px;
+    }
+
+    /* Form control enhancements */
+    .login-form .form-control {
+        position: relative;
+        background: white;
+        border-color: var(--gray-300);
+    }
+
+    .login-form .form-control:focus {
+        border-color: var(--primary-500);
+        box-shadow: 0 0 0 4px var(--primary-200);
+        transform: translateY(-1px);
+    }
+
+    /* Form group with better spacing */
+    .login-form .form-group {
+        position: relative;
+    }
+
+    /* Input icons */
+    .login-form .form-group.has-icon .form-control {
+        padding-left: var(--space-12);
+    }
+
+    /* Better button styling */
+    .login-btn {
+        box-shadow: 0 4px 15px rgba(99, 102, 241, 0.3);
+        position: relative;
+        overflow: hidden;
+    }
+
+    .login-btn::before {
+        content: '';
+        position: absolute;
+        inset: 0;
+        background: rgba(255, 255, 255, 0.1);
+        transform: scaleX(0);
+        transform-origin: left;
+        transition: transform var(--transition-base);
+        pointer-events: none;
+    }
+
+    .login-btn:hover::before {
+        transform: scaleX(1);
+    }
+
+    .login-btn:hover {
+        box-shadow: 0 8px 25px rgba(99, 102, 241, 0.4);
+    }
+
+    .login-btn:active {
+        transform: scale(0.98);
+    }
+
+    /* Remember me with better styling */
+    .remember-me {
+        transition: color var(--transition-fast);
+    }
+
+    .remember-me:hover {
+        color: var(--gray-800);
+    }
+
+    .remember-me input {
+        cursor: pointer;
+        transition: all var(--transition-fast);
+    }
+
+    .remember-me input:hover {
+        transform: scale(1.1);
+    }
+
+    /* Error message styling */
+    .error-message {
+        display: flex;
+        align-items: center;
+        gap: var(--space-3);
+        animation: slideInDown 0.3s ease-out;
+    }
+
+    @keyframes slideInDown {
+        from {
+            opacity: 0;
+            transform: translateY(-20px);
+        }
+        to {
+            opacity: 1;
+            transform: translateY(0);
+        }
+    }
+
+    .error-message::before {
+        content: '✕';
+        font-weight: bold;
+        font-size: var(--text-lg);
+    }
+
+    /* Social login section */
+    .social-login {
+        border-top: 1px solid var(--gray-200);
+        padding-top: var(--space-6);
+        margin-top: var(--space-6);
+    }
+
+    /* Footer link styling */
+    .login-footer p {
+        margin: 0;
+    }
+
+    .login-footer a {
+        transition: all var(--transition-fast);
+    }
+
+    .login-footer a:hover {
+        color: var(--primary-700);
+    }
+
+    /* Responsive improvements */
+    @media (max-width: 768px) {
+        .login-container {
+            min-height: auto;
+            padding: var(--space-8) 0;
+        }
+
+        .login-card {
+            max-width: 100%;
+        }
+    }
 </style>
 {% endblock %}
 

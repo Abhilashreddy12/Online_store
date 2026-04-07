@@ -263,6 +263,39 @@
         padding: var(--space-4);
         font-size: var(--text-lg);
         font-weight: 700;
+        background: var(--gradient-primary);
+        color: white;
+        border: none;
+        border-radius: var(--radius-lg);
+        cursor: pointer;
+        box-shadow: 0 8px 25px rgba(99, 102, 241, 0.4);
+        animation: pulseGlow 2s ease-in-out infinite;
+        transition: all var(--transition-base);
+    }
+    
+    .btn-add-cart:hover:not(:disabled) {
+        animation: none;
+        transform: translateY(-2px) scale(1.02);
+        box-shadow: 0 12px 35px rgba(99, 102, 241, 0.6);
+    }
+    
+    .btn-add-cart:active:not(:disabled) {
+        transform: scale(0.98);
+    }
+    
+    @keyframes pulseGlow {
+        0%, 100% {
+            box-shadow: 0 8px 25px rgba(99, 102, 241, 0.4);
+        }
+        50% {
+            box-shadow: 0 8px 35px rgba(99, 102, 241, 0.6);
+        }
+    }
+    
+    .btn-add-cart:disabled {
+        opacity: 0.6;
+        cursor: not-allowed;
+        animation: none;
     }
     
     .btn-wishlist {

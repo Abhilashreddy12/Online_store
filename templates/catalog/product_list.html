@@ -254,6 +254,31 @@
         padding: var(--space-2) var(--space-3);
         font-size: var(--text-sm);
         justify-content: center;
+        transition: all var(--transition-fast);
+    }
+    
+    .product-actions .btn[style*="width: 100%"] {
+        background: var(--gradient-primary);
+        color: white;
+        font-weight: 600;
+        box-shadow: 0 6px 20px rgba(99, 102, 241, 0.35);
+        animation: pulseGlow 2s ease-in-out infinite;
+        border: none;
+    }
+    
+    .product-actions .btn[style*="width: 100%"]:hover {
+        animation: none;
+        transform: translateY(-2px) scale(1.01);
+        box-shadow: 0 10px 30px rgba(99, 102, 241, 0.5);
+    }
+    
+    @keyframes pulseGlow {
+        0%, 100% {
+            box-shadow: 0 6px 20px rgba(99, 102, 241, 0.35);
+        }
+        50% {
+            box-shadow: 0 6px 30px rgba(99, 102, 241, 0.5);
+        }
     }
     
     /* Pagination */

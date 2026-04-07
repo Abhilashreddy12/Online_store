@@ -294,6 +294,251 @@
             align-items: stretch;
         }
     }
+
+    /* Enhanced Profile Styling */
+
+    /* Better card design */
+    .profile-card {
+        position: relative;
+        overflow: hidden;
+        border: 1px solid var(--gray-200);
+    }
+
+    .profile-card::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        height: 4px;
+        background: var(--gradient-primary);
+    }
+
+    .profile-card:hover {
+        border-color: var(--primary-300);
+        box-shadow: 0 12px 32px rgba(99, 102, 241, 0.12);
+        transform: translateY(-2px);
+    }
+
+    /* Card action buttons */
+    .card-actions {
+        display: flex;
+        gap: var(--space-2);
+        margin-top: var(--space-4);
+        padding-top: var(--space-4);
+        border-top: 1px solid var(--gray-100);
+    }
+
+    .card-actions .btn {
+        flex: 1;
+        padding: var(--space-2) var(--space-3);
+        font-size: var(--text-sm);
+    }
+
+    .btn-edit-profile {
+        background: var(--primary-500);
+        color: white;
+        transition: all var(--transition-fast);
+    }
+
+    .btn-edit-profile:hover {
+        background: var(--primary-600);
+        transform: scale(1.02);
+    }
+
+    /* Improved icons */
+    .card-icon {
+        animation: pulse-icon 2s ease-in-out infinite;
+    }
+
+    @keyframes pulse-icon {
+        0%, 100% {
+            transform: scale(1);
+        }
+        50% {
+            transform: scale(1.05);
+        }
+    }
+
+    /* Better info item styling */
+    .info-item {
+        transition: all var(--transition-fast);
+        padding: var(--space-4) 0;
+    }
+
+    .info-item:hover {
+        background: var(--gray-50);
+        padding: var(--space-4) var(--space-3);
+        margin: 0 calc(-1 * var(--space-3));
+        border-radius: var(--radius-md);
+    }
+
+    /* Enhanced statistics */
+    .stat-item {
+        background: linear-gradient(135deg, var(--primary-50) 0%, white 100%);
+        border: 1px solid var(--primary-200);
+        transition: all var(--transition-fast);
+    }
+
+    .stat-item:hover {
+        border-color: var(--primary-500);
+        box-shadow: 0 8px 16px rgba(99, 102, 241, 0.1);
+        transform: translateY(-2px);
+    }
+
+    .stat-value {
+        background: var(--gradient-primary);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+        background-clip: text;
+    }
+
+    /* Better address cards */
+    .address-card {
+        background: white;
+        border-color: var(--gray-300);
+        transition: all var(--transition-base);
+        position: relative;
+    }
+
+    .address-card::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        height: 2px;
+        background: linear-gradient(90deg, var(--primary-500), transparent);
+        transform: scaleX(0);
+        transform-origin: left;
+        transition: transform var(--transition-base);
+    }
+
+    .address-card:hover::before {
+        transform: scaleX(1);
+    }
+
+    .address-card.default::before {
+        background: linear-gradient(90deg, var(--success-500), transparent);
+        transform: scaleX(1);
+    }
+
+    .address-card:hover {
+        border-color: var(--primary-400);
+        box-shadow: 0 8px 24px rgba(99, 102, 241, 0.15);
+        transform: translateY(-3px);
+    }
+
+    .address-card.default:hover {
+        border-color: var(--success-400);
+        box-shadow: 0 8px 24px rgba(16, 185, 129, 0.15);
+    }
+
+    /* Better address actions */
+    .address-actions {
+        opacity: 0.7;
+        transition: opacity var(--transition-fast);
+    }
+
+    .address-card:hover .address-actions {
+        opacity: 1;
+    }
+
+    .address-actions .btn {
+        transition: all var(--transition-fast);
+    }
+
+    .address-actions .btn-secondary:hover {
+        background: var(--primary-500);
+        color: white;
+        border-color: var(--primary-500);
+        transform: scale(1.02);
+    }
+
+    /* Improved empty state */
+    .empty-addresses {
+        padding: var(--space-12) var(--space-6);
+        background: linear-gradient(135deg, var(--primary-50) 0%, white 100%);
+        border: 2px dashed var(--primary-300);
+        border-radius: var(--radius-xl);
+    }
+
+    .empty-icon {
+        animation: float 3s ease-in-out infinite;
+    }
+
+    @keyframes float {
+        0%, 100% {
+            transform: translateY(0px);
+        }
+        50% {
+            transform: translateY(-10px);
+        }
+    }
+
+    /* Addresses section title with better styling */
+    .section-header {
+        transition: all var(--transition-fast);
+    }
+
+    .section-title {
+        font-weight: 700;
+        letter-spacing: -0.5px;
+    }
+
+    .addresses-section {
+        border: 1px solid var(--gray-200);
+        background: white;
+        transition: all var(--transition-base);
+    }
+
+    .addresses-section:hover {
+        border-color: var(--primary-300);
+    }
+
+    /* Better responsive for mobile */
+    @media (max-width: 640px) {
+        .profile-grid {
+            gap: var(--space-4);
+        }
+
+        .profile-card {
+            padding: var(--space-4);
+        }
+
+        .card-header {
+            margin-bottom: var(--space-4);
+            gap: var(--space-2);
+        }
+
+        .card-icon {
+            width: 40px;
+            height: 40px;
+            font-size: 1.25rem;
+        }
+
+        .card-title {
+            font-size: var(--text-base);
+        }
+
+        .address-grid {
+            grid-template-columns: 1fr;
+        }
+
+        .section-header {
+            flex-direction: column-reverse;
+        }
+
+        .section-header .btn {
+            width: 100%;
+        }
+    }
+
+    /* Loading state */
+    .profile-card.loading {
+        opacity: 0.7;
+        pointer-events: none;
+    }
 </style>
 {% endblock %}
 
@@ -342,6 +587,10 @@
                 <span class="info-value">
                     <span class="points-badge">🎁 {{ customer.loyalty_points }} points</span>
                 </span>
+            </div>
+
+            <div class="card-actions">
+                <a href="{% url 'customers:profile' %}" class="btn btn-edit-profile">✏️ Edit Profile</a>
             </div>
         </div>
         

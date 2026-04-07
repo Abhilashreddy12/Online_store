@@ -15,15 +15,17 @@ from django.contrib.auth.models import User
 logger = logging.getLogger(__name__)
 
 # Configuration - read from Django settings first, then env
-def _get_openai_key():
+
+# DeepSeek API Key configuration
+def _get_deepseek_key():
     try:
-        key = getattr(settings, 'OPENAI_API_KEY', '') or os.environ.get('OPENAI_API_KEY', '')
+        key = getattr(settings, 'DEEPSEEK_API_KEY', '') or os.environ.get('DEEPSEEK_API_KEY', '')
         return key.strip() if key else ''
     except Exception:
-        return os.environ.get('OPENAI_API_KEY', '')
+        return os.environ.get('DEEPSEEK_API_KEY', '')
 
-OPENAI_API_KEY = _get_openai_key()
-LLM_MODEL = os.environ.get('LLM_MODEL', 'gpt-3.5-turbo')
+DEEPSEEK_API_KEY = _get_deepseek_key()
+LLM_MODEL = os.environ.get('LLM_MODEL', 'deepseek-chat')
 USE_SIMPLE_AGENT = os.environ.get('USE_SIMPLE_AGENT', 'false').lower() == 'true'
 
 
@@ -261,111 +263,74 @@ class SimpleAgent:
         return response
 
 
-class LangChainAgent:
+
+# Placeholder for DeepSeek integration
+class DeepSeekAgent:
     """
-    LangChain-based agent using langgraph (compatible with langchain 1.x).
-    Requires OpenAI API key.
+    DeepSeek-based agent for the shopping assistant chatbot.
+    Requires DeepSeek API key.
     """
 
     def __init__(self, user: Optional[User] = None, session_id: str = None):
         self.user = user
         self.session_id = session_id or 'anonymous'
-        self._llm = None
-        self._tools = []
-        self._setup_agent()
-
-    def _setup_agent(self):
-        """Initialize the LLM and tools"""
-        try:
-            from langchain_openai import ChatOpenAI
-            from .tools import create_langchain_tools
-            from .rag_pipeline import create_faq_tool
-
-            api_key = _get_openai_key()
-            if not api_key:
-                logger.warning("OpenAI API key not set, LangChain agent unavailable")
-                return
-
-            self._llm = ChatOpenAI(
-                model=LLM_MODEL,
-                temperature=0.7,
-                api_key=api_key
-            )
-
-            self._tools = create_langchain_tools(self.user, self.session_id)
-            faq_tool = create_faq_tool()
-            if faq_tool:
-                self._tools.append(faq_tool)
-
-            logger.info("LangChain agent initialized successfully")
-
-        except ImportError as e:
-            logger.warning(f"LangChain dependencies not available: {e}")
-        except Exception as e:
-            logger.error(f"Failed to initialize LangChain agent: {e}")
+        self.api_key = DEEPSEEK_API_KEY
 
     def run(self, message: str) -> Dict:
-        """Process a message using langgraph react agent"""
-        if self._llm is None:
+        if not self.api_key:
             return SimpleAgent(self.user, self.session_id).run(message)
 
         try:
-            from langgraph.prebuilt import create_react_agent
-            from langchain_core.messages import HumanMessage, SystemMessage
             from .memory import get_memory
-
-            # Build conversation history as messages
+            import requests
+            # Prepare conversation history
             memory = get_memory()
             history_entries = memory.get_history(self.session_id) if hasattr(memory, 'get_history') else []
 
+            # Build messages for DeepSeek
+            messages = []
+            # Add system prompt
             system_content = SYSTEM_PROMPT.format(context="", history="")
-            messages = [SystemMessage(content=system_content)]
+            messages.append({"role": "system", "content": system_content})
 
-            # Add past turns (up to last 6)
+            # Add up to last 6 turns
             for entry in history_entries[-6:]:
-                messages.append(HumanMessage(content=entry.get('user', '')))
+                if entry.get('user'):
+                    messages.append({"role": "user", "content": entry['user']})
                 if entry.get('assistant'):
-                    from langchain_core.messages import AIMessage
-                    messages.append(AIMessage(content=entry['assistant']))
+                    messages.append({"role": "assistant", "content": entry['assistant']})
 
-            messages.append(HumanMessage(content=message))
+            # Add current user message
+            messages.append({"role": "user", "content": message})
 
-            agent = create_react_agent(self._llm, self._tools)
-            result = agent.invoke({"messages": messages})
-
-            # Extract the last AI message
-            output = ''
-            for msg in reversed(result.get('messages', [])):
-                if hasattr(msg, 'content') and msg.__class__.__name__ == 'AIMessage':
-                    output = msg.content
-                    break
-
-            if not output:
-                output = result.get('output', '')
-
-            # Try to parse structured JSON response
-            try:
-                if output.strip().startswith('{'):
-                    return json.loads(output)
-            except Exception:
-                pass
-
+            # DeepSeek API endpoint (OpenAI-compatible)
+            api_url = "https://api.deepseek.com/v1/chat/completions"
+            headers = {
+                "Authorization": f"Bearer {self.api_key}",
+                "Content-Type": "application/json"
+            }
+            payload = {
+                "model": LLM_MODEL,
+                "messages": messages,
+                "temperature": 0.7,
+                "stream": False
+            }
+            resp = requests.post(api_url, headers=headers, json=payload, timeout=30)
+            resp.raise_for_status()
+            data = resp.json()
+            output = data["choices"][0]["message"]["content"] if data.get("choices") else "(No response)"
             return {'type': 'text', 'message': output, 'data': None}
-
         except Exception as e:
-            logger.error(f"LangChain agent error: {e}")
-            return SimpleAgent(self.user, self.session_id).run(message)
+            logger.error(f"DeepSeek agent error: {e}")
+            return {'type': 'text', 'message': 'Sorry, there was an error with the DeepSeek API.', 'data': None}
 
 
 def get_agent(user: Optional[User] = None, session_id: str = None):
     """
-    Get the appropriate agent based on configuration.
+    Always use SimpleAgent (no LLM, no API key required).
+    To re-enable LLM, change this logic.
     """
-    api_key = _get_openai_key()
-    if USE_SIMPLE_AGENT or not api_key:
-        return SimpleAgent(user, session_id)
-    
-    return LangChainAgent(user, session_id)
+    return SimpleAgent(user, session_id)
 
 
 def process_message(
