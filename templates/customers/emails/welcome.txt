@@ -1,0 +1,51 @@
+WELCOME TO OUR STORE!
+=====================
+
+Hi {{ customer_name }},
+
+Welcome to our store! We're thrilled to have you join our community of premium style enthusiasts.
+
+---
+
+START SHOPPING
+==============
+Explore our curated collection of fashion items, from trendy pieces to timeless classics.
+We offer the latest styles at competitive prices.
+
+---
+
+CREATE YOUR WISHLIST
+====================
+Save your favorite items to your wishlist and get notified when they go on sale.
+Never miss out on the pieces you love.
+
+---
+
+EXCLUSIVE REWARDS
+=================
+Earn loyalty points with every purchase and unlock exclusive discounts and rewards.
+Your loyalty is our priority!
+
+---
+
+FAST & SECURE
+=============
+Enjoy fast shipping and secure checkout. We use industry-leading security measures
+to protect your information.
+
+Start Shopping: {{ site_url }}/shop/
+
+---
+
+NEED HELP?
+==========
+If you have any questions or need assistance, our customer support team is here to help.
+Contact us: {{ support_email }}
+
+---
+
+Thank you for joining us!
+
+Store: {{ site_url }}
+
+This is an automated email. Please do not reply directly to this message.

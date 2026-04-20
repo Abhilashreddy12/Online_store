@@ -1,0 +1,35 @@
+PAYMENT RECEIVED
+================
+
+Hi {{ customer_name }},
+
+Thank you! We have successfully received your payment. Your order is being prepared for shipment.
+
+---
+
+PAYMENT CONFIRMATION
+====================
+Order #: {{ order_number }}
+Amount Paid: {{ order_amount }}
+Payment Method: {{ payment_method }}
+Status: Confirmed & Received
+
+---
+
+WHAT HAPPENS NEXT?
+==================
+1. Your order is now being processed and packaged
+2. You'll receive a shipping confirmation within 24 hours
+3. Your invoice will be available in your account
+4. Track your shipment using the tracking number provided
+
+View Your Orders: {{ site_url }}/orders/
+
+---
+
+Thank you for your business!
+
+Contact: {{ support_email }}
+Store: {{ site_url }}
+
+This is an automated email. Please do not reply directly to this message.

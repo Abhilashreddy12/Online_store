@@ -421,15 +421,26 @@ def track_order(user: User, order_number: str = None) -> Dict:
     """Track an order"""
     from orders.models import Order
     
+    import logging
+    logger = logging.getLogger("chatbot.order_tracking")
     try:
+        logger.debug(f"track_order called for user={user} order_number={order_number}")
         if order_number:
-            order = Order.objects.get(order_number=order_number, customer=user)
+            # Try exact match
+            order = Order.objects.filter(order_number=order_number, customer=user).first()
+            if not order:
+                # Try case-insensitive match and strip spaces/hyphens
+                order = Order.objects.filter(order_number__iexact=order_number.replace(' ', '').replace('_', '-'), customer=user).first()
+            if not order:
+                logger.warning(f"Order not found for user={user} order_number={order_number}")
+                return {'success': False, 'message': f'Order {order_number} not found for your account.'}
         else:
             # Get most recent order
             order = Order.objects.filter(customer=user).order_by('-created_at').first()
             if not order:
-                return {'success': False, 'message': 'No orders found'}
-        
+                logger.warning(f"No orders found for user={user}")
+                return {'success': False, 'message': 'No orders found for your account.'}
+
         items = [
             {
                 'name': item.product_name,
@@ -438,7 +449,8 @@ def track_order(user: User, order_number: str = None) -> Dict:
             }
             for item in order.items.all()
         ]
-        
+
+        logger.debug(f"Order found: {order.order_number} for user={user}")
         return {
             'success': True,
             'order_number': order.order_number,
@@ -452,8 +464,9 @@ def track_order(user: User, order_number: str = None) -> Dict:
             'delivered_at': order.delivered_at.strftime('%Y-%m-%d %H:%M') if order.delivered_at else None,
             'items': items
         }
-    except Order.DoesNotExist:
-        return {'success': False, 'message': 'Order not found'}
+    except Exception as e:
+        logger.error(f"Order tracking error for user={user} order_number={order_number}: {e}")
+        return {'success': False, 'message': f'Order tracking failed: {str(e)}'}
 
 
 def get_personalized_recommendations(user: User, limit: int = 5) -> List[Dict]:

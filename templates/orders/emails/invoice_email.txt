@@ -1,0 +1,57 @@
+YOUR INVOICE
+============
+
+Hi {{ customer_name }},
+
+Your invoice for order #{{ order.order_number }} is attached to this email in PDF format.
+
+---
+
+INVOICE DETAILS
+===============
+Invoice #: INV-{{ invoice_number }}
+Invoice Date: {{ invoice_date }}
+Order #: {{ order.order_number }}
+Status: {{ order.get_status_display }}
+
+---
+
+ITEMS
+=====
+{% for item in order_items %}
+{{ item.product.name }}
+  Quantity: {{ item.quantity }}
+  Price: ${{ item.product.price|floatformat:2 }}
+  Total: ${{ item.subtotal|floatformat:2 }}
+
+{% endfor %}
+
+---
+
+INVOICE TOTAL
+=============
+Subtotal:     ${{ order.subtotal|floatformat:2 }}
+{% if order.tax_amount %}Tax:          ${{ order.tax_amount|floatformat:2 }}
+{% endif %}{% if order.shipping_cost %}Shipping:     ${{ order.shipping_cost|floatformat:2 }}
+{% endif %}{% if order.discount_amount %}Discount:    -${{ order.discount_amount|floatformat:2 }}
+{% endif %}
+TOTAL DUE:    ${{ order.total_amount|floatformat:2 }}
+
+---
+
+DOCUMENT ATTACHED
+=================
+Your complete invoice is attached to this email in PDF format.
+If you cannot see the attachment, please login to your account
+to view and download your invoice.
+
+View in Account: {{ site_url }}/orders/{{ order.id }}/
+
+---
+
+Thank you for your business!
+
+Contact: {{ support_email }}
+Store: {{ site_url }}
+
+This is an automated email. Please do not reply directly to this message.

@@ -1,0 +1,295 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Edit Profile - Fashion Store{% endblock %}
+
+{% block extra_css %}
+<style>
+    .edit-profile-container {
+        max-width: 600px;
+        margin: var(--space-8) auto;
+        background: white;
+        border-radius: var(--radius-xl);
+        box-shadow: var(--shadow-md);
+        overflow: hidden;
+    }
+
+    .form-header {
+        background: var(--gradient-primary);
+        color: white;
+        padding: var(--space-6);
+        text-align: center;
+    }
+
+    .form-header h1 {
+        font-size: 1.75rem;
+        font-weight: 700;
+        margin: 0;
+    }
+
+    .form-content {
+        padding: var(--space-6);
+    }
+
+    .form-group {
+        margin-bottom: var(--space-6);
+    }
+
+    .form-group label {
+        display: block;
+        font-weight: 600;
+        color: var(--gray-700);
+        margin-bottom: var(--space-2);
+        font-size: var(--text-sm);
+    }
+
+    .form-group input,
+    .form-group select,
+    .form-group textarea {
+        width: 100%;
+        padding: var(--space-3) var(--space-4);
+        border: 1px solid var(--gray-300);
+        border-radius: var(--radius-md);
+        font-size: var(--text-base);
+        font-family: inherit;
+        transition: all var(--transition-fast);
+    }
+
+    .form-group input:focus,
+    .form-group select:focus,
+    .form-group textarea:focus {
+        outline: none;
+        border-color: var(--primary-500);
+        box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.1);
+    }
+
+    .form-row {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: var(--space-4);
+    }
+
+    .checkbox-group {
+        display: flex;
+        align-items: center;
+        gap: var(--space-3);
+    }
+
+    .checkbox-group input[type="checkbox"] {
+        width: auto;
+    }
+
+    .checkbox-group label {
+        margin-bottom: 0;
+        cursor: pointer;
+    }
+
+    .form-actions {
+        display: flex;
+        gap: var(--space-4);
+        margin-top: var(--space-8);
+        padding-top: var(--space-6);
+        border-top: 1px solid var(--gray-200);
+    }
+
+    .form-actions .btn {
+        flex: 1;
+        padding: var(--space-3) var(--space-6);
+        font-size: var(--text-base);
+        font-weight: 600;
+        border: none;
+        border-radius: var(--radius-md);
+        cursor: pointer;
+        transition: all var(--transition-fast);
+    }
+
+    .btn-primary {
+        background: var(--gradient-primary);
+        color: white;
+    }
+
+    .btn-primary:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 8px 16px rgba(99, 102, 241, 0.3);
+    }
+
+    .btn-secondary {
+        background: var(--gray-100);
+        color: var(--gray-700);
+        border: 1px solid var(--gray-300);
+    }
+
+    .btn-secondary:hover {
+        background: var(--gray-200);
+    }
+
+    .form-info {
+        background: var(--primary-50);
+        border-left: 4px solid var(--primary-500);
+        padding: var(--space-4);
+        border-radius: var(--radius-md);
+        margin-bottom: var(--space-6);
+        font-size: var(--text-sm);
+        color: var(--primary-700);
+    }
+
+    @media (max-width: 640px) {
+        .edit-profile-container {
+            margin: var(--space-4);
+            border-radius: var(--radius-lg);
+        }
+
+        .form-header {
+            padding: var(--space-4);
+        }
+
+        .form-header h1 {
+            font-size: 1.5rem;
+        }
+
+        .form-content {
+            padding: var(--space-4);
+        }
+
+        .form-row {
+            grid-template-columns: 1fr;
+        }
+
+        .form-actions {
+            flex-direction: column;
+        }
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="edit-profile-container">
+    <div class="form-header">
+        <h1>✏️ Edit Your Profile</h1>
+    </div>
+
+    <div class="form-content">
+        <div class="form-info">
+            💡 Update your personal information below. Your phone number and profile details will help us serve you better.
+        </div>
+
+        <form method="POST" action="{% url 'customers:edit_profile' %}">
+            {% csrf_token %}
+
+            <!-- Full Name Section -->
+            <div class="form-row">
+                <div class="form-group">
+                    <label for="first_name">First Name</label>
+                    <input 
+                        type="text" 
+                        id="first_name" 
+                        name="first_name" 
+                        value="{{ user.first_name }}"
+                        placeholder="Enter your first name"
+                    >
+                </div>
+                <div class="form-group">
+                    <label for="last_name">Last Name</label>
+                    <input 
+                        type="text" 
+                        id="last_name" 
+                        name="last_name" 
+                        value="{{ user.last_name }}"
+                        placeholder="Enter your last name"
+                    >
+                </div>
+            </div>
+
+            <!-- Email -->
+            <div class="form-group">
+                <label for="email">Email Address</label>
+                <input 
+                    type="email" 
+                    id="email" 
+                    name="email" 
+                    value="{{ user.email }}"
+                    placeholder="Enter your email address"
+                    required
+                >
+            </div>
+
+            <!-- Phone Number -->
+            <div class="form-group">
+                <label for="phone">📞 Phone Number <span style="color: var(--error-500);">*</span></label>
+                <input 
+                    type="tel" 
+                    id="phone" 
+                    name="phone" 
+                    value="{{ customer.phone }}"
+                    placeholder="Enter your phone number (e.g., +91 98765 43210)"
+                    required
+                >
+                <small style="color: var(--gray-500); display: block; margin-top: var(--space-2);">
+                    This is required for delivery and order confirmation
+                </small>
+            </div>
+
+            <!-- Date of Birth & Gender -->
+            <div class="form-row">
+                <div class="form-group">
+                    <label for="date_of_birth">Date of Birth</label>
+                    <input 
+                        type="date" 
+                        id="date_of_birth" 
+                        name="date_of_birth" 
+                        value="{% if customer.date_of_birth %}{{ customer.date_of_birth|date:'Y-m-d' }}{% endif %}"
+                    >
+                </div>
+                <div class="form-group">
+                    <label for="gender">Gender</label>
+                    <select id="gender" name="gender">
+                        <option value="">Select Gender</option>
+                        <option value="M" {% if customer.gender == 'M' %}selected{% endif %}>Male</option>
+                        <option value="F" {% if customer.gender == 'F' %}selected{% endif %}>Female</option>
+                        <option value="O" {% if customer.gender == 'O' %}selected{% endif %}>Other</option>
+                    </select>
+                </div>
+            </div>
+
+            <!-- Preferences -->
+            <div style="margin-top: var(--space-8);">
+                <h3 style="font-size: var(--text-lg); font-weight: 600; color: var(--gray-800); margin-bottom: var(--space-4);">
+                    Preferences
+                </h3>
+
+                <div style="display: flex; flex-direction: column; gap: var(--space-4);">
+                    <div class="checkbox-group">
+                        <input 
+                            type="checkbox" 
+                            id="newsletter_subscribed" 
+                            name="newsletter_subscribed"
+                            {% if customer.newsletter_subscribed %}checked{% endif %}
+                        >
+                        <label for="newsletter_subscribed">
+                            📧 Subscribe to newsletter for exclusive deals and updates
+                        </label>
+                    </div>
+
+                    <div class="checkbox-group">
+                        <input 
+                            type="checkbox" 
+                            id="sms_notifications" 
+                            name="sms_notifications"
+                            {% if customer.sms_notifications %}checked{% endif %}
+                        >
+                        <label for="sms_notifications">
+                            📱 Receive SMS notifications for order updates
+                        </label>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Form Actions -->
+            <div class="form-actions">
+                <a href="{% url 'customers:profile' %}" class="btn btn-secondary">← Cancel</a>
+                <button type="submit" class="btn btn-primary">💾 Save Changes</button>
+            </div>
+        </form>
+    </div>
+</div>
+{% endblock %}

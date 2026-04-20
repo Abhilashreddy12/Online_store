@@ -211,20 +211,27 @@ class SimpleAgent:
             
             elif intent == 'track_order':
                 if not self.user or not self.user.is_authenticated:
-                    response['message'] = "Please log in to track your orders."
+                    response['type'] = 'error'
+                    response['message'] = "You must be logged in to track your orders. Please log in and try again."
                 else:
-                    # Try to extract order number from message
                     import re
-                    order_match = re.search(r'ORD[-\s]?[\w-]+', message.upper())
-                    order_number = order_match.group(0) if order_match else None
-                    
+                    order_match = re.search(r'(ORD[-_\s]?[0-9]{8,}-[A-Z0-9]+|[0-9]{8,}-[A-Z0-9]+|ORD[-_\s]?[A-Z0-9]+)', message.upper())
+                    order_number = order_match.group(0).replace(' ', '').replace('_', '-') if order_match else None
                     result = track_order(self.user, order_number)
-                    response['type'] = 'order'
                     if result['success']:
+                        response['type'] = 'order'
                         response['message'] = f"Order {result['order_number']} Status: {result['status_display']}"
                         response['data'] = result
                     else:
-                        response['message'] = result['message']
+                        # Fallback: show recent orders if tracking fails
+                        orders = get_user_orders(self.user, limit=5)
+                        if orders:
+                            response['type'] = 'order_list'
+                            response['message'] = (result['message'] or "Order not found.") + " Here are your recent orders. Tap one to track it."
+                            response['data'] = {'orders': orders}
+                        else:
+                            response['type'] = 'error'
+                            response['message'] = result['message'] or "Order not found. You have no recent orders."
             
             elif intent == 'order_history':
                 if not self.user or not self.user.is_authenticated:

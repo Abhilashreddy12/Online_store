@@ -1,0 +1,40 @@
+ORDER STATUS UPDATE
+===================
+
+Hi {{ customer_name }},
+
+We have an update on your order. Please see the details below.
+
+---
+
+ORDER INFORMATION
+=================
+Order #: {{ order_number }}
+Current Status: {{ order_status }}
+
+---
+
+UPDATE
+======
+{{ status_message }}
+
+{% if tracking_available %}
+---
+
+TRACKING INFORMATION
+====================
+Tracking Number: {{ tracking_number }}
+
+You can use this tracking number to monitor your shipment with the carrier.
+{% endif %}
+
+---
+
+View Your Order: {{ site_url }}/orders/
+
+Thank you for your patience!
+
+Contact: {{ support_email }}
+Store: {{ site_url }}
+
+This is an automated email. Please do not reply directly to this message.

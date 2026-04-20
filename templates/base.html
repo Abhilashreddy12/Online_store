@@ -4,9 +4,9 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <meta name="description" content="Fashion Store - Discover the latest trends in fashion. Shop quality clothing, accessories, and more.">
+    <meta name="description" content="Ma. Diriclet - Discover the latest trends in fashion. Shop quality clothing, accessories, and more.">
     <meta name="theme-color" content="#667eea">
-    <title>{% block title %}Fashion Store{% endblock %}</title>
+    <title>{% block title %}Ma. Diriclet{% endblock %}</title>
     
     <!-- Google Fonts -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -50,8 +50,8 @@
                 <nav class="nav">
                     <!-- Logo -->
                     <a href="{% url 'catalog:home' %}" class="logo">
-                        <span class="logo-icon">🛍️</span>
-                        <span>Fashion Store</span>
+                        <img src="{% static 'images/logo.jpg' %}" alt="Ma. Diriclet Logo" class="logo-image">
+                        <span class="logo-text">Ma. Diriclet</span>
                     </a>
                     
                     <!-- Desktop Navigation -->
@@ -99,6 +99,9 @@
     
     <!-- Mobile Navigation -->
     <nav class="mobile-nav" id="mobile-nav">
+        <button class="mobile-nav-close" id="mobile-nav-close" aria-label="Close navigation">
+            <span>✕</span>
+        </button>
         <ul>
             <li><a href="{% url 'catalog:home' %}">🏠 Home</a></li>
             <li><a href="{% url 'catalog:product_list' %}">🛒 Shop</a></li>
@@ -148,9 +151,9 @@
         <div class="container">
             <div class="footer-content">
                 <div class="footer-section">
-                    <h3>🛍️ Fashion Store</h3>
+                    <h3>Ma. Diriclet</h3>
                     <p style="color: var(--gray-400); margin-top: var(--space-2);">
-                        Your one-stop destination for trendy, high-quality fashion. 
+                        Your one-stop destination for trendy, high-quality fashion.
                         Shop the latest styles at unbeatable prices.
                     </p>
                 </div>
@@ -189,7 +192,7 @@
             </div>
             
             <div class="footer-bottom">
-                <p>&copy; {% now "Y" %} Fashion Store. All rights reserved.</p>
+                <p>&copy; {% now "Y" %} Ma. Diriclet. All rights reserved.</p>
                 <p style="margin-top: var(--space-2);">Built with Django • Deployed on Render</p>
             </div>
         </div>
@@ -236,6 +239,12 @@
         mobileNav.querySelectorAll('a').forEach(link => {
             link.addEventListener('click', closeMobileNav);
         });
+
+        // Close mobile nav with close button
+        const closeBtn = document.getElementById('mobile-nav-close');
+        if (closeBtn) {
+            closeBtn.addEventListener('click', closeMobileNav);
+        }
         
         // Close mobile nav on window resize
         window.addEventListener('resize', () => {

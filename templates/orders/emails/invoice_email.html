@@ -1,0 +1,219 @@
+{% load static %}
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            line-height: 1.6;
+            color: #333;
+            background-color: #f5f5f5;
+            margin: 0;
+            padding: 0;
+        }
+        .email-container {
+            max-width: 600px;
+            margin: 0 auto;
+            background-color: #ffffff;
+            border-radius: 8px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+            overflow: hidden;
+        }
+        .header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 30px 20px;
+            text-align: center;
+        }
+        .header h1 {
+            margin: 0;
+            font-size: 28px;
+            font-weight: 700;
+        }
+        .content {
+            padding: 30px 20px;
+        }
+        .greeting {
+            font-size: 16px;
+            margin-bottom: 20px;
+        }
+        .invoice-info {
+            background-color: #f9fafb;
+            border-left: 4px solid #667eea;
+            padding: 15px;
+            margin: 20px 0;
+            border-radius: 4px;
+        }
+        .invoice-number {
+            font-size: 20px;
+            font-weight: 700;
+            color: #667eea;
+            margin: 10px 0;
+        }
+        .order-details {
+            margin: 20px 0;
+        }
+        .detail-row {
+            display: flex;
+            justify-content: space-between;
+            padding: 10px 0;
+            border-bottom: 1px solid #e5e7eb;
+        }
+        .detail-row.total {
+            font-weight: 700;
+            font-size: 18px;
+            color: #667eea;
+            border-bottom: 2px solid #667eea;
+            margin-top: 10px;
+        }
+        .button {
+            display: inline-block;
+            padding: 12px 30px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            text-decoration: none;
+            border-radius: 5px;
+            margin: 20px 0;
+            font-weight: 600;
+            transition: transform 0.2s;
+        }
+        .button:hover {
+            transform: scale(1.02);
+        }
+        .footer {
+            background-color: #f9fafb;
+            padding: 20px;
+            border-top: 1px solid #e5e7eb;
+            font-size: 12px;
+            color: #6b7280;
+            text-align: center;
+        }
+        .items-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 20px 0;
+        }
+        .items-table th {
+            background-color: #f3f4f6;
+            padding: 10px;
+            text-align: left;
+            border-bottom: 2px solid #e5e7eb;
+            font-weight: 600;
+        }
+        .items-table td {
+            padding: 10px;
+            border-bottom: 1px solid #e5e7eb;
+        }
+        .items-table tr:last-child td {
+            border-bottom: none;
+        }
+        .download-notice {
+            background-color: #fef3c7;
+            border-left: 4px solid #f59e0b;
+            padding: 15px;
+            margin: 20px 0;
+            border-radius: 4px;
+            color: #92400e;
+        }
+    </style>
+</head>
+<body>
+    <div class="email-container">
+        <!-- Header -->
+        <div class="header">
+            <h1>📄 Your Invoice</h1>
+        </div>
+
+        <!-- Content -->
+        <div class="content">
+            <div class="greeting">
+                <p>Hi <strong>{{ customer_name }}</strong>,</p>
+                <p>Your invoice for order #{{ order.order_number }} is attached to this email. You can download or view it directly from your account.</p>
+            </div>
+
+            <!-- Invoice Info -->
+            <div class="invoice-info">
+                <div style="font-weight: 600; color: #6b7280;">Invoice Details</div>
+                <div class="invoice-number">INV-{{ invoice_number }}</div>
+                <div style="margin-top: 10px; color: #6b7280;">
+                    <strong>Invoice Date:</strong> {{ invoice_date }}<br>
+                    <strong>Order #:</strong> {{ order.order_number }}<br>
+                    <strong>Status:</strong> <span style="color: #3b82f6;">{{ order.get_status_display }}</span>
+                </div>
+            </div>
+
+            <!-- Order Items -->
+            <h3 style="color: #1f2937; margin-top: 30px;">Items</h3>
+            <table class="items-table">
+                <thead>
+                    <tr>
+                        <th>Product</th>
+                        <th>Qty</th>
+                        <th>Price</th>
+                        <th>Total</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for item in order_items %}
+                    <tr>
+                        <td>{{ item.product.name }}</td>
+                        <td style="text-align: center;">{{ item.quantity }}</td>
+                        <td>${{ item.product.price|floatformat:2 }}</td>
+                        <td><strong>${{ item.subtotal|floatformat:2 }}</strong></td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+
+            <!-- Order Summary -->
+            <div class="order-details">
+                <div class="detail-row">
+                    <span>Subtotal:</span>
+                    <span>${{ order.subtotal|floatformat:2 }}</span>
+                </div>
+                {% if order.tax_amount %}
+                <div class="detail-row">
+                    <span>Tax:</span>
+                    <span>${{ order.tax_amount|floatformat:2 }}</span>
+                </div>
+                {% endif %}
+                {% if order.shipping_cost %}
+                <div class="detail-row">
+                    <span>Shipping:</span>
+                    <span>${{ order.shipping_cost|floatformat:2 }}</span>
+                </div>
+                {% endif %}
+                {% if order.discount_amount %}
+                <div class="detail-row">
+                    <span>Discount:</span>
+                    <span>-${{ order.discount_amount|floatformat:2 }}</span>
+                </div>
+                {% endif %}
+                <div class="detail-row total">
+                    <span>Total Due:</span>
+                    <span>${{ order.total_amount|floatformat:2 }}</span>
+                </div>
+            </div>
+
+            <!-- Download Notice -->
+            <div class="download-notice">
+                <strong>📎 PDF Attached:</strong> Your complete invoice is attached to this email. If you cannot see the attachment, you can view your invoice from your account dashboard.
+            </div>
+
+            <a href="{{ site_url }}/orders/{{ order.id }}/" class="button">View in Account</a>
+        </div>
+
+        <!-- Footer -->
+        <div class="footer">
+            <p style="margin: 0 0 10px 0;">Thank you for your business!</p>
+            <p style="margin: 10px 0;">
+                <strong>Contact:</strong> {{ support_email }}<br>
+                <strong>Store:</strong> {{ site_url }}
+            </p>
+            <p style="margin: 10px 0; color: #9ca3af;">This is an automated email. Please do not reply directly to this message.</p>
+        </div>
+    </div>
+</body>
+</html>

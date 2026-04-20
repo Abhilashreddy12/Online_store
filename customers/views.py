@@ -53,7 +53,7 @@ def register(request):
                 last_name=last_name
             )
             # Create customer profile
-            Customer.objects.create(user=user)
+            Customer.objects.create(user=user,email=email)
             
             # Auto login
             login(request, user)
@@ -117,6 +117,34 @@ def profile(request):
         'addresses': addresses,
         'total_orders': total_orders,
         'delivered_orders': delivered_orders,
+    })
+
+
+@login_required
+def edit_profile(request):
+    """Edit user profile"""
+    customer, created = Customer.objects.get_or_create(user=request.user)
+    
+    if request.method == 'POST':
+        # Update User fields
+        request.user.first_name = request.POST.get('first_name', '')
+        request.user.last_name = request.POST.get('last_name', '')
+        request.user.email = request.POST.get('email', '')
+        request.user.save()
+        
+        # Update Customer fields
+        customer.phone = request.POST.get('phone', '')
+        customer.date_of_birth = request.POST.get('date_of_birth', '') or None
+        customer.gender = request.POST.get('gender', '') or None
+        customer.newsletter_subscribed = request.POST.get('newsletter_subscribed') == 'on'
+        customer.sms_notifications = request.POST.get('sms_notifications') == 'on'
+        customer.save()
+        
+        messages.success(request, 'Profile updated successfully!')
+        return redirect('customers:profile')
+    
+    return render(request, 'customers/edit_profile.html', {
+        'customer': customer,
     })
 
 

@@ -1,0 +1,73 @@
+ORDER CONFIRMATION
+==================
+
+Hi {{ customer_name }},
+
+Thank you for placing your order! We've received your order and it's being prepared for shipment.
+
+---
+
+ORDER INFORMATION
+=================
+Order #: {{ order.order_number }}
+Date: {{ order_date }} at {{ order_time }}
+Status: {{ order.get_status_display }}
+
+---
+
+ORDER ITEMS
+===========
+{% for item in order_items %}
+{{ item.product.name }}
+  Quantity: {{ item.quantity }}
+  Price: ${{ item.product.price|floatformat:2 }}
+  Subtotal: ${{ item.subtotal|floatformat:2 }}
+
+{% endfor %}
+
+---
+
+ORDER TOTAL
+===========
+Subtotal:     ${{ order.subtotal|floatformat:2 }}
+{% if order.tax_amount %}Tax (10%):    ${{ order.tax_amount|floatformat:2 }}
+{% endif %}{% if order.shipping_cost %}Shipping:     ${{ order.shipping_cost|floatformat:2 }}
+{% endif %}{% if order.discount_amount %}Discount:    -${{ order.discount_amount|floatformat:2 }}
+{% endif %}
+TOTAL AMOUNT: ${{ order.total_amount|floatformat:2 }}
+
+---
+
+SHIPPING ADDRESS
+================
+{{ order.shipping_address.street_address }}
+{{ order.shipping_address.city }}, {{ order.shipping_address.state }} {{ order.shipping_address.postal_code }}
+{{ order.shipping_address.country }}
+
+---
+
+WHAT'S NEXT?
+============
+1. You'll receive a shipping confirmation email soon
+2. Track your order using the order number above
+3. An invoice PDF will be attached to your next email
+
+View your full order details at:
+{{ site_url }}/orders/{{ order.id }}/
+
+---
+
+SECURITY NOTICE
+===============
+We never ask for passwords or sensitive information via email.
+Your transaction is secure and encrypted.
+
+---
+
+Thank you for shopping with us!
+
+If you have any questions, please contact us:
+Email: {{ support_email }}
+Store: {{ site_url }}
+
+This is an automated email. Please do not reply directly to this message.

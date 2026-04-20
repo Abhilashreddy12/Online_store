@@ -44,7 +44,7 @@ DEBUG = env('DEBUG', default=False)
 ALLOWED_HOSTS = env.list('ALLOWED_HOSTS', default=[])
 
 # Always allow Render domain and localhost
-RENDER_HOSTS = ['localhost', '127.0.0.1', 'online-store-production.onrender.com']
+RENDER_HOSTS = ['localhost', '127.0.0.1', 'online-store-production.onrender.com','madiriclet.com','www.madiriclet.com']
 for host in RENDER_HOSTS:
     if host not in ALLOWED_HOSTS:
         ALLOWED_HOSTS.append(host)
@@ -351,30 +351,37 @@ LOGIN_URL = 'customers:login'
 LOGIN_REDIRECT_URL = 'catalog:home'
 LOGOUT_REDIRECT_URL = 'catalog:home'
 
-# Email configuration for password reset
-# Set USE_CONSOLE_EMAIL=True in environment to force console backend for testing
+# Email configuration for password reset and order confirmations
+# Using Titan Mail SMTP for secure email delivery
+# SECURITY: Never hardcode credentials - always use environment variables
+
 USE_CONSOLE_EMAIL = env.bool('USE_CONSOLE_EMAIL', default=False)
 
 EMAIL_HOST_USER = env('EMAIL_HOST_USER', default='')
 EMAIL_HOST_PASSWORD = env('EMAIL_HOST_PASSWORD', default='')
 
-if USE_CONSOLE_EMAIL:
-    # Explicitly use console backend for testing (prints emails to terminal)
+if USE_CONSOLE_EMAIL and DEBUG:
+    # Development: Print emails to console for testing
     EMAIL_BACKEND = 'django.core.mail.backends.console.EmailBackend'
     DEFAULT_FROM_EMAIL = 'noreply@fashionstore.local'
+    SERVER_EMAIL = DEFAULT_FROM_EMAIL
 elif EMAIL_HOST_USER and EMAIL_HOST_PASSWORD:
-    # Use SMTP when credentials are provided (works in both DEBUG and production)
+    # Production & Development: Use SMTP when credentials are provided (Titan Mail)
     EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
-    EMAIL_HOST = env('EMAIL_HOST', default='smtp.gmail.com')
+    EMAIL_HOST = env('EMAIL_HOST', default='mail.titanmail.com')
     EMAIL_PORT = env.int('EMAIL_PORT', default=587)
     EMAIL_USE_TLS = env.bool('EMAIL_USE_TLS', default=True)
     EMAIL_USE_SSL = env.bool('EMAIL_USE_SSL', default=False)
     DEFAULT_FROM_EMAIL = env('DEFAULT_FROM_EMAIL', default=EMAIL_HOST_USER)
-    SERVER_EMAIL = DEFAULT_FROM_EMAIL
+    SERVER_EMAIL = env('SERVER_EMAIL', default=EMAIL_HOST_USER)
+    
+    # SECURITY: Email connection timeout
+    EMAIL_TIMEOUT = 30
 else:
     # Fallback: Use console backend when no credentials
     EMAIL_BACKEND = 'django.core.mail.backends.console.EmailBackend'
     DEFAULT_FROM_EMAIL = 'noreply@fashionstore.local'
+    SERVER_EMAIL = DEFAULT_FROM_EMAIL
 
 # Password reset settings
 PASSWORD_RESET_TIMEOUT = 86400  # 24 hours in seconds

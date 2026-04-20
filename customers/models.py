@@ -3,19 +3,19 @@ from django.db import models
 from django.contrib.auth.models import User
 from cloudinary.models import CloudinaryField
 
-
 class Customer(models.Model):
     """Extended customer profile"""
     user = models.OneToOneField(User, on_delete=models.CASCADE, related_name='customer_profile')
-    phone = models.CharField(max_length=20, blank=True)
+    phone = models.CharField(max_length=20, blank=True,null=True)
+    email = models.EmailField(blank=True, null=True)
     date_of_birth = models.DateField(null=True, blank=True)
-
+    #phone = models.Charfield(max_length=20,blank= true)
     GENDER_CHOICES = [
         ('M', 'Male'),
         ('F', 'Female'),
         ('O', 'Other'),
     ]
-    gender = models.CharField(max_length=1, choices=GENDER_CHOICES, blank=True)
+    gender = models.CharField(max_length=1, choices=GENDER_CHOICES, blank=True,null=True)
 
     profile_picture = CloudinaryField('profile_picture', blank=True, null=True)
 
@@ -90,9 +90,6 @@ class Address(models.Model):
 
     def __str__(self):
         return f"{self.full_name} - {self.address_line1}, {self.city}"
-
-
-
 
 
 

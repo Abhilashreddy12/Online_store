@@ -1,0 +1,142 @@
+{% load static %}
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            line-height: 1.6;
+            color: #333;
+            background-color: #f5f5f5;
+            margin: 0;
+            padding: 0;
+        }
+        .email-container {
+            max-width: 600px;
+            margin: 0 auto;
+            background-color: #ffffff;
+            border-radius: 8px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+            overflow: hidden;
+        }
+        .header {
+            background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+            color: white;
+            padding: 30px 20px;
+            text-align: center;
+        }
+        .header h1 {
+            margin: 0;
+            font-size: 28px;
+            font-weight: 700;
+        }
+        .content {
+            padding: 30px 20px;
+        }
+        .greeting {
+            font-size: 16px;
+            margin-bottom: 20px;
+        }
+        .payment-info {
+            background-color: #f0fdf4;
+            border-left: 4px solid #10b981;
+            padding: 15px;
+            margin: 20px 0;
+            border-radius: 4px;
+        }
+        .order-number {
+            font-size: 20px;
+            font-weight: 700;
+            color: #10b981;
+            margin: 10px 0;
+        }
+        .detail-row {
+            display: flex;
+            justify-content: space-between;
+            padding: 10px 0;
+            border-bottom: 1px solid #e5e7eb;
+        }
+        .detail-row.total {
+            font-weight: 700;
+            font-size: 18px;
+            color: #10b981;
+            border-bottom: 2px solid #10b981;
+            margin-top: 10px;
+        }
+        .button {
+            display: inline-block;
+            padding: 12px 30px;
+            background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+            color: white;
+            text-decoration: none;
+            border-radius: 5px;
+            margin: 20px 0;
+            font-weight: 600;
+            transition: transform 0.2s;
+        }
+        .button:hover {
+            transform: scale(1.02);
+        }
+        .footer {
+            background-color: #f9fafb;
+            padding: 20px;
+            border-top: 1px solid #e5e7eb;
+            font-size: 12px;
+            color: #6b7280;
+            text-align: center;
+        }
+    </style>
+</head>
+<body>
+    <div class="email-container">
+        <!-- Header -->
+        <div class="header">
+            <h1>✓ Payment Received</h1>
+        </div>
+
+        <!-- Content -->
+        <div class="content">
+            <div class="greeting">
+                <p>Hi <strong>{{ customer_name }}</strong>,</p>
+                <p>Thank you! We have successfully received your payment. Your order is being prepared for shipment.</p>
+            </div>
+
+            <!-- Payment Info -->
+            <div class="payment-info">
+                <div style="font-weight: 600; color: #065f46;">Payment Confirmation</div>
+                <div class="order-number">Order #{{ order_number }}</div>
+                <div style="margin-top: 10px; color: #065f46;">
+                    <strong>Amount Paid:</strong> <span style="font-size: 20px; font-weight: 700;">{{ order_amount }}</span><br>
+                    <strong>Payment Method:</strong> {{ payment_method }}<br>
+                    <strong>Status:</strong> <span style="color: #10b981;">Confirmed & Received</span>
+                </div>
+            </div>
+
+            <!-- Next Steps -->
+            <div style="background-color: #eff6ff; border-left: 4px solid #3b82f6; padding: 15px; margin: 20px 0; border-radius: 4px;">
+                <strong style="color: #1e40af;">What Happens Next?</strong>
+                <ul style="margin: 10px 0; padding-left: 20px;">
+                    <li>Your order is now being processed and packaged</li>
+                    <li>You'll receive a shipping confirmation within 24 hours</li>
+                    <li>Your invoice will be available in your account</li>
+                    <li>Track your shipment using the tracking number</li>
+                </ul>
+            </div>
+
+            <a href="{{ site_url }}/orders/" class="button">View Your Orders</a>
+        </div>
+
+        <!-- Footer -->
+        <div class="footer">
+            <p style="margin: 0 0 10px 0;">Thank you for your business!</p>
+            <p style="margin: 10px 0;">
+                <strong>Contact:</strong> {{ support_email }}<br>
+                <strong>Store:</strong> {{ site_url }}
+            </p>
+            <p style="margin: 10px 0; color: #9ca3af;">This is an automated email. Please do not reply directly to this message.</p>
+        </div>
+    </div>
+</body>
+</html>
