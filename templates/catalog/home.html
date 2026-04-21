@@ -1,9 +1,64 @@
 {% extends 'base.html' %}
 {% load static %}
 
-{% block title %}Fashion Store - Discover Premium Style & Trends{% endblock %}
+{% block title %}{{ page_title }}{% endblock %}
+
+{% block meta_description %}{{ meta_description }}{% endblock %}
+{% block meta_keywords %}{{ meta_keywords }}{% endblock %}
+{% block canonical_url %}{{ canonical_url }}{% endblock %}
+
+{% block og_title %}{{ og_title }}{% endblock %}
+{% block og_description %}{{ og_description }}{% endblock %}
+{% block og_type %}{{ og_type }}{% endblock %}
+{% block og_url %}{{ og_url }}{% endblock %}
+{% block og_image %}{{ og_image }}{% endblock %}
+
+{% block twitter_title %}{{ twitter_title }}{% endblock %}
+{% block twitter_description %}{{ twitter_description }}{% endblock %}
+{% block twitter_image %}{{ twitter_image }}{% endblock %}
 
 {% block extra_css %}
+<!-- SEO Structured Data (JSON-LD) -->
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "WebSite",
+  "name": "Madiriclet Shopping Store",
+  "url": "https://madiriclet.com",
+  "description": "Your premium online shopping destination for fashion, accessories, and lifestyle products",
+  "potentialAction": {
+    "@type": "SearchAction",
+    "target": {
+      "@type": "EntryPoint",
+      "urlTemplate": "https://madiriclet.com/products/?search={search_term_string}"
+    },
+    "query-input": "required name=search_term_string"
+  }
+}
+</script>
+
+<!-- Organization Schema -->
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "Organization",
+  "name": "Madiriclet Shopping Store",
+  "url": "https://madiriclet.com",
+  "logo": "https://madiriclet.com/static/images/logo.png",
+  "description": "Premium online shopping platform for fashion and lifestyle products",
+  "sameAs": [
+    "https://www.facebook.com/madiriclet",
+    "https://www.instagram.com/madiriclet",
+    "https://www.twitter.com/madiriclet"
+  ],
+  "contactPoint": {
+    "@type": "ContactPoint",
+    "contactType": "Customer Support",
+    "availableLanguage": ["en"]
+  }
+}
+</script>
+
 <style>
     /* ============================================
        ANIMATIONS
@@ -1204,12 +1259,11 @@
             New Season Collection 2026
         </span>
         <h1 class="hero-title">
-            <span class="hero-title-gradient">Elevate Your Style</span><br>
-            Define Your Fashion
+            <span class="hero-title-gradient">Madiriclet Shopping Store</span><br>
+            Discover Premium Fashion & Trends
         </h1>
         <p class="hero-subtitle">
-            Discover curated collections of premium fashion essentials. From timeless classics 
-            to trending styles, find everything you need to express your unique personality.
+            Welcome to Madiriclet, your ultimate online shopping destination. Discover curated collections of premium fashion essentials, accessories, and lifestyle products. From timeless classics to trending styles, find everything you need to express your unique personality with fast delivery and secure checkout.
         </p>
         <div class="hero-actions">
             <a href="{% url 'catalog:product_list' %}" class="hero-btn hero-btn-primary">

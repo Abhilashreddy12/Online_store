@@ -61,6 +61,7 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
+    'django.contrib.sitemaps',
     # Cloudinary
     'cloudinary',
     'cloudinary_storage',
@@ -84,6 +85,7 @@ ROOT_URLCONF = 'shopping_store.urls'
 # Required Django middleware for admin
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
+    'django.middleware.gzip.GZipMiddleware',
     'whitenoise.middleware.WhiteNoiseMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
     'django.middleware.common.CommonMiddleware',
@@ -281,6 +283,29 @@ else:
     SECURE_CONTENT_TYPE_NOSNIFF = False
     X_FRAME_OPTIONS = 'SAMEORIGIN'
 
+
+# ============================================
+# SEO & PERFORMANCE CONFIGURATION
+# ============================================
+
+# Cache configuration for better performance
+CACHES = {
+    'default': {
+        'BACKEND': 'django.core.cache.backends.locmem.LocMemCache',
+        'LOCATION': 'madiriclet-cache',
+        'TIMEOUT': 3600,  # 1 hour cache timeout
+    }
+}
+
+# Sitemap cache
+CACHE_MIDDLEWARE_SECONDS = 3600
+
+# Gzip compression for static files (already handled by WhiteNoise)
+STATICFILES_STORAGE = 'whitenoise.storage.CompressedManifestStaticFilesStorage'
+
+# Cache control headers for static files (14 days)
+# This is handled by WhiteNoise in production
+STATICFILES_CACHE_CONTROL = 'max-age=1209600, public'  # 14 days in seconds
 
 
 # Jazzmin advanced admin UI configuration (professional light theme)

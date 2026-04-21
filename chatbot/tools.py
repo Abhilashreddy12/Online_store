@@ -110,14 +110,14 @@ def search_products(
     query: str = None,
     filters: Dict = None,
     limit: int = 10,
-    use_semantic: bool = True
+    use_semantic: bool = False
 ) -> List[Dict]:
     """
-    Search products using both database filters and semantic search.
+    Search products using database filters and keyword matching (rule-based only).
+    No AI/embeddings are used - pure database queries.
     Returns a list of product dictionaries.
     """
     from catalog.models import Product, ProductVariant
-    from .embeddings import get_product_store
     
     if filters is None:
         filters = {}
@@ -175,42 +175,8 @@ def search_products(
             Q(brand__name__icontains=query)
         )
     
-    # If using semantic search and we have a query
-    product_ids = None
-    if use_semantic and query:
-        try:
-            store = get_product_store()
-            semantic_results = store.search_by_text(query, k=limit * 2)
-            if semantic_results:
-                # Get product IDs from semantic search
-                semantic_ids = [pid for pid, score in semantic_results]
-                # Combine with database filter results
-                db_ids = list(queryset.values_list('id', flat=True)[:limit * 2])
-                # Prioritize products that appear in both
-                combined_ids = []
-                for pid in semantic_ids:
-                    if pid in db_ids:
-                        combined_ids.append(pid)
-                # Then add remaining semantic results
-                for pid in semantic_ids:
-                    if pid not in combined_ids:
-                        combined_ids.append(pid)
-                # Then add remaining db results
-                for pid in db_ids:
-                    if pid not in combined_ids:
-                        combined_ids.append(pid)
-                product_ids = combined_ids[:limit]
-        except Exception as e:
-            logger.warning(f"Semantic search failed: {e}")
-    
-    # Get final results
-    if product_ids:
-        # Preserve order from semantic search
-        preserved = {pid: i for i, pid in enumerate(product_ids)}
-        products = list(queryset.filter(id__in=product_ids))
-        products.sort(key=lambda p: preserved.get(p.id, 999))
-    else:
-        products = list(queryset[:limit])
+    # Get final results - keyword-based database filtering only (no AI)
+    products = list(queryset[:limit])
     
     # Format results
     return [format_product(p) for p in products]
@@ -272,35 +238,47 @@ def format_product(product) -> Dict:
 
 
 def get_semantic_recommendations(product_id: int = None, query: str = None, limit: int = 5) -> List[Dict]:
-    """Get product recommendations using semantic similarity"""
+    """Get product recommendations using category/brand matching (keyword-based, no AI)"""
     from catalog.models import Product
-    from .embeddings import get_product_store
+    from django.db.models import Q, Count
     
     try:
-        store = get_product_store()
-        
         if product_id:
-            # Get product text and find similar
+            # Find similar products by category and brand
             product = Product.objects.get(id=product_id)
-            from .embeddings import create_product_embedding_text
-            text = create_product_embedding_text(product)
-            results = store.search_by_text(text, k=limit + 1)  # +1 to exclude self
-            product_ids = [pid for pid, _ in results if pid != product_id][:limit]
+            
+            # First priority: same category, high rating
+            category_products = Product.objects.filter(
+                category=product.category,
+                is_active=True
+            ).exclude(id=product_id).order_by('-rating')[:limit]
+            
+            if len(category_products) < limit:
+                # Fallback: same brand, high rating
+                brand_products = Product.objects.filter(
+                    brand=product.brand,
+                    is_active=True
+                ).exclude(id=product_id).order_by('-rating')[:limit - len(category_products)]
+                products = list(category_products) + list(brand_products)
+            else:
+                products = list(category_products)
         elif query:
-            results = store.search_by_text(query, k=limit)
-            product_ids = [pid for pid, _ in results]
+            # Keyword search on name, description, category, brand
+            products = Product.objects.filter(
+                Q(name__icontains=query) |
+                Q(description__icontains=query) |
+                Q(category__name__icontains=query) |
+                Q(brand__name__icontains=query),
+                is_active=True
+            ).order_by('-rating')[:limit]
+            products = list(products)
         else:
-            return []
-        
-        products = Product.objects.filter(id__in=product_ids, is_active=True)
-        # Preserve order
-        preserved = {pid: i for i, pid in enumerate(product_ids)}
-        products = list(products)
-        products.sort(key=lambda p: preserved.get(p.id, 999))
+            # Trending: highest rated products
+            products = list(Product.objects.filter(is_active=True).order_by('-rating')[:limit])
         
         return [format_product(p) for p in products]
     except Exception as e:
-        logger.error(f"Semantic recommendation error: {e}")
+        logger.error(f"Recommendation error: {e}")
         return []
 
 

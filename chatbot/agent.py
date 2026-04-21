@@ -1,7 +1,16 @@
 """
-Agent Module
-------------
-LangChain agent that orchestrates the shopping assistant chatbot.
+Agent Module - KEYWORD-BASED RULE SYSTEM (NO AI/EMBEDDINGS)
+------------------------------------------------------------------
+Pure rule-based agent orchestrating the shopping assistant chatbot.
+No LLM, no embeddings, no neural networks - only keyword/regex pattern matching.
+
+Features:
+- Intent detection via keyword matching and regex patterns
+- Database filtering with SQL queries (category, brand, price, size, color, gender)
+- Category/brand-based recommendations (no semantic similarity)
+- Cart and order management via Django ORM
+- FAQ matching via keyword search (no embedding distance)
+- No API calls, no ML model loading, minimal latency
 """
 
 import os

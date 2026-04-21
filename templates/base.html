@@ -2,15 +2,52 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
+    <!-- Essential Meta Tags -->
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <meta name="description" content="Ma. Diriclet - Discover the latest trends in fashion. Shop quality clothing, accessories, and more.">
     <meta name="theme-color" content="#667eea">
-    <title>{% block title %}Ma. Diriclet{% endblock %}</title>
+    <meta name="csrf-token" content="{{ csrf_token }}">
     
-    <!-- Google Fonts -->
+    <!-- SEO Meta Tags -->
+    <title>{% block title %}Madiriclet Shopping Store | Online Shopping Platform{% endblock %}</title>
+    <meta name="description" content="{% block meta_description %}Madiriclet - Your premium online shopping destination. Discover curated collections of fashion, accessories, and lifestyle products with fast delivery and secure checkout.{% endblock %}">
+    <meta name="keywords" content="{% block meta_keywords %}online shopping, ecommerce, fashion store, clothing, accessories, shopping platform, Madiriclet{% endblock %}">
+    <meta name="author" content="Madiriclet">
+    <meta name="copyright" content="Copyright © 2026 Madiriclet. All rights reserved.">
+    <meta name="robots" content="index, follow">
+    <link rel="canonical" href="{% block canonical_url %}https://madiriclet.com{% endblock %}">
+    
+    <!-- Open Graph Tags (Social Sharing) -->
+    <meta property="og:site_name" content="Madiriclet Shopping Store">
+    <meta property="og:title" content="{% block og_title %}Madiriclet Shopping Store | Online Shopping Platform{% endblock %}">
+    <meta property="og:description" content="{% block og_description %}Discover curated collections of fashion, accessories, and lifestyle products with fast delivery and secure checkout.{% endblock %}">
+    <meta property="og:type" content="{% block og_type %}website{% endblock %}">
+    <meta property="og:url" content="{% block og_url %}https://madiriclet.com{% endblock %}">
+    <meta property="og:image" content="{% block og_image %}{{ request.build_absolute_uri }}/static/images/preview.jpg{% endblock %}">
+    <meta property="og:image:width" content="1200">
+    <meta property="og:image:height" content="630">
+    <meta property="og:image:alt" content="Madiriclet Shopping Store">
+    
+    <!-- Twitter Card Tags -->
+    <meta name="twitter:card" content="summary_large_image">
+    <meta name="twitter:title" content="{% block twitter_title %}Madiriclet Shopping Store | Online Shopping Platform{% endblock %}">
+    <meta name="twitter:description" content="{% block twitter_description %}Discover curated collections of fashion, accessories, and lifestyle products with fast delivery and secure checkout.{% endblock %}">
+    <meta name="twitter:image" content="{% block twitter_image %}{{ request.build_absolute_uri }}/static/images/preview.jpg{% endblock %}">
+    <meta name="twitter:image:alt" content="Madiriclet Shopping Store">
+    <meta name="twitter:site" content="@madiriclet">
+    
+    <!-- Favicon & Apple Touch Icon -->
+    <link rel="icon" type="image/jpg" href="{% static 'images/logo.jpg' %}" sizes="32x32">
+    <link rel="icon" type="image/jpg" href="{% static 'images/logo.jpg' %}" sizes="16x16">
+    <link rel="apple-touch-icon" href="{% static 'images/logo.jpg' %}">
+    <link rel="manifest" href="/manifest.json">
+    
+    <!-- Preconnect to External Resources -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link rel="preconnect" href="https://cdnjs.cloudflare.com">
+    
+    <!-- Google Fonts -->
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Poppins:wght@500;600;700&display=swap" rel="stylesheet">
     
     <!-- Main CSS -->
@@ -18,9 +55,6 @@
     
     <!-- Chatbot CSS -->
     <link rel="stylesheet" href="{% static 'css/chatbot.css' %}">
-    
-    <!-- CSRF Token for AJAX -->
-    <meta name="csrf-token" content="{{ csrf_token }}">
     
     {% block extra_css %}{% endblock %}
 </head>

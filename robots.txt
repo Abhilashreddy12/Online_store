@@ -1,0 +1,51 @@
+# Robots.txt for Madiriclet Shopping Store
+# This file guides search engine crawlers on how to index the website
+
+# Allow all crawlers by default
+User-agent: *
+Allow: /
+
+# Disallow admin and sensitive areas
+Disallow: /admin/
+Disallow: /account/password_reset/
+Disallow: /account/password_reset/done/
+Disallow: /account/reset/
+Disallow: /account/login/
+Disallow: /account/register/
+
+# Disallow search/filter results that create duplicate content
+Disallow: /*?*sort=
+Disallow: /*?*filter=
+
+# Allow access to static files and media
+Allow: /static/
+Allow: /media/
+
+# Disallow temporary/session pages
+Disallow: /checkout/
+Disallow: /cart/
+
+# Crawl delay (optional - remove if not needed)
+# Crawl-delay: 1
+
+# Sitemap location (Required for SEO)
+Sitemap: https://madiriclet.com/sitemap.xml
+
+# Block bad bots (optional)
+User-agent: AhrefsBot
+User-agent: SemrushBot
+User-agent: DotBot
+Disallow: /
+
+# Allow Google, Bing, and other major search engines
+User-agent: Googlebot
+Allow: /
+
+User-agent: Bingbot
+Allow: /
+
+User-agent: Slurp
+Allow: /
+
+User-agent: DuckDuckBot
+Allow: /

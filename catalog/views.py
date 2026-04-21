@@ -144,14 +144,31 @@ def add_review(request, slug):
     return redirect('catalog:product_detail', slug=slug)
 
 
+
 def home(request):
-    """Homepage view"""
+    """Homepage view with SEO optimization"""
     context = {
         'featured_products': Product.objects.filter(is_active=True, is_featured=True)[:8],
         'categories': Category.objects.filter(is_active=True, parent=None)[:6],
         'new_arrivals': Product.objects.filter(is_active=True).order_by('-created_at')[:8],
+        # SEO Meta Tags
+        'page_title': 'Madiriclet Shopping Store | Online Shopping Platform',
+        'meta_description': 'Madiriclet - Your premium online shopping destination. Discover curated collections of fashion, accessories, and lifestyle products with fast delivery and secure checkout.',
+        'meta_keywords': 'online shopping, ecommerce, fashion store, clothing, accessories, shopping platform, Madiriclet',
+        'canonical_url': request.build_absolute_uri('/'),
+        # Open Graph Tags
+        'og_title': 'Madiriclet Shopping Store',
+        'og_description': 'Discover curated collections of fashion, accessories, and lifestyle products with fast delivery and secure checkout.',
+        'og_type': 'website',
+        'og_url': request.build_absolute_uri('/'),
+        'og_image': request.build_absolute_uri('/static/images/preview.jpg'),
+        # Twitter Card Tags
+        'twitter_title': 'Madiriclet Shopping Store | Online Shopping',
+        'twitter_description': 'Discover premium fashion and accessories online with Madiriclet',
+        'twitter_image': request.build_absolute_uri('/static/images/preview.jpg'),
     }
     return render(request, 'catalog/home.html', context)
+
 
 
 @login_required
