@@ -60,7 +60,7 @@ class ProductVariantInline(admin.TabularInline):
 @admin.register(Product)
 class ProductAdmin(admin.ModelAdmin):
     list_display = ['name', 'sku', 'category', 'brand', 'price_display', 'stock_status', 
-                   'is_active', 'is_featured', 'created_at']
+                   'variant_count', 'is_active', 'is_featured', 'created_at']
     list_filter = ['is_active', 'is_featured', 'gender', 'category', 'brand', 'created_at']
     search_fields = ['name', 'sku', 'description']
     prepopulated_fields = {'slug': ('name',)}
@@ -125,6 +125,85 @@ class ProductAdmin(admin.ModelAdmin):
             color, status
         )
     stock_status.short_description = 'Stock'
+    
+    def variant_count(self, obj):
+        count = obj.variants.count()
+        if count == 0:
+            color = 'red'
+            status = '❌ No Variants'
+        elif count < 5:
+            color = 'orange'
+            status = f'⚠️ {count} variants'
+        else:
+            color = 'green'
+            status = f'✓ {count} variants'
+        return format_html(
+            '<span style="color: {}; font-weight: bold;">{}</span>',
+            color, status
+        )
+    variant_count.short_description = 'Variants'
+    
+    def generate_variants(self, request, queryset):
+        """Generate default variants for selected products"""
+        from .signals import create_default_variants
+        
+        variants_created = 0
+        for product in queryset:
+            # Check if product already has variants
+            if not product.variants.exists():
+                # Manually trigger the variant creation logic
+                sizes = Size.objects.all()
+                colors = Color.objects.all()
+                
+                # If no sizes or colors exist, create defaults
+                if not sizes.exists():
+                    default_sizes = ['XS', 'S', 'M', 'L', 'XL', 'XXL']
+                    for idx, size_name in enumerate(default_sizes):
+                        Size.objects.get_or_create(
+                            name=size_name,
+                            defaults={'code': size_name, 'display_order': idx}
+                        )
+                    sizes = Size.objects.all()
+                
+                if not colors.exists():
+                    default_colors = [
+                        ('Black', '#000000'),
+                        ('White', '#FFFFFF'),
+                        ('Blue', '#0000FF'),
+                        ('Red', '#FF0000'),
+                        ('Green', '#00AA00'),
+                    ]
+                    for idx, (color_name, hex_code) in enumerate(default_colors):
+                        Color.objects.get_or_create(
+                            name=color_name,
+                            defaults={'code': hex_code, 'display_order': idx}
+                        )
+                    colors = Color.objects.all()
+                
+                # Create variants
+                for size in sizes:
+                    for color in colors:
+                        if not ProductVariant.objects.filter(
+                            product=product,
+                            size=size,
+                            color=color
+                        ).exists():
+                            sku = f"{product.sku}-{size.code}-{color.code}".upper()
+                            ProductVariant.objects.create(
+                                product=product,
+                                size=size,
+                                color=color,
+                                sku=sku,
+                                price_adjustment=0,
+                                stock_quantity=product.stock_quantity,
+                                is_active=True
+                            )
+                            variants_created += 1
+        
+        self.message_user(request, f'Successfully created {variants_created} variants.')
+    
+    generate_variants.short_description = 'Generate variants for selected products'
+    actions = ['generate_variants']
 
 
 @admin.register(ProductImage)

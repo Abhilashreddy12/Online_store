@@ -13,7 +13,6 @@ class ChatLogAdmin(admin.ModelAdmin):
     def has_add_permission(self, request):
         return False
 
-
 @admin.register(ProductEmbedding)
 class ProductEmbeddingAdmin(admin.ModelAdmin):
     list_display = ['product_id', 'faiss_id', 'created_at', 'updated_at']

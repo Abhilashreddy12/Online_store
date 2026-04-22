@@ -121,6 +121,11 @@ class Product(models.Model):
     def is_low_stock(self):
         return self.stock_quantity <= self.low_stock_threshold
 
+    @property
+    def available_variants(self):
+        """Get all active variants with stock > 0"""
+        return self.variants.filter(is_active=True, stock_quantity__gt=0)
+
     def __str__(self):
         return self.name
 

@@ -561,7 +561,8 @@
             </div>
             
             <!-- Add to Cart Form -->
-            {% if product.variants.exists %}
+            {% if product.variants.exists and product.available_variants %}
+            <!-- Variant-based purchase -->
             <form method="post" action="{% url 'cart:add_to_cart' product.id %}" class="product-form">
                 {% csrf_token %}
                 
@@ -602,20 +603,19 @@
                     {% endif %}
                 </div>
             </form>
-            {% else %}
+            {% elif product.stock_quantity > 0 %}
+            <!-- Direct purchase (no variants) -->
             <form method="post" action="{% url 'cart:add_to_cart' product.id %}" class="product-form">
                 {% csrf_token %}
                 
                 <div class="form-group">
                     <label class="form-label">Quantity:</label>
-                    <input type="number" name="quantity" value="1" min="1" max="100" class="form-input quantity-input">
+                    <input type="number" name="quantity" value="1" min="1" max="{{ product.stock_quantity }}" class="form-input quantity-input">
                 </div>
                 
                 <div class="product-actions">
-                    {% if user.is_authenticated and product.stock_quantity > 0 %}
+                    {% if user.is_authenticated %}
                     <button type="submit" class="btn btn-add-cart">🛒 Add to Cart</button>
-                    {% elif product.stock_quantity == 0 %}
-                    <button type="button" class="btn btn-secondary btn-add-cart" disabled>Out of Stock</button>
                     {% else %}
                     <a href="{% url 'customers:login' %}?next={{ request.path }}" class="btn btn-add-cart">Login to Purchase</a>
                     {% endif %}
@@ -625,6 +625,25 @@
                     {% endif %}
                 </div>
             </form>
+            {% else %}
+            <!-- No purchase option available -->
+            <div class="stock-status out-of-stock" style="margin-bottom: var(--space-6);">
+                {% if product.variants.exists and not product.available_variants %}
+                <span style="font-size: var(--text-lg);">⚠️ No variants available with stock</span>
+                {% else %}
+                <span style="font-size: var(--text-lg);">⚠️ Out of Stock</span>
+                {% endif %}
+            </div>
+            <p style="color: var(--gray-600); margin-bottom: var(--space-6);">
+                {% if product.variants.exists and not product.available_variants %}
+                This product's size and color variants are currently out of stock. Please check back later or contact our support team for updates.
+                {% else %}
+                This product is currently out of stock. Please check back soon or contact support for assistance.
+                {% endif %}
+            </p>
+            {% if user.is_authenticated %}
+            <a href="{% url 'cart:add_to_wishlist' product.id %}" class="btn btn-secondary" style="display: inline-block;">❤️ Add to Wishlist</a>
+            {% endif %}
             {% endif %}
             
             <!-- Product Details -->
