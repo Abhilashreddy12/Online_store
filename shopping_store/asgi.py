@@ -9,13 +9,15 @@ os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'shopping_store.settings')
 django.setup()
 
 import catalog.routing
+import voice_bot.routing
 
 application = ProtocolTypeRouter({
 	'http': get_asgi_application(),
 	'websocket': SessionMiddlewareStack(
 		AuthMiddlewareStack(
 			URLRouter(
-				catalog.routing.websocket_urlpatterns
+				catalog.routing.websocket_urlpatterns +
+				voice_bot.routing.websocket_urlpatterns
 			)
 		)
 	),

@@ -72,6 +72,7 @@ INSTALLED_APPS = [
     'cart',
     'dashboard',
     'chatbot',
+    'voice_bot',
 ]
 
 
@@ -349,9 +350,39 @@ JAZZMIN_SETTINGS = {
     "changeform_format": "horizontal_tabs",
     "changeform_format_overrides": {"auth.user": "collapsible", "auth.group": "vertical_tabs"},
     "language_chooser": True,
-    "show_view_site": True,  # Show the 'View site' link in the admin
-    "site_url": "/",  # Ensure the 'View site' link points to your homepage
 }
+
+# ============================================
+# DJANGO CHANNELS CONFIGURATION
+# ============================================
+
+# ASGI Application
+ASGI_APPLICATION = 'shopping_store.asgi.application'
+
+# Channel Layers (In-memory for development, Redis for production)
+if env('REDIS_URL', default=None):
+    # Production: Use Redis
+    CHANNEL_LAYERS = {
+        'default': {
+            'BACKEND': 'channels_redis.core.RedisChannelLayer',
+            'CONFIG': {
+                'hosts': [env('REDIS_URL')],
+                'capacity': 1500,
+                'expiry': 10,
+            },
+        },
+    }
+else:
+    # Development: Use in-memory channel layer
+    CHANNEL_LAYERS = {
+        'default': {
+            'BACKEND': 'channels.layers.InMemoryChannelLayer',
+        }
+    }
+
+# WebSocket Configuration
+WEBSOCKET_ACCEPT_ALL = True  # Accept all WebSocket connections
+WEBSOCKET_TIMEOUT = 3600  # 1 hour
 
 # Jazzmin UI color theme customization (professional light)
 JAZZMIN_UI_TWEAKS = {
@@ -392,8 +423,11 @@ if USE_CONSOLE_EMAIL and DEBUG:
     SERVER_EMAIL = DEFAULT_FROM_EMAIL
 elif EMAIL_HOST_USER and EMAIL_HOST_PASSWORD:
     # Production & Development: Use SMTP when credentials are provided (Titan Mail)
-    EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
-    EMAIL_HOST = env('EMAIL_HOST', default='mail.titanmail.com')
+    # Using custom backend to handle GoDaddy's self-signed certificate chain
+    EMAIL_BACKEND = 'shopping_store.email_backends.GoDaddySMTPBackend'
+    EMAIL_HOST = env('EMAIL_HOST', default='smtpout.secureserver.net')
+    # GoDaddy Titan Mail recommends TLS (port 587) instead of SSL (port 465)
+    # Custom backend disables SSL cert verification to avoid chain errors
     EMAIL_PORT = env.int('EMAIL_PORT', default=587)
     EMAIL_USE_TLS = env.bool('EMAIL_USE_TLS', default=True)
     EMAIL_USE_SSL = env.bool('EMAIL_USE_SSL', default=False)

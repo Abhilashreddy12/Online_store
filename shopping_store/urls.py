@@ -33,6 +33,7 @@ urlpatterns = [
     path('orders/', include('orders.urls')),
     path('account/', include('customers.urls')),
     path('chatbot/', include('chatbot.urls')),
+    path('', include('voice_bot.urls')),
     # Dashboard stats demo
     path('dashboard/stats/', dashboard_stats, name='dashboard_stats'),
     # SEO - Sitemap and Robots

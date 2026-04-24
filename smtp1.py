@@ -2,8 +2,8 @@ import smtplib
 from email.mime.text import MIMEText
 from email.mime.multipart import MIMEMultipart
 
-SMTP_HOST = "smtp.titan.email"
-SMTP_PORT = 587 
+SMTP_HOST = "smtpout.secureserver.net"
+SMTP_PORT = 465 
 EMAIL = "info@madiriclet.com"
 PASSWORD = "aBhi@12345.ab"
 
