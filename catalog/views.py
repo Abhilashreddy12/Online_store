@@ -34,10 +34,54 @@ class ProductListView(ListView):
         if category_slug:
             queryset = queryset.filter(category__slug=category_slug)
         
+        # Filter by category (from sidebar)
+        category_param = self.request.GET.get('category')
+        if category_param:
+            category_list = [c.strip() for c in category_param.split(',')]
+            # Filter by category ID
+            queryset = queryset.filter(category__id__in=category_list)
+        
         # Filter by brand
-        brand_slug = self.request.GET.get('brand')
-        if brand_slug:
-            queryset = queryset.filter(brand__slug=brand_slug)
+        brand_params = self.request.GET.get('brand')
+        if brand_params:
+            brand_list = [b.strip() for b in brand_params.split(',')]
+            # Try filtering by ID first, then by slug
+            queryset = queryset.filter(
+                Q(brand__id__in=brand_list) | Q(brand__slug__in=brand_list)
+            )
+        
+        # Filter by price range
+        min_price = self.request.GET.get('min_price')
+        max_price = self.request.GET.get('max_price')
+        if min_price:
+            try:
+                queryset = queryset.filter(price__gte=float(min_price))
+            except ValueError:
+                pass
+        if max_price:
+            try:
+                queryset = queryset.filter(price__lte=float(max_price))
+            except ValueError:
+                pass
+        
+        # Filter by size (from sidebar)
+        sizes = self.request.GET.get('size')
+        if sizes:
+            size_list = [s.strip() for s in sizes.split(',')]
+            queryset = queryset.filter(variants__size__name__in=size_list).distinct()
+        
+        # Filter by color (from sidebar)
+        colors = self.request.GET.get('color')
+        if colors:
+            color_list = [c.strip() for c in colors.split(',')]
+            queryset = queryset.filter(variants__color__name__in=color_list).distinct()
+        
+        # Filter by availability
+        availability = self.request.GET.get('availability')
+        if availability == 'in_stock':
+            queryset = queryset.filter(variants__stock_quantity__gt=0).distinct()
+        elif availability == 'out_of_stock':
+            queryset = queryset.filter(variants__stock_quantity=0).distinct()
         
         # Filter by gender
         gender = self.request.GET.get('gender')
@@ -80,6 +124,11 @@ class ProductListView(ListView):
         context['cart_count'] = cart_count
         context['search_query'] = search_query
         context['is_search'] = bool(search_query)
+        
+        # Add available sizes and colors for sidebar filters
+        from catalog.models import Size, Color
+        context['size_options'] = Size.objects.all()
+        context['color_options'] = Color.objects.all()
         return context
 
 

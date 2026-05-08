@@ -377,6 +377,33 @@
     .btn-wishlist {
         padding: var(--space-4);
         font-size: var(--text-base);
+        background: white;
+        border: 2px solid #D4AF37;
+        color: #D4AF37;
+        font-weight: 600;
+        cursor: pointer;
+        transition: all var(--transition-base);
+        border-radius: 0;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        gap: 0.5rem;
+    }
+    
+    .btn-wishlist:hover {
+        background: #D4AF37;
+        color: white;
+        transform: translateY(-2px);
+        box-shadow: 0 6px 20px rgba(212, 175, 55, 0.3);
+    }
+    
+    .btn-wishlist:active {
+        transform: translateY(0);
+    }
+    
+    .btn-wishlist.active {
+        background: #D4AF37;
+        color: white;
     }
     
     /* Product Details Card */

@@ -3,7 +3,9 @@ from django.contrib.auth.decorators import login_required
 from django.contrib.auth import login, logout, authenticate
 from django.contrib.auth.forms import UserCreationForm, AuthenticationForm
 from django.contrib.auth.models import User
+from django.contrib.auth.views import PasswordResetView
 from django.contrib import messages
+from django.conf import settings
 from .models import Customer, Address
 
 
@@ -203,3 +205,13 @@ def delete_address(request, address_id):
     return redirect('customers:profile')
 
 
+class CustomPasswordResetView(PasswordResetView):
+    """
+    Custom password reset view that passes FRONTEND_URL to the email template
+    """
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        # Add FRONTEND_URL from environment for email links
+        frontend_url = getattr(settings, 'FRONTEND_URL', 'http://localhost:8000')
+        context['frontend_url'] = frontend_url
+        return context

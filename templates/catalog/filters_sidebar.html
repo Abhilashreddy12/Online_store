@@ -1,0 +1,162 @@
+<!-- Sidebar Filters Template -->
+
+<!-- Category Filter -->
+<div class="filter-group">
+    <h3 class="filter-title">
+        Category
+        <button class="filter-toggle" onclick="toggleFilterGroup(this)">▼</button>
+    </h3>
+    <div class="filter-options">
+        <div class="filter-option">
+            <input type="checkbox" id="all-categories" name="category" value="" onchange="applyFilters()">
+            <label for="all-categories">All Categories</label>
+        </div>
+        {% for category in categories %}
+        <div class="filter-option">
+            <input type="checkbox" id="category-{{ category.id }}" name="category" value="{{ category.id }}" onchange="applyFilters()">
+            <label for="category-{{ category.id }}">{{ category.name }}</label>
+        </div>
+        {% endfor %}
+    </div>
+</div>
+
+<!-- Price Range Filter -->
+<div class="filter-group">
+    <h3 class="filter-title">
+        Price Range
+        <button class="filter-toggle" onclick="toggleFilterGroup(this)">▼</button>
+    </h3>
+    <div class="filter-options" style="padding-top: var(--space-2);">
+        <div class="price-slider">
+            <div class="price-inputs">
+                <input type="number" id="min-price" placeholder="Min" class="price-input" onchange="applyFilters()">
+                <input type="number" id="max-price" placeholder="Max" class="price-input" onchange="applyFilters()">
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Size Filter -->
+<div class="filter-group">
+    <h3 class="filter-title">
+        Size
+        <button class="filter-toggle" onclick="toggleFilterGroup(this)">▼</button>
+    </h3>
+    <div class="filter-options">
+        {% for size in size_options %}
+        <div class="filter-option">
+            <input type="checkbox" id="size-{{ size.id }}" name="size" value="{{ size.name }}" onchange="applyFilters()">
+            <label for="size-{{ size.id }}">{{ size.name }}</label>
+        </div>
+        {% empty %}
+        <div class="filter-option">
+            <input type="checkbox" id="size-xs" name="size" value="XS" onchange="applyFilters()">
+            <label for="size-xs">XS</label>
+        </div>
+        <div class="filter-option">
+            <input type="checkbox" id="size-s" name="size" value="S" onchange="applyFilters()">
+            <label for="size-s">S</label>
+        </div>
+        <div class="filter-option">
+            <input type="checkbox" id="size-m" name="size" value="M" onchange="applyFilters()">
+            <label for="size-m">M</label>
+        </div>
+        <div class="filter-option">
+            <input type="checkbox" id="size-l" name="size" value="L" onchange="applyFilters()">
+            <label for="size-l">L</label>
+        </div>
+        <div class="filter-option">
+            <input type="checkbox" id="size-xl" name="size" value="XL" onchange="applyFilters()">
+            <label for="size-xl">XL</label>
+        </div>
+        <div class="filter-option">
+            <input type="checkbox" id="size-xxl" name="size" value="XXL" onchange="applyFilters()">
+            <label for="size-xxl">XXL</label>
+        </div>
+        {% endfor %}
+    </div>
+</div>
+
+<!-- Color Filter -->
+<div class="filter-group">
+    <h3 class="filter-title">
+        Color
+        <button class="filter-toggle" onclick="toggleFilterGroup(this)">▼</button>
+    </h3>
+    <div class="filter-options">
+        {% for color in color_options %}
+        <div class="filter-option">
+            <input type="checkbox" id="color-{{ color.id }}" name="color" value="{{ color.name }}" onchange="applyFilters()">
+            <label for="color-{{ color.id }}">{{ color.name }}</label>
+        </div>
+        {% empty %}
+        <div class="filter-option">
+            <input type="checkbox" id="color-black" name="color" value="Black" onchange="applyFilters()">
+            <label for="color-black">Black</label>
+        </div>
+        <div class="filter-option">
+            <input type="checkbox" id="color-white" name="color" value="White" onchange="applyFilters()">
+            <label for="color-white">White</label>
+        </div>
+        <div class="filter-option">
+            <input type="checkbox" id="color-red" name="color" value="Red" onchange="applyFilters()">
+            <label for="color-red">Red</label>
+        </div>
+        <div class="filter-option">
+            <input type="checkbox" id="color-blue" name="color" value="Blue" onchange="applyFilters()">
+            <label for="color-blue">Blue</label>
+        </div>
+        <div class="filter-option">
+            <input type="checkbox" id="color-green" name="color" value="Green" onchange="applyFilters()">
+            <label for="color-green">Green</label>
+        </div>
+        <div class="filter-option">
+            <input type="checkbox" id="color-beige" name="color" value="Beige" onchange="applyFilters()">
+            <label for="color-beige">Beige</label>
+        </div>
+        {% endfor %}
+    </div>
+</div>
+
+<!-- Brand Filter -->
+<div class="filter-group">
+    <h3 class="filter-title">
+        Brand
+        <button class="filter-toggle" onclick="toggleFilterGroup(this)">▼</button>
+    </h3>
+    <div class="filter-options">
+        {% for brand in brands %}
+        <div class="filter-option">
+            <input type="checkbox" id="brand-{{ brand.id }}" name="brand" value="{{ brand.id }}" onchange="applyFilters()">
+            <label for="brand-{{ brand.id }}">{{ brand.name }}</label>
+        </div>
+        {% empty %}
+        <p style="font-size: var(--text-sm); color: #999999;">No brands available</p>
+        {% endfor %}
+    </div>
+</div>
+
+<!-- Availability Filter -->
+<div class="filter-group">
+    <h3 class="filter-title">
+        Availability
+        <button class="filter-toggle" onclick="toggleFilterGroup(this)">▼</button>
+    </h3>
+    <div class="filter-options">
+        <div class="filter-option">
+            <input type="radio" id="availability-all" name="availability" value="" onchange="applyFilters()">
+            <label for="availability-all">All</label>
+        </div>
+        <div class="filter-option">
+            <input type="radio" id="availability-instock" name="availability" value="in_stock" onchange="applyFilters()">
+            <label for="availability-instock">In Stock</label>
+        </div>
+        <div class="filter-option">
+            <input type="radio" id="availability-outofstock" name="availability" value="out_of_stock" onchange="applyFilters()">
+            <label for="availability-outofstock">Out of Stock</label>
+        </div>
+    </div>
+</div>
+
+<!-- Clear Filters Button -->
+<button class="clear-filters" onclick="clearAllFilters()">Clear All Filters</button>

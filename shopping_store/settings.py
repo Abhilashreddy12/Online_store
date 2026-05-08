@@ -49,6 +49,11 @@ for host in RENDER_HOSTS:
     if host not in ALLOWED_HOSTS:
         ALLOWED_HOSTS.append(host)
 
+# Frontend URL for email links (password reset, order tracking, etc.)
+# Used in email templates for generating clickable links
+# Format: http://localhost:8000 (dev) or https://yourdomain.com (production)
+FRONTEND_URL = env('FRONTEND_URL', default='http://localhost:8000')
+
 # ALLOWED_HOSTS = ['localhost', '127.0.0.1', '.onrender.com', 'online-store-qke4.onrender.com','192.168.0.106']
 
 INSTALLED_APPS = [
