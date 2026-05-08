@@ -2,323 +2,400 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <!-- Essential Meta Tags -->
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <meta name="theme-color" content="#667eea">
+    <meta name="theme-color" content="#000000">
     <meta name="csrf-token" content="{{ csrf_token }}">
     
     <!-- SEO Meta Tags -->
-    <title>{% block title %}Madiriclet Shopping Store | Online Shopping Platform{% endblock %}</title>
-    <meta name="description" content="{% block meta_description %}Madiriclet - Your premium online shopping destination. Discover curated collections of fashion, accessories, and lifestyle products with fast delivery and secure checkout.{% endblock %}">
-    <meta name="keywords" content="{% block meta_keywords %}online shopping, ecommerce, fashion store, clothing, accessories, shopping platform, Madiriclet{% endblock %}">
-    <meta name="author" content="Madiriclet">
-    <meta name="copyright" content="Copyright © 2026 Madiriclet. All rights reserved.">
+    <title>{% block title %}LUXE Fashion Store | Luxury Fashion Online{% endblock %}</title>
+    <meta name="description" content="{% block meta_description %}LUXE - Discover the finest curated luxury fashion collection. Premium clothing, accessories, and lifestyle products with fast worldwide delivery.{% endblock %}">
+    <meta name="keywords" content="{% block meta_keywords %}luxury fashion, designer clothing, premium accessories, online shopping, fashion store, LUXE{% endblock %}">
+    <meta name="author" content="LUXE Fashion Store">
+    <meta name="copyright" content="Copyright © 2026 LUXE. All rights reserved.">
     <meta name="robots" content="index, follow">
-    <link rel="canonical" href="{% block canonical_url %}https://madiriclet.com{% endblock %}">
+    <link rel="canonical" href="{% block canonical_url %}https://luxe-store.com{% endblock %}">
     
-    <!-- Open Graph Tags (Social Sharing) -->
-    <meta property="og:site_name" content="Madiriclet Shopping Store">
-    <meta property="og:title" content="{% block og_title %}Madiriclet Shopping Store | Online Shopping Platform{% endblock %}">
-    <meta property="og:description" content="{% block og_description %}Discover curated collections of fashion, accessories, and lifestyle products with fast delivery and secure checkout.{% endblock %}">
+    <!-- Open Graph Tags -->
+    <meta property="og:site_name" content="LUXE Fashion Store">
+    <meta property="og:title" content="{% block og_title %}LUXE Fashion Store | Luxury Fashion Online{% endblock %}">
+    <meta property="og:description" content="{% block og_description %}Discover the finest curated luxury fashion collection with premium quality and worldwide delivery.{% endblock %}">
     <meta property="og:type" content="{% block og_type %}website{% endblock %}">
-    <meta property="og:url" content="{% block og_url %}https://madiriclet.com{% endblock %}">
-    <meta property="og:image" content="{% block og_image %}{{ request.build_absolute_uri }}/static/images/preview.jpg{% endblock %}">
-    <meta property="og:image:width" content="1200">
-    <meta property="og:image:height" content="630">
-    <meta property="og:image:alt" content="Madiriclet Shopping Store">
+    <meta property="og:url" content="{% block og_url %}https://luxe-store.com{% endblock %}">
+    <meta property="og:image" content="{% block og_image %}{{ request.build_absolute_uri }}/static/images/logo.png{% endblock %}">
     
     <!-- Twitter Card Tags -->
     <meta name="twitter:card" content="summary_large_image">
-    <meta name="twitter:title" content="{% block twitter_title %}Madiriclet Shopping Store | Online Shopping Platform{% endblock %}">
-    <meta name="twitter:description" content="{% block twitter_description %}Discover curated collections of fashion, accessories, and lifestyle products with fast delivery and secure checkout.{% endblock %}">
-    <meta name="twitter:image" content="{% block twitter_image %}{{ request.build_absolute_uri }}/static/images/preview.jpg{% endblock %}">
-    <meta name="twitter:image:alt" content="Madiriclet Shopping Store">
-    <meta name="twitter:site" content="@madiriclet">
+    <meta name="twitter:title" content="{% block twitter_title %}LUXE Fashion Store{% endblock %}">
+    <meta name="twitter:description" content="{% block twitter_description %}Discover luxury fashion online{% endblock %}">
+    <meta name="twitter:site" content="@luxefashion">
     
-    <!-- Favicon & Apple Touch Icon -->
-    <link rel="icon" type="image/jpg" href="{% static 'images/logo.jpg' %}" sizes="32x32">
-    <link rel="icon" type="image/jpg" href="{% static 'images/logo.jpg' %}" sizes="16x16">
-    <link rel="apple-touch-icon" href="{% static 'images/logo.jpg' %}">
-    <link rel="manifest" href="/manifest.json">
+    <!-- Favicon -->
+    <link rel="icon" type="image/png" href="{% static 'images/logo.png' %}" sizes="32x32">
+    <link rel="apple-touch-icon" href="{% static 'images/logo.png' %}">
     
-    <!-- Preconnect to External Resources -->
+    <!-- Preconnect -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link rel="preconnect" href="https://cdnjs.cloudflare.com">
     
     <!-- Google Fonts -->
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Poppins:wght@500;600;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Playfair+Display:wght@600;700&display=swap" rel="stylesheet">
+    
+    <!-- Font Awesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     
     <!-- Main CSS -->
+    <link rel="stylesheet" href="{% static 'css/style.css' %}">
     <link rel="stylesheet" href="{% static 'css/main.css' %}">
-    
-    <!-- Chatbot CSS -->
     <link rel="stylesheet" href="{% static 'css/chatbot.css' %}">
     
     {% block extra_css %}{% endblock %}
 </head>
 <body>
-    <!-- Promotional Banners -->
-    {% if active_banners %}
-        {% for banner in active_banners %}
-        <div class="promo-banner" style="background-color: {{ banner.background_color }}; color: {{ banner.text_color }};">
-            <div class="container">
-                <strong>{{ banner.title }}</strong>
-                <span style="margin: 0 8px;">•</span>
-                <span>{{ banner.message }}</span>
-                {% if banner.link_url %}
-                    <a href="{{ banner.link_url }}" style="color: {{ banner.text_color }};">
-                        {{ banner.link_text }} →
-                    </a>
-                {% endif %}
+    <!-- DESKTOP NAVBAR -->
+    <nav class="navbar-desktop">
+        <div class="navbar-container">
+            <a href="{% url 'catalog:home' %}" class="navbar-logo">
+                <img src="{% static 'images/logo.jpg' %}" alt="LUXE Fashion Store" style="height: 50px; width: auto; object-fit: contain;">
+            </a>
+            <ul class="navbar-menu">
+                <li><a href="{% url 'catalog:home' %}">Home</a></li>
+                <li><a href="{% url 'catalog:product_list' %}">Shop</a></li>
+                <li><a href="{% url 'catalog:product_list' %}">Categories</a></li>
+                <li><a href="{% url 'catalog:product_list' %}">New Arrivals</a></li>
+            </ul>
+            <div class="navbar-icons">
+                <div class="navbar-icon" title="Search" onclick="openSearchModal()">
+                    <i class="fas fa-search"></i>
+                </div>
+                <div class="navbar-icon" onclick="toggleCart()" style="position: relative;">
+                    <i class="fas fa-shopping-bag"></i>
+                    {% if cart_count > 0 %}
+                    <span class="cart-badge">{{ cart_count }}</span>
+                    {% endif %}
+                </div>
+                <div class="navbar-icon" title="Profile" onclick="navigateToProfile()">
+                    <i class="fas fa-user"></i>
+                </div>
             </div>
         </div>
-        {% endfor %}
-    {% endif %}
-    
-    <!-- Header -->
-    <header class="header">
-        <div class="container">
-            <div class="header-content">
-                <nav class="nav">
-                    <!-- Logo -->
-                    <a href="{% url 'catalog:home' %}" class="logo">
-                        <img src="{% static 'images/logo.jpg' %}" alt="Ma. Diriclet Logo" class="logo-image">
-                        <span class="logo-text">Ma. Diriclet</span>
-                    </a>
-                    
-                    <!-- Desktop Navigation -->
-                    <ul class="nav-links">
-                        <li><a href="{% url 'catalog:home' %}">🏠 Home</a></li>
-                        <li><a href="{% url 'catalog:product_list' %}">🛒 Shop</a></li>
-                        {% if user.is_authenticated %}
-                            <li>
-                                <a href="{% url 'cart:wishlist_detail' %}">❤️ Wishlist</a>
-                            </li>
-                            <li>
-                                <a href="{% url 'cart:cart_detail' %}" class="cart-link">
-                                    🛒 Cart
-                                    {% if cart_count > 0 %}
-                                    <span class="cart-badge">{{ cart_count }}</span>
-                                    {% endif %}
-                                </a>
-                            </li>
-                            <li><a href="{% url 'orders:order_list' %}">📦 Orders</a></li>
-                            <li><a href="{% url 'customers:profile' %}">👤 Profile</a></li>
-                            {% if user.is_staff %}
-                                <li><a href="{% url 'catalog:admin_dashboard' %}">📊 Dashboard</a></li>
-                                <li><a href="/admin/">⚙️ Admin</a></li>
-                            {% endif %}
-                            <li><a href="{% url 'customers:logout' %}">🚪 Logout</a></li>
-                        {% else %}
-                            <li><a href="{% url 'customers:login' %}">🔐 Login</a></li>
-                            <li><a href="{% url 'customers:register' %}" class="btn btn-primary" style="background: rgba(255,255,255,0.2); padding: 8px 20px;">Register</a></li>
-                        {% endif %}
-                    </ul>
-                    
-                    <!-- Hamburger Menu Button -->
-                    <button class="hamburger" id="hamburger-btn" aria-label="Toggle navigation" aria-expanded="false">
-                        <span></span>
-                        <span></span>
-                        <span></span>
-                    </button>
-                </nav>
-            </div>
-        </div>
-    </header>
-    
-    <!-- Mobile Navigation Overlay -->
-    <div class="mobile-nav-overlay" id="mobile-nav-overlay"></div>
-    
-    <!-- Mobile Navigation -->
-    <nav class="mobile-nav" id="mobile-nav">
-        <button class="mobile-nav-close" id="mobile-nav-close" aria-label="Close navigation">
-            <span>✕</span>
-        </button>
-        <ul>
-            <li><a href="{% url 'catalog:home' %}">🏠 Home</a></li>
-            <li><a href="{% url 'catalog:product_list' %}">🛒 Shop</a></li>
-            {% if user.is_authenticated %}
-                <li><a href="{% url 'cart:wishlist_detail' %}">❤️ Wishlist</a></li>
-                <li>
-                    <a href="{% url 'cart:cart_detail' %}">
-                        🛒 Cart
-                        {% if cart_count > 0 %}
-                        <span class="badge badge-danger">{{ cart_count }}</span>
-                        {% endif %}
-                    </a>
-                </li>
-                <li><a href="{% url 'orders:order_list' %}">📦 My Orders</a></li>
-                <li><a href="{% url 'customers:profile' %}">👤 Profile</a></li>
-                {% if user.is_staff %}
-                    <li><a href="{% url 'catalog:admin_dashboard' %}">📊 Dashboard</a></li>
-                    <li><a href="/admin/">⚙️ Admin Panel</a></li>
-                {% endif %}
-                <li><a href="{% url 'customers:logout' %}">🚪 Logout</a></li>
-            {% else %}
-                <li><a href="{% url 'customers:login' %}">🔐 Login</a></li>
-                <li><a href="{% url 'customers:register' %}">📝 Register</a></li>
-            {% endif %}
-        </ul>
     </nav>
 
-    <!-- Messages / Alerts -->
+    <!-- MOBILE TOP NAVBAR -->
+    <div class="navbar-mobile-top">
+        <a href="{% url 'catalog:home' %}" class="mobile-logo">
+            <img src="{% static 'images/logo.jpg' %}" alt="LUXE Fashion Store" style="height: 40px; width: auto; object-fit: contain;">
+        </a>
+        <div style="display: flex; gap: 1rem; align-items: center;">
+            <div class="navbar-icon" style="position: relative;">
+                <i class="fas fa-shopping-bag"></i>
+                {% if cart_count > 0 %}
+                <span class="cart-badge">{{ cart_count }}</span>
+                {% endif %}
+            </div>
+            <button class="mobile-menu-toggle" onclick="toggleMobileMenu()">
+                <i class="fas fa-bars"></i>
+            </button>
+        </div>
+    </div>
+
+    <!-- MOBILE SIDEBAR MENU -->
+    <div class="mobile-overlay" id="mobileOverlay" onclick="closeMobileMenu()"></div>
+    <div class="mobile-sidebar" id="mobileSidebar">
+        <button class="mobile-sidebar-close" onclick="closeMobileMenu()">
+            <i class="fas fa-times"></i>
+        </button>
+        <div class="mobile-search-container">
+            <input type="text" class="mobile-search-input" id="mobileSearchInput" placeholder="Search products...">
+            <button class="mobile-search-btn" onclick="performSearch(document.getElementById('mobileSearchInput').value)">
+                <i class="fas fa-search"></i>
+            </button>
+        </div>
+        <ul class="mobile-sidebar-menu">
+            <li><a href="{% url 'catalog:home' %}" onclick="closeMobileMenu()">Home</a></li>
+            <li><a href="{% url 'catalog:product_list' %}" onclick="closeMobileMenu()">Shop</a></li>
+            <li><a href="{% url 'catalog:product_list' %}" onclick="closeMobileMenu()">Categories</a></li>
+            <li><a href="{% url 'catalog:product_list' %}" onclick="closeMobileMenu()">New Arrivals</a></li>
+            {% if user.is_authenticated %}
+            <li><a href="{% url 'customers:profile' %}" onclick="closeMobileMenu()">Profile</a></li>
+            <li><a href="{% url 'customers:logout' %}" onclick="closeMobileMenu()">Logout</a></li>
+            {% else %}
+            <li><a href="{% url 'customers:login' %}" onclick="closeMobileMenu()">Login</a></li>
+            <li><a href="{% url 'customers:register' %}" onclick="closeMobileMenu()">Register</a></li>
+            {% endif %}
+            <li><a href="#" onclick="closeMobileMenu()">About Us</a></li>
+            <li><a href="#" onclick="closeMobileMenu()">Contact</a></li>
+        </ul>
+    </div>
+
+    <!-- MESSAGES / ALERTS -->
     {% if messages %}
-    <div class="messages" id="messages">
+    <div class="messages-container" id="messages">
         {% for message in messages %}
         <div class="alert alert-{{ message.tags }}" role="alert">
-            {% if message.tags == 'success' %}✓{% elif message.tags == 'error' %}✕{% elif message.tags == 'warning' %}⚠{% else %}ℹ{% endif %}
             <span>{{ message }}</span>
         </div>
         {% endfor %}
     </div>
     {% endif %}
 
-    <!-- Main Content -->
-    <main class="main-content">
+    <!-- MAIN CONTENT -->
+    <div class="main-content">
         {% block content %}{% endblock %}
-    </main>
+    </div>
 
-    <!-- Footer -->
+    <!-- MOBILE BOTTOM NAVIGATION -->
+    <nav class="mobile-nav-bottom">
+        <div class="mobile-nav-item active" onclick="navigateTo('{% url 'catalog:home' %}')">
+            <div class="mobile-nav-icon"><i class="fas fa-home"></i></div>
+            <div class="mobile-nav-label">Home</div>
+        </div>
+        <div class="mobile-nav-item" onclick="navigateTo('{% url 'catalog:product_list' %}')">
+            <div class="mobile-nav-icon"><i class="fas fa-compass"></i></div>
+            <div class="mobile-nav-label">Explore</div>
+        </div>
+        <div class="mobile-nav-item" onclick="navigateTo('{% url 'catalog:product_list' %}')">
+            <div class="mobile-nav-icon"><i class="fas fa-star"></i></div>
+            <div class="mobile-nav-label">New</div>
+        </div>
+        <div class="mobile-nav-item" onclick="toggleCart()">
+            <div class="mobile-nav-icon" style="position: relative;">
+                <i class="fas fa-shopping-bag"></i>
+                {% if cart_count > 0 %}
+                <span class="mobile-nav-badge">{{ cart_count }}</span>
+                {% endif %}
+            </div>
+            <div class="mobile-nav-label">Cart</div>
+        </div>
+        <div class="mobile-nav-item" onclick="navigateTo('{% url 'customers:profile' %}')">
+            <div class="mobile-nav-icon"><i class="fas fa-user"></i></div>
+            <div class="mobile-nav-label">Profile</div>
+        </div>
+    </nav>
+
+    <!-- SEARCH MODAL -->
+    <div class="search-modal" id="searchModal">
+        <div class="search-modal-content">
+            <button class="search-modal-close" onclick="closeSearchModal()">
+                <i class="fas fa-times"></i>
+            </button>
+            <div class="search-modal-header">
+                <h2>Search Products</h2>
+            </div>
+            <div class="search-modal-body">
+                <form onsubmit="handleSearchSubmit(event)">
+                    <div class="search-input-wrapper">
+                        <input type="text" class="search-modal-input" id="searchInput" placeholder="What are you looking for?" autocomplete="off">
+                        <button type="submit" class="search-submit-btn">
+                            <i class="fas fa-search"></i>
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+        <div class="search-modal-overlay" onclick="closeSearchModal()"></div>
+    </div>
+
+    <!-- FOOTER -->
     <footer class="footer">
-        <div class="container">
-            <div class="footer-content">
+        <div class="footer-container">
+            <div class="footer-grid">
                 <div class="footer-section">
-                    <h3>Ma. Diriclet</h3>
-                    <p style="color: var(--gray-400); margin-top: var(--space-2);">
-                        Your one-stop destination for trendy, high-quality fashion.
-                        Shop the latest styles at unbeatable prices.
-                    </p>
-                </div>
-                
-                <div class="footer-section">
-                    <h3>Quick Links</h3>
+                    <h4>Shop</h4>
                     <ul>
-                        <li><a href="{% url 'catalog:home' %}">Home</a></li>
-                        <li><a href="{% url 'catalog:product_list' %}">Shop All</a></li>
-                        {% if user.is_authenticated %}
-                        <li><a href="{% url 'orders:order_list' %}">My Orders</a></li>
-                        <li><a href="{% url 'customers:profile' %}">My Account</a></li>
-                        {% endif %}
+                        <li><a href="{% url 'catalog:product_list' %}">All Products</a></li>
+                        <li><a href="{% url 'catalog:product_list' %}">New Arrivals</a></li>
+                        <li><a href="{% url 'catalog:product_list' %}">Sale</a></li>
+                        <li><a href="{% url 'catalog:product_list' %}">Collections</a></li>
                     </ul>
                 </div>
-                
                 <div class="footer-section">
-                    <h3>Customer Service</h3>
+                    <h4>Customer Service</h4>
                     <ul>
                         <li><a href="#">Contact Us</a></li>
+                        <li><a href="#">FAQ</a></li>
                         <li><a href="#">Shipping Info</a></li>
-                        <li><a href="#">Returns & Exchanges</a></li>
-                        <li><a href="#">FAQs</a></li>
+                        <li><a href="#">Returns</a></li>
                     </ul>
                 </div>
-                
                 <div class="footer-section">
-                    <h3>Connect With Us</h3>
+                    <h4>About</h4>
                     <ul>
-                        <li><a href="#">📘 Facebook</a></li>
-                        <li><a href="#">📸 Instagram</a></li>
-                        <li><a href="#">🐦 Twitter</a></li>
-                        <li><a href="#">📧 Newsletter</a></li>
+                        <li><a href="#">About Us</a></li>
+                        <li><a href="#">Blog</a></li>
+                        <li><a href="#">Careers</a></li>
+                        <li><a href="#">Press</a></li>
+                    </ul>
+                </div>
+                <div class="footer-section">
+                    <h4>Connect</h4>
+                    <ul>
+                        <li><a href="https://instagram.com">Instagram</a></li>
+                        <li><a href="https://facebook.com">Facebook</a></li>
+                        <li><a href="https://twitter.com">Twitter</a></li>
+                        <li><a href="https://pinterest.com">Pinterest</a></li>
                     </ul>
                 </div>
             </div>
-            
             <div class="footer-bottom">
-                <p>&copy; {% now "Y" %} Ma. Diriclet. All rights reserved.</p>
-                <p style="margin-top: var(--space-2);">Built with Django • Deployed on Render</p>
+                <p>&copy; 2026 LUXE Fashion Store. All rights reserved.</p>
             </div>
         </div>
     </footer>
 
-    <!-- JavaScript -->
     <script>
-    (function() {
-        // Mobile Navigation Toggle
-        const hamburger = document.getElementById('hamburger-btn');
-        const mobileNav = document.getElementById('mobile-nav');
-        const mobileNavOverlay = document.getElementById('mobile-nav-overlay');
-        
-        function toggleMobileNav() {
-            const isOpen = mobileNav.classList.contains('open');
-            
-            if (isOpen) {
-                closeMobileNav();
-            } else {
-                openMobileNav();
+        // Mobile Menu Toggle
+        function toggleMobileMenu() {
+            const sidebar = document.getElementById('mobileSidebar');
+            const overlay = document.getElementById('mobileOverlay');
+            sidebar.classList.toggle('active');
+            overlay.classList.toggle('active');
+        }
+
+        function closeMobileMenu() {
+            const sidebar = document.getElementById('mobileSidebar');
+            const overlay = document.getElementById('mobileOverlay');
+            sidebar.classList.remove('active');
+            overlay.classList.remove('active');
+        }
+
+        // Navigation
+        function navigateTo(url) {
+            window.location.href = url;
+        }
+
+        // Cart Toggle
+        function toggleCart() {
+            window.location.href = '{% url 'cart:cart_detail' %}';
+        }
+
+        // Mobile Bottom Nav Active State
+        function setActiveBottomNav(index) {
+            const items = document.querySelectorAll('.mobile-nav-item');
+            items.forEach((item, i) => {
+                if (i === index) {
+                    item.classList.add('active');
+                } else {
+                    item.classList.remove('active');
+                }
+            });
+        }
+
+        // Set active nav on page load based on current URL
+        document.addEventListener('DOMContentLoaded', function() {
+            const currentUrl = window.location.pathname;
+            let activeIndex = 0;
+
+            if (currentUrl === '/') activeIndex = 0;
+            else if (currentUrl.includes('/shop/') || currentUrl.includes('/catalog/')) activeIndex = 1;
+            else if (currentUrl.includes('/new/')) activeIndex = 2;
+            else if (currentUrl.includes('/cart/')) activeIndex = 3;
+            else if (currentUrl.includes('/profile/')) activeIndex = 4;
+
+            setActiveBottomNav(activeIndex);
+
+            // Auto-hide messages after 5 seconds
+            const messages = document.getElementById('messages');
+            if (messages) {
+                setTimeout(() => {
+                    messages.style.transition = 'opacity 0.3s ease';
+                    messages.style.opacity = '0';
+                    setTimeout(() => {
+                        messages.remove();
+                    }, 300);
+                }, 5000);
             }
-        }
-        
-        function openMobileNav() {
-            mobileNav.classList.add('open');
-            mobileNavOverlay.classList.add('open');
-            hamburger.classList.add('active');
-            hamburger.setAttribute('aria-expanded', 'true');
-            document.body.style.overflow = 'hidden';
-        }
-        
-        function closeMobileNav() {
-            mobileNav.classList.remove('open');
-            mobileNavOverlay.classList.remove('open');
-            hamburger.classList.remove('active');
-            hamburger.setAttribute('aria-expanded', 'false');
-            document.body.style.overflow = '';
-        }
-        
-        hamburger.addEventListener('click', toggleMobileNav);
-        mobileNavOverlay.addEventListener('click', closeMobileNav);
-        
-        // Close mobile nav when clicking a link
-        mobileNav.querySelectorAll('a').forEach(link => {
-            link.addEventListener('click', closeMobileNav);
         });
 
-        // Close mobile nav with close button
-        const closeBtn = document.getElementById('mobile-nav-close');
-        if (closeBtn) {
-            closeBtn.addEventListener('click', closeMobileNav);
-        }
-        
-        // Close mobile nav on window resize
-        window.addEventListener('resize', () => {
-            if (window.innerWidth > 992) {
-                closeMobileNav();
+        // Close mobile menu on outside click
+        document.addEventListener('click', function(event) {
+            const sidebar = document.getElementById('mobileSidebar');
+            const menuBtn = document.querySelector('.mobile-menu-toggle');
+            
+            if (!sidebar.contains(event.target) && !menuBtn.contains(event.target)) {
+                closeMobileMenu();
             }
         });
-        
-        // Auto-hide messages after 5 seconds
-        const messages = document.getElementById('messages');
-        if (messages) {
-            setTimeout(() => {
-                messages.style.transition = 'opacity 0.3s ease';
-                messages.style.opacity = '0';
+
+        // Close mobile menu on Escape key
+        document.addEventListener('keydown', function(e) {
+            if (e.key === 'Escape') {
+                closeMobileMenu();
+                closeSearchModal();
+            }
+        });
+
+        // Search Modal Functions
+        function openSearchModal() {
+            const modal = document.getElementById('searchModal');
+            if (modal) {
+                modal.classList.add('open');
+                document.body.style.overflow = 'hidden';
+                // Focus on search input
                 setTimeout(() => {
-                    messages.remove();
-                }, 300);
-            }, 5000);
+                    const searchInput = document.getElementById('searchInput');
+                    if (searchInput) searchInput.focus();
+                }, 100);
+            }
         }
-        
-        // Keyboard navigation for hamburger
-        hamburger.addEventListener('keydown', (e) => {
-            if (e.key === 'Enter' || e.key === ' ') {
+
+        function closeSearchModal() {
+            const modal = document.getElementById('searchModal');
+            if (modal) {
+                modal.classList.remove('open');
+                document.body.style.overflow = '';
+            }
+        }
+
+        function handleSearchSubmit(event) {
+            event.preventDefault();
+            const searchQuery = document.getElementById('searchInput').value.trim();
+            if (searchQuery) {
+                performSearch(searchQuery);
+            }
+        }
+
+        function performSearch(query) {
+            if (query.trim()) {
+                closeSearchModal();
+                // Redirect to product list with search query
+                window.location.href = '{% url 'catalog:product_list' %}?search=' + encodeURIComponent(query);
+            }
+        }
+
+        // Navigate to Profile
+        function navigateToProfile() {
+            {% if user.is_authenticated %}
+                window.location.href = '{% url 'customers:profile' %}';
+            {% else %}
+                window.location.href = '{% url 'customers:login' %}';
+            {% endif %}
+        }
+
+        // Close search modal on overlay click
+        document.addEventListener('DOMContentLoaded', function() {
+            const searchModal = document.getElementById('searchModal');
+            if (searchModal) {
+                const overlay = searchModal.querySelector('.search-modal-overlay');
+                if (overlay) {
+                    overlay.addEventListener('click', closeSearchModal);
+                }
+            }
+        });
+
+        // Open search modal on keyboard shortcut (Ctrl+K or Cmd+K)
+        document.addEventListener('keydown', function(e) {
+            if ((e.ctrlKey || e.metaKey) && e.key === 'k') {
                 e.preventDefault();
-                toggleMobileNav();
+                openSearchModal();
             }
         });
-        
-        // Close mobile nav on Escape key
-        document.addEventListener('keydown', (e) => {
-            if (e.key === 'Escape' && mobileNav.classList.contains('open')) {
-                closeMobileNav();
-            }
-        });
-    })();
     </script>
-    
+
     <!-- Chatbot Widget -->
     <script src="{% static 'js/chatbot.js' %}"></script>
-    
+
     {% block extra_js %}{% endblock %}
 </body>
 </html>

@@ -143,6 +143,13 @@
             padding: 15px;
             margin-bottom: 20px;
             min-height: 80px;
+            position: relative;
+        }
+
+        .transcript-section.active {
+            background: #e3f2fd;
+            border-left-color: #2196f3;
+            box-shadow: 0 0 10px rgba(33, 150, 243, 0.2);
         }
 
         .transcript-title {
@@ -151,6 +158,29 @@
             color: #667eea;
             text-transform: uppercase;
             margin-bottom: 8px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .transcript-indicator {
+            display: inline-block;
+            width: 6px;
+            height: 6px;
+            border-radius: 50%;
+            background: #667eea;
+            animation: transcribePulse 1s ease-in-out infinite;
+        }
+
+        @keyframes transcribePulse {
+            0%, 100% { 
+                opacity: 1;
+                transform: scale(1);
+            }
+            50% { 
+                opacity: 0.5;
+                transform: scale(1.2);
+            }
         }
 
         .transcript-text {
@@ -159,6 +189,36 @@
             font-family: 'Georgia', serif;
             line-height: 1.6;
             word-wrap: break-word;
+            min-height: 24px;
+        }
+
+        .transcript-text.placeholder {
+            color: #999;
+            font-style: italic;
+        }
+
+        .transcript-status {
+            font-size: 11px;
+            color: #667eea;
+            margin-top: 8px;
+            font-weight: 500;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .status-dot {
+            display: inline-block;
+            width: 4px;
+            height: 4px;
+            border-radius: 50%;
+            background: #667eea;
+            animation: blink 1.5s ease-in-out infinite;
+        }
+
+        @keyframes blink {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.3; }
         }
 
         .intent-badge {
@@ -302,10 +362,28 @@
             display: none;
             color: #c92a2a;
             font-size: 14px;
+            line-height: 1.6;
+            white-space: pre-wrap;
+            word-wrap: break-word;
+            max-height: 300px;
+            overflow-y: auto;
+            font-family: Arial, sans-serif;
         }
 
         .error-section.active {
             display: block;
+            animation: errorSlideIn 0.3s ease;
+        }
+        
+        @keyframes errorSlideIn {
+            from {
+                opacity: 0;
+                transform: translateY(-10px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
         }
 
         .info-text {
@@ -347,6 +425,14 @@
 <body>
     <div class="container">
         <h1>🎤 Real-Time Voice Assistant</h1>
+
+        <div style="background: #e3f2fd; border-left: 4px solid #2196f3; border-radius: 8px; padding: 12px; margin-bottom: 20px; font-size: 13px; color: #1565c0; line-height: 1.5;">
+            <strong>📱 Mobile Setup:</strong><br>
+            • Must use <strong>HTTPS</strong> (HTTP won't work)<br>
+            • Use ngrok: <code style="background: #fff; padding: 2px 4px; border-radius: 3px;">pip install ngrok && ngrok http 8000</code><br>
+            • Or access from desktop: <code style="background: #fff; padding: 2px 4px; border-radius: 3px;">http://localhost:8000</code><br>
+            • Grant microphone permission when prompted
+        </div>
 
         <div class="settings">
             <div class="setting-group">
@@ -393,9 +479,16 @@
             </div>
         </div>
 
-        <div class="transcript-section">
-            <div class="transcript-title">📝 Live Transcription</div>
+        <div class="transcript-section" id="transcript-section">
+            <div class="transcript-title">
+                <span id="transcript-icon">📝</span> Live Transcription
+                <span class="transcript-indicator" id="transcript-indicator" style="display: none;"></span>
+            </div>
             <div class="transcript-text" id="transcript">Waiting for audio...</div>
+            <div class="transcript-status" id="transcript-status" style="display: none;">
+                <span class="status-dot"></span>
+                <span id="status-text">Transcribing...</span>
+            </div>
             <div class="progress-bar">
                 <div class="progress-bar-fill" id="confidence-progress"></div>
             </div>
@@ -427,20 +520,65 @@
     </div>
 
     <script>
+        /**
+         * RealtimeVoiceBot - Real-time voice streaming with modern Web Audio API
+         * 
+         * FIXES:
+         * - REMOVED audio feedback loop (no destination connection)
+         * - AGGRESSIVE VAD filtering (threshold 0.05) 
+         * - BUFFERING to combine small chunks
+         * - ROBUST stop button with isStopping flag
+         * - DEVICE enumeration for explicit microphone selection
+         * - DEBUG logging for voice vs silence detection
+         * - PROPER state management during stop
+         */
         class RealtimeVoiceBot {
             constructor() {
+                // ===== WebSocket =====
                 this.ws = null;
-                this.mediaRecorder = null;
-                this.audioChunks = [];
-                this.sessionId = null;
+                this.wsReconnectAttempts = 0;
+                this.wsReconnectDelay = 1000;
+                this.wsMaxReconnectDelay = 30000;
+                this.isManuallyClosing = false;
+                
+                // ===== Audio Processing =====
+                this.audioContext = null;
+                this.audioWorkletNode = null;
+                this.mediaStreamSource = null;
+                this.mediaStream = null;
+                this.analyser = null;
+                
+                // ===== Streaming Control =====
                 this.isRecording = false;
+                this.isStopping = false; // ✅ FIX: Stop button debounce
                 this.startTime = null;
-
+                this.totalBytesSent = 0;
+                this.totalChunksSent = 0;
+                this.sessionId = null;
+                
+                // ===== VAD (Voice Activity Detection) =====
+                this.vadThreshold = 0.05; // ✅ FIX: INCREASED from 0.01 to 0.05 (much more aggressive)
+                this.vadEnabled = true;
+                this.voiceDetectedCount = 0;
+                this.silenceSkippedCount = 0;
+                
+                // ===== BUFFERING (NEW) =====
+                this.audioBuffer = [];
+                this.bufferedBytes = 0;
+                this.bufferThreshold = 8192; // Send when >= 8KB accumulated
+                this.maxBufferSize = 65536; // Max buffer before forced flush
+                
+                // ===== Microphone Device =====
+                this.selectedMicDeviceId = null;
+                
+                // ===== UI Elements =====
                 this.initElements();
                 this.attachEventListeners();
                 this.connectWebSocket();
             }
 
+            // ========== INITIALIZATION ==========
+            
             initElements() {
                 this.startBtn = document.getElementById('start-btn');
                 this.stopBtn = document.getElementById('stop-btn');
@@ -451,6 +589,10 @@
                 this.chunksCount = document.getElementById('chunks-count');
                 this.processingTime = document.getElementById('processing-time');
                 this.transcript = document.getElementById('transcript');
+                this.transcriptSection = document.getElementById('transcript-section');
+                this.transcriptIndicator = document.getElementById('transcript-indicator');
+                this.transcriptStatus = document.getElementById('transcript-status');
+                this.statusText = document.getElementById('status-text');
                 this.intentBadges = document.getElementById('intent-badges');
                 this.responseSection = document.getElementById('response-section');
                 this.responseText = document.getElementById('response-text');
@@ -466,33 +608,81 @@
                 this.stopBtn.addEventListener('click', () => this.stopRecording());
             }
 
+            // ========== WEBSOCKET CONNECTION ==========
+            
             connectWebSocket() {
+                if (this.isManuallyClosing) return;
+                
                 const protocol = window.location.protocol === 'https:' ? 'wss:' : 'ws:';
                 const wsUrl = `${protocol}//${window.location.host}/ws/voice-stream/`;
 
-                this.ws = new WebSocket(wsUrl);
+                try {
+                    this.ws = new WebSocket(wsUrl);
+                    this.ws.binaryType = 'arraybuffer'; // Enable binary message support
 
-                this.ws.onopen = () => {
-                    console.log('✅ WebSocket connected');
-                    this.connectionStatus.textContent = '🟢 Connected';
-                    this.connectionStatus.style.color = '#51cf66';
-                };
+                    this.ws.onopen = () => {
+                        console.log('✅ WebSocket connected');
+                        this.connectionStatus.textContent = '🟢 Connected';
+                        this.connectionStatus.style.color = '#51cf66';
+                        this.wsReconnectAttempts = 0;
+                        this.wsReconnectDelay = 1000;
+                    };
 
-                this.ws.onmessage = (event) => this.handleMessage(JSON.parse(event.data));
+                    this.ws.onmessage = (event) => this.handleMessage(event);
 
-                this.ws.onerror = (error) => {
-                    console.error('❌ WebSocket error:', error);
-                    this.showError('WebSocket connection error');
-                };
+                    this.ws.onerror = (error) => {
+                        console.error('❌ WebSocket error:', error);
+                        if (this.isRecording) {
+                            this.showError('WebSocket connection error - attempting to reconnect...');
+                        }
+                    };
 
-                this.ws.onclose = () => {
-                    console.log('❌ WebSocket disconnected');
-                    this.connectionStatus.textContent = '🔴 Disconnected';
-                    this.connectionStatus.style.color = '#ff6b6b';
-                };
+                    this.ws.onclose = () => {
+                        console.log('❌ WebSocket closed');
+                        this.connectionStatus.textContent = '🔴 Disconnected';
+                        this.connectionStatus.style.color = '#ff6b6b';
+                        
+                        // Auto-reconnect if recording (unless manually closed)
+                        if (this.isRecording && !this.isManuallyClosing) {
+                            this._reconnectWebSocket();
+                        }
+                    };
+                } catch (error) {
+                    console.error('Failed to create WebSocket:', error);
+                    this.showError('WebSocket connection failed');
+                }
             }
 
-            handleMessage(data) {
+            /**
+             * Auto-reconnect WebSocket with exponential backoff
+             * Prevents hammering the server with reconnection attempts
+             */
+            _reconnectWebSocket() {
+                this.wsReconnectAttempts++;
+                const delay = Math.min(
+                    this.wsReconnectDelay * Math.pow(1.5, this.wsReconnectAttempts - 1),
+                    this.wsMaxReconnectDelay
+                );
+                
+                console.log(`🔄 Reconnecting in ${delay}ms (attempt ${this.wsReconnectAttempts})...`);
+                this.statusText.textContent = `Reconnecting in ${Math.round(delay / 1000)}s...`;
+                
+                setTimeout(() => {
+                    if (this.isRecording && !this.isManuallyClosing) {
+                        this.connectWebSocket();
+                    }
+                }, delay);
+            }
+
+            handleMessage(event) {
+                // Handle binary (ArrayBuffer) messages from backend
+                if (event.data instanceof ArrayBuffer) {
+                    console.log('[AudioWorklet] Received binary audio response');
+                    return;
+                }
+                
+                // Handle text (JSON) messages
+                const data = JSON.parse(event.data);
                 const type = data.type;
 
                 switch(type) {
@@ -502,27 +692,45 @@
                         break;
 
                     case 'session_ready':
+                    case 'initialized':
                         console.log('✅ Session ready');
                         break;
 
                     case 'chunk_received':
-                        this.chunksCount.textContent = data.chunk_index || '...';
+                        this.totalChunksSent = (data.chunk_index || 0) + 1;
+                        this.chunksCount.textContent = this.totalChunksSent;
+                        console.debug(`📦 Backend acked chunk #${this.totalChunksSent}`);
                         break;
 
                     case 'processing_started':
-                        console.log('Processing started...');
+                        console.log('🔄 Processing started');
+                        this.showTranscriptionStatus('Processing audio...');
                         break;
 
                     case 'partial_transcript':
-                        this.transcript.textContent = data.text;
-                        this.updateConfidenceBar(data.confidence);
+                        this.updatePartialTranscript(data.text, data.confidence);
                         break;
 
                     case 'intent_detected':
                         this.displayIntentBadges(data);
                         break;
 
+                    case 'status_update':
+                        this.showTranscriptionStatus(data.message);
+                        if (data.bytes_needed) {
+                            this.updateProgressBar(data.bytes_received || 0, data.bytes_needed);
+                        }
+                        if (!this.transcript.textContent.includes('speech')) {
+                            this.transcript.textContent = `🎙️ ${data.message}`;
+                            this.transcript.classList.add('placeholder');
+                        }
+                        break;
+
                     case 'final_result':
+                        if (data.clipping_warning) {
+                            console.warn('⚠️ AUDIO CLIPPING:', data.clipping_warning);
+                            this.showError(data.clipping_warning);
+                        }
                         this.handleFinalResult(data);
                         break;
 
@@ -534,6 +742,50 @@
                         this.showError(data.message);
                         break;
                 }
+            }
+
+            // ========== MESSAGE HANDLERS ==========
+            
+            updatePartialTranscript(text, confidence) {
+                if (!text) {
+                    // No text yet, show placeholder
+                    this.transcript.textContent = '🎙️ Listening for speech...';
+                    this.transcript.classList.add('placeholder');
+                    return;
+                }
+                
+                // Remove placeholder styling if present
+                this.transcript.classList.remove('placeholder');
+                
+                // Update transcript text
+                this.transcript.textContent = text;
+                
+                // Show active state on transcript section
+                this.transcriptSection.classList.add('active');
+                
+                // Show transcription indicator
+                this.transcriptIndicator.style.display = 'inline-block';
+                this.transcriptStatus.style.display = 'flex';
+                this.statusText.textContent = 'Transcribing in real-time...';
+                
+                // Update confidence bar
+                this.updateConfidenceBar(confidence);
+                
+                console.log('📝 Partial transcript:', text);
+            }
+
+            showTranscriptionStatus(message) {
+                this.statusText.textContent = message;
+                this.transcriptStatus.style.display = 'flex';
+                console.log(`📊 Status: ${message}`);
+            }
+
+            updateProgressBar(bytesReceived, bytesNeeded) {
+                const percentage = Math.min((bytesReceived / bytesNeeded) * 100, 100);
+                this.confidenceProgress.style.width = percentage + '%';
+                this.confidenceProgress.style.background = percentage < 100 
+                    ? 'linear-gradient(90deg, #ffa500, #ff8c00)' 
+                    : 'linear-gradient(90deg, #667eea, #764ba2)';
             }
 
             updateConfidenceBar(confidence) {
@@ -557,6 +809,10 @@
 
             handleFinalResult(data) {
                 this.transcript.textContent = data.detected_text;
+                this.transcript.classList.remove('placeholder');
+                this.transcriptIndicator.style.display = 'none';
+                this.transcriptStatus.style.display = 'flex';
+                this.statusText.textContent = '✅ Transcription complete';
                 this.processingTime.textContent = data.processing_time_ms + 'ms';
 
                 this.displayIntentBadges(data);
@@ -569,6 +825,9 @@
                 this.isRecording = false;
                 this.startBtn.disabled = false;
                 this.stopBtn.disabled = true;
+                
+                // Keep transcript section active to show final result
+                this.transcriptSection.classList.add('active');
             }
 
             playAudioResponse(data) {
@@ -585,81 +844,426 @@
             }
 
             showError(message) {
-                this.errorSection.textContent = '❌ ' + message;
+                // Replace newlines with HTML line breaks for display
+                const displayMessage = message.replace(/\n/g, '<br>');
+                this.errorSection.innerHTML = '❌ ' + displayMessage;
                 this.errorSection.classList.add('active');
                 setTimeout(() => {
                     this.errorSection.classList.remove('active');
-                }, 5000);
+                }, 8000);
             }
 
             async startRecording() {
                 try {
-                    const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+                    // ===== VALIDATION =====
+                    if (!window.isSecureContext) {
+                        let errorMsg = `🔒 HTTPS Required (Security Policy)\n\nMicrophone is blocked on HTTP.\n\n`;
+                        const hostname = window.location.hostname;
+                        if (hostname === 'localhost' || hostname === '127.0.0.1') {
+                            errorMsg += `Desktop: Try http://${hostname}:8000`;
+                        } else {
+                            errorMsg += `Use HTTPS URL or ngrok tunnel`;
+                        }
+                        this.showError(errorMsg);
+                        return;
+                    }
 
-                    this.mediaRecorder = new MediaRecorder(stream);
-                    this.audioChunks = [];
+                    if (!navigator.mediaDevices?.getUserMedia) {
+                        this.showError('❌ Microphone API not supported\n\nUse Chrome/Firefox');
+                        return;
+                    }
 
-                    // Send init message
+                    console.log('🔐 Requesting microphone access...');
+
+                    // ===== ENUMERATE DEVICES (NEW) =====
+                    try {
+                        const devices = await navigator.mediaDevices.enumerateDevices();
+                        const audioInputs = devices.filter(d => d.kind === 'audioinput');
+                        
+                        if (audioInputs.length === 0) {
+                            this.showError('❌ No microphone devices found');
+                            return;
+                        }
+                        
+                        // Select first audio input device (usually default mic)
+                        this.selectedMicDeviceId = audioInputs[0].deviceId;
+                        console.log(`✅ Found ${audioInputs.length} microphone(s)`);
+                        console.log(`📍 Selected device: ${audioInputs[0].label || 'Default Microphone'}`);
+                        audioInputs.forEach((dev, i) => {
+                            console.log(`  [${i}] ${dev.label} (ID: ${dev.deviceId})`);
+                        });
+                    } catch (error) {
+                        console.warn('⚠️ Could not enumerate devices, using default:', error);
+                        this.selectedMicDeviceId = 'default';
+                    }
+
+                    // ===== AUDIO CONTEXT SETUP =====
+                    this.audioContext = new (window.AudioContext || window.webkitAudioContext)();
+                    const sampleRate = this.audioContext.sampleRate;
+                    console.log(`🎤 Audio Context initialized - SR: ${sampleRate}Hz`);
+
+                    // ===== MICROPHONE STREAM (WITH DEVICE ID) =====
+                    const stream = await navigator.mediaDevices.getUserMedia({
+                        audio: {
+                            deviceId: this.selectedMicDeviceId ? { exact: this.selectedMicDeviceId } : undefined,
+                            channelCount: { exact: 1 },
+                            echoCancellation: true,
+                            noiseSuppression: true,
+                            autoGainControl: false, // CRITICAL: Disable to prevent clipping
+                            latency: 0.01
+                        }
+                    });
+
+                    this.mediaStream = stream; // ✅ FIX: Store stream reference
+                    this.mediaStreamSource = this.audioContext.createMediaStreamSource(stream);
+                    console.log('✅ Microphone granted');
+                    
+                    // ===== LOG STREAM SETTINGS =====
+                    const audioTrack = stream.getAudioTracks()[0];
+                    if (audioTrack) {
+                        const settings = audioTrack.getSettings();
+                        console.log(`🔊 Stream settings:`, {
+                            sampleRate: settings.sampleRate,
+                            channelCount: settings.channelCount,
+                            echoCancellation: settings.echoCancellation,
+                            noiseSuppression: settings.noiseSuppression,
+                            autoGainControl: settings.autoGainControl
+                        });
+                    }
+
+                    // ===== LOAD AUDIOWORKLET =====
+                    try {
+                        await this.audioContext.audioWorklet.addModule('/static/audio-worklet-processor.js');
+                        this.audioWorkletNode = new AudioWorkletNode(
+                            this.audioContext, 
+                            'audio-capture-processor'
+                        );
+                        
+                        // Tell the worklet what the input sample rate is
+                        this.audioWorkletNode.port.postMessage({
+                            type: 'INIT',
+                            sampleRate: sampleRate
+                        });
+                        
+                        // Handle audio chunks from the worklet
+                        this.audioWorkletNode.port.onmessage = (event) => {
+                            this._handleAudioChunk(event.data);
+                        };
+                        
+                        console.log('✅ AudioWorklet loaded and initialized');
+                    } catch (error) {
+                        console.warn('AudioWorklet not supported, falling back to ScriptProcessor');
+                        this.showError('⚠️ AudioWorklet not supported\n\nTry Chrome/Edge on Desktop');
+                        return;
+                    }
+
+                    // ===== CONNECT AUDIO PIPELINE =====
+                    this.mediaStreamSource.connect(this.audioWorkletNode);
+                    // ✅ FIX: REMOVED .connect(this.audioContext.destination) - NO AUDIO FEEDBACK LOOP
+                    console.log('✅ Audio pipeline connected (NO feedback loop)');
+
+                    // ===== WEBSOCKET INIT MESSAGE =====
                     this.ws.send(JSON.stringify({
                         type: 'init',
                         language: this.languageSelect.value,
-                        include_tts: this.includeTtsCheckbox.checked
+                        include_tts: this.includeTtsCheckbox.checked,
+                        sample_rate: 16000,
+                        bit_depth: 16,
+                        channels: 1,
+                        vad_enabled: this.vadEnabled,
+                        vad_threshold: this.vadThreshold
                     }));
 
-                    this.mediaRecorder.ondataavailable = (event) => {
-                        this.audioChunks.push(event.data);
-                        this.sendAudioChunk(event.data);
-                    };
-
-                    this.mediaRecorder.start(2000);  // Send chunks every 2 seconds for better audio continuity
-
+                    // ===== START RECORDING =====
                     this.isRecording = true;
+                    this.isStopping = false; // ✅ FIX: Reset stopping flag
+                    this.isManuallyClosing = false;
                     this.startTime = Date.now();
+                    this.totalChunksSent = 0;
+                    this.totalBytesSent = 0;
+                    this.voiceDetectedCount = 0;
+                    this.silenceSkippedCount = 0;
+                    this.audioBuffer = []; // ✅ FIX: Clear buffer
+                    this.bufferedBytes = 0;
                     this.startBtn.disabled = true;
                     this.stopBtn.disabled = false;
+
+                    // ===== UI INITIALIZATION =====
                     this.transcript.textContent = '🎙️ Listening...';
+                    this.transcript.classList.add('placeholder');
+                    this.transcriptSection.classList.remove('active');
+                    this.transcriptIndicator.style.display = 'none';
+                    this.transcriptStatus.style.display = 'none';
                     this.responseSection.classList.remove('active');
                     this.errorSection.classList.remove('active');
 
-                    console.log('✅ Recording started');
+                    console.log('🔴 RECORDING STARTED with AudioWorklet (Raw PCM @ 16kHz)');
+                    console.log(`📊 VAD Threshold: ${this.vadThreshold} | Buffer Threshold: ${this.bufferThreshold} bytes`);
+                    this.showTranscriptionStatus('🎙️ Recording... Speak now!');
+
                 } catch (error) {
-                    this.showError('Microphone access denied: ' + error.message);
+                    console.error('❌ Microphone error:', error);
+                    
+                    let errorMsg = '❌ Microphone Error\n\n';
+                    if (error.name === 'NotAllowedError') {
+                        errorMsg += 'Permission denied\n\n1. Check permission prompt\n2. Click "Allow"\n3. Reload page';
+                    } else if (error.name === 'NotFoundError') {
+                        errorMsg += 'No microphone found\n\nCheck device connection';
+                    } else if (error.name === 'NotSupportedError') {
+                        errorMsg += 'Browser not supported\n\nUse Chrome/Firefox';
+                    } else {
+                        errorMsg += error.message;
+                    }
+                    
+                    this.showError(errorMsg);
                 }
             }
 
-            sendAudioChunk(audioBlob) {
-                if (!this.isRecording) return;
+            /**
+             * ✅ CRITICAL FIX: Handle audio chunk from AudioWorklet
+             * 
+             * NEW FEATURES:
+             * - AGGRESSIVE VAD (RMS threshold 0.05)
+             * - BUFFERING to avoid fragmented chunks
+             * - ISSTOPPING flag check to halt streaming
+             * - DETAILED DEBUG logging for voice vs silence
+             * - AUTO-FLUSH if buffer gets too large
+             */
+            _handleAudioChunk(event) {
+                // ===== SANITY CHECKS =====
+                if (!this.isRecording || this.isStopping) {
+                    console.debug('🛑 Ignoring chunk: recording stopped or stopping');
+                    return;
+                }
+                if (!this.ws || this.ws.readyState !== WebSocket.OPEN) {
+                    console.debug('🛑 Ignoring chunk: WebSocket not open');
+                    return;
+                }
 
-                const reader = new FileReader();
-                reader.onload = (e) => {
-                    const base64Audio = btoa(
-                        new Uint8Array(e.target.result).reduce((d, b) => d + String.fromCharCode(b), '')
-                    );
+                const { data, rms, isVoice, silenceRatio } = event;
+                
+                // ===== DEBUG: Log every chunk =====
+                console.debug(`📊 Chunk: RMS=${rms.toFixed(4)} | Voice=${isVoice} | Silence=${(silenceRatio*100).toFixed(0)}%`);
 
+                // ===== AGGRESSIVE VAD: Skip if silent =====
+                if (this.vadEnabled && !isVoice) {
+                    // More aggressive: also check RMS against threshold
+                    if (rms < this.vadThreshold) {
+                        this.silenceSkippedCount++;
+                        console.log(`🔇 SILENCE SKIPPED (RMS: ${rms.toFixed(4)} < ${this.vadThreshold})`);
+                        return;
+                    }
+                }
+
+                // ===== VOICE DETECTED =====
+                if (rms >= this.vadThreshold) {
+                    this.voiceDetectedCount++;
+                    console.log(`✅ VOICE DETECTED (RMS: ${rms.toFixed(4)} >= ${this.vadThreshold})`);
+                }
+
+                // ===== BUFFER AUDIO (NEW) =====
+                try {
+                    // Add to buffer instead of sending immediately
+                    this.audioBuffer.push({
+                        data: data,
+                        rms: rms,
+                        isVoice: isVoice,
+                        silenceRatio: silenceRatio
+                    });
+                    this.bufferedBytes += data.length * 2;
+                    
+                    console.debug(`💾 Buffered: ${this.audioBuffer.length} chunks, ${this.bufferedBytes} bytes`);
+
+                    // ===== FLUSH IF THRESHOLD REACHED OR BUFFER TOO LARGE =====
+                    if (this.bufferedBytes >= this.bufferThreshold || this.bufferedBytes >= this.maxBufferSize) {
+                        console.log(`📤 FLUSHING buffer: ${this.bufferedBytes} bytes`);
+                        this._flushAudioBuffer();
+                    }
+                } catch (error) {
+                    console.error('Failed to buffer audio chunk:', error);
+                }
+            }
+
+            /**
+             * ✅ NEW: Flush accumulated audio buffer
+             * Sends combined chunks to backend instead of individual fragments
+             */
+            _flushAudioBuffer() {
+                if (this.audioBuffer.length === 0) {
+                    console.debug('📭 Buffer empty, nothing to flush');
+                    return;
+                }
+
+                try {
+                    // Combine all Int16Arrays into single buffer
+                    const totalSamples = this.audioBuffer.reduce((sum, chunk) => sum + chunk.data.length, 0);
+                    const combinedInt16 = new Int16Array(totalSamples);
+                    
+                    let offset = 0;
+                    let avgRms = 0;
+                    let maxRms = 0;
+                    let silentChunks = 0;
+                    
+                    for (const chunk of this.audioBuffer) {
+                        combinedInt16.set(chunk.data, offset);
+                        offset += chunk.data.length;
+                        avgRms += chunk.rms;
+                        maxRms = Math.max(maxRms, chunk.rms);
+                        if (!chunk.isVoice) silentChunks++;
+                    }
+                    
+                    avgRms /= this.audioBuffer.length;
+                    
+                    // Convert to Uint8Array for base64
+                    const uint8View = new Uint8Array(combinedInt16.buffer);
+                    const base64 = this._uint8ToBase64(uint8View);
+                    
+                    // Send combined chunk
                     this.ws.send(JSON.stringify({
                         type: 'audio_chunk',
-                        data: base64Audio
+                        data: base64,
+                        chunk_size: combinedInt16.length * 2,
+                        rms: parseFloat(avgRms.toFixed(4)),
+                        max_rms: parseFloat(maxRms.toFixed(4)),
+                        sample_count: combinedInt16.length,
+                        chunk_count: this.audioBuffer.length,
+                        silent_chunks: silentChunks
                     }));
-                };
-                reader.readAsArrayBuffer(audioBlob);
+                    
+                    this.totalBytesSent += combinedInt16.length * 2;
+                    this.totalChunksSent++;
+                    
+                    console.log(`✅ SENT: Chunk#${this.totalChunksSent} | ${combinedInt16.length*2} bytes | Avg RMS: ${avgRms.toFixed(4)} | Chunks: ${this.audioBuffer.length}`);
+                    
+                    // Clear buffer
+                    this.audioBuffer = [];
+                    this.bufferedBytes = 0;
+                } catch (error) {
+                    console.error('Failed to flush audio buffer:', error);
+                }
+            }
+
+            /**
+             * Efficient base64 encoding from Uint8Array
+             * Avoids String.fromCharCode.apply() which can fail on large arrays
+             */
+            _uint8ToBase64(uint8Array) {
+                const chunkSize = 8192; // Process in chunks to avoid stack overflow
+                let base64 = '';
+                
+                for (let i = 0; i < uint8Array.length; i += chunkSize) {
+                    const chunk = uint8Array.subarray(i, Math.min(i + chunkSize, uint8Array.length));
+                    base64 += String.fromCharCode.apply(null, chunk);
+                }
+                
+                return btoa(base64);
             }
 
             async stopRecording() {
-                this.mediaRecorder.stop();
+                // ===== DEBOUNCE: Prevent multiple stop calls =====
+                if (!this.isRecording || this.isStopping) {
+                    console.warn('⚠️ Already stopping or not recording');
+                    return;
+                }
 
-                // Wait for final processing
-                await new Promise(resolve => {
-                    this.mediaRecorder.onstop = () => {
+                console.log('🔴 STOP REQUEST - Beginning graceful shutdown...');
+                this.isStopping = true; // ✅ FIX: Set stopping flag
+                this.statusText.textContent = '⏳ Processing...';
+                this.transcriptStatus.style.display = 'flex';
+
+                try {
+                    // ===== STEP 1: NOTIFY BACKEND IMMEDIATELY =====
+                    if (this.ws && this.ws.readyState === WebSocket.OPEN) {
+                        this.ws.send(JSON.stringify({ type: 'stop_stream' }));
+                        console.log('✅ Sent stop_stream to backend');
+                    }
+
+                    // ===== STEP 2: FLUSH REMAINING BUFFER =====
+                    if (this.audioBuffer.length > 0) {
+                        console.log(`💾 Flushing final ${this.audioBuffer.length} chunks...`);
+                        this._flushAudioBuffer();
+                    }
+
+                    // ===== STEP 3: STOP AUDIOWORKLET =====
+                    if (this.audioWorkletNode) {
+                        console.log('⏹️ Stopping AudioWorklet...');
+                        this.audioWorkletNode.port.postMessage({ type: 'STOP' });
+                        this.audioWorkletNode.disconnect();
+                        this.audioWorkletNode = null;
+                    }
+
+                    // ===== STEP 4: STOP MICROPHONE STREAM =====
+                    if (this.mediaStream) {
+                        console.log('🎤 Stopping microphone stream...');
+                        const tracks = this.mediaStream.getTracks() || [];
+                        tracks.forEach(track => {
+                            track.stop();
+                            console.log(`  ✅ Stopped ${track.kind} track`);
+                        });
+                    } else if (this.mediaStreamSource) {
+                        const tracks = this.mediaStreamSource?.mediaStream?.getTracks() || [];
+                        tracks.forEach(track => track.stop());
+                    }
+
+                    // ===== STEP 5: CLEANUP MEDIA SOURCE =====
+                    if (this.mediaStreamSource) {
+                        console.log('🔌 Disconnecting media source...');
+                        this.mediaStreamSource.disconnect();
+                        this.mediaStreamSource = null;
+                    }
+
+                    // ===== STEP 6: CLOSE AUDIO CONTEXT =====
+                    if (this.audioContext && this.audioContext.state !== 'closed') {
+                        console.log('🔇 Closing AudioContext...');
+                        await this.audioContext.close();
+                    }
+
+                    // ===== STEP 7: SEND FINAL MESSAGE =====
+                    if (this.ws && this.ws.readyState === WebSocket.OPEN) {
                         this.ws.send(JSON.stringify({
                             type: 'process',
-                            final: true
+                            final: true,
+                            total_chunks: this.totalChunksSent,
+                            total_bytes: this.totalBytesSent,
+                            voice_chunks: this.voiceDetectedCount,
+                            silence_chunks: this.silenceSkippedCount
                         }));
-                        resolve();
-                    };
-                });
+                        console.log('✅ Sent final process message');
+                    }
 
-                this.isRecording = false;
-                console.log('✅ Recording stopped');
+                    // ===== STEP 8: RESET STATE =====
+                    this.isRecording = false;
+                    this.isStopping = false; // ✅ FIX: Reset stopping flag
+                    this.audioBuffer = [];
+                    this.bufferedBytes = 0;
+                    this.mediaStream = null;
+
+                    // ===== UPDATE UI =====
+                    this.startBtn.disabled = false;
+                    this.stopBtn.disabled = true;
+                    
+                    const duration = ((Date.now() - this.startTime) / 1000).toFixed(1);
+                    console.log(`
+╔════════════════════════════════════════╗
+║       🛑 RECORDING STOPPED             ║
+╠════════════════════════════════════════╣
+║ Duration:        ${duration}s
+║ Chunks Sent:     ${this.totalChunksSent}
+║ Bytes Sent:      ${this.totalBytesSent}
+║ Voice Detected:  ${this.voiceDetectedCount}
+║ Silence Skipped: ${this.silenceSkippedCount}
+╚════════════════════════════════════════╝
+`);
+                } catch (error) {
+                    console.error('❌ Error during stop:', error);
+                    this.showError(`Stop error: ${error.message}`);
+                }
+            }
+
+            // ========== UI METHODS ==========
+            
+            getTotalAudioBytes() {
+                return this.totalBytesSent;
             }
         }
 

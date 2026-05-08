@@ -59,6 +59,12 @@ class VoiceStreamConsumer(AsyncWebsocketConsumer):
         self.classifier = None
         self.service_handler = None
         
+        # Store results for later saving
+        self.transcript_result = None
+        self.intent_result = None
+        self.service_result = None
+        self.processing_time_ms = 0
+        
         await self.accept()
         
         logger.info(f"[{self.session_id}] WebSocket connected - User: {self.user.username if self.user.is_authenticated else 'Anonymous'}")
@@ -75,8 +81,18 @@ class VoiceStreamConsumer(AsyncWebsocketConsumer):
         logger.info(f"[{self.session_id}] WebSocket disconnected - Close code: {close_code}")
         
         # Save session data if we have meaningful data
-        if self.transcribed_text or self.current_intent:
-            await self._save_voice_query_async()
+        # This saves queries that were successfully processed
+        if (self.transcribed_text or self.current_intent) and self.transcript_result:
+            try:
+                await self._save_voice_query_async(
+                    self.transcript_result,
+                    self.intent_result,
+                    self.service_result,
+                    self.processing_time_ms
+                )
+                logger.info(f"[{self.session_id}] Query saved on disconnect")
+            except Exception as e:
+                logger.error(f"[{self.session_id}] Error saving query on disconnect: {str(e)}")
     
     async def receive(self, text_data=None, bytes_data=None):
         """
@@ -134,12 +150,18 @@ class VoiceStreamConsumer(AsyncWebsocketConsumer):
         self.language = data.get('language', 'en')
         self.include_tts = data.get('include_tts', False)
         
+        # CRITICAL: Log audio format info from frontend
+        sample_rate = data.get('sample_rate', 16000)
+        bit_depth = data.get('bit_depth', 16)
+        channels = data.get('channels', 1)
+        
+        logger.info(f"[{self.session_id}] Session initialized - Language: {self.language}, TTS: {self.include_tts}")
+        logger.info(f"[{self.session_id}] Audio format - SR: {sample_rate}Hz, Bit: {bit_depth}-bit, Channels: {channels}")
+        
         # Initialize processing engines
         self.stt_engine = await sync_to_async(lambda: get_stt_engine())()
         self.classifier = await sync_to_async(lambda: get_classifier())()
         self.service_handler = await sync_to_async(lambda: get_service_handler())()
-        
-        logger.info(f"[{self.session_id}] Session initialized - Language: {self.language}")
         
         await self.send(text_data=json.dumps({
             'type': 'session_ready',
@@ -157,18 +179,29 @@ class VoiceStreamConsumer(AsyncWebsocketConsumer):
                 return
             
             self.audio_chunks.append(audio_data)
+            total_bytes = sum(len(c) for c in self.audio_chunks)
             
             # Send chunk acknowledgment
             await self.send(text_data=json.dumps({
                 'type': 'chunk_received',
                 'chunk_index': len(self.audio_chunks),
-                'total_bytes': sum(len(c) for c in self.audio_chunks)
+                'total_bytes': total_bytes
             }))
             
-            # Auto-process chunks after receiving 2 chunks (4+ seconds of audio)
-            # This ensures we have enough audio for reliable transcription
-            if len(self.audio_chunks) >= 2 and len(self.audio_chunks) % 2 == 0:
+            # Auto-process chunks after accumulating enough audio (~2 seconds worth)
+            # This prevents transcription attempts on tiny audio chunks
+            # At 16kHz mono 16-bit: 2 seconds ≈ 64KB
+            if total_bytes >= 32000:  # At least ~1 second of audio
                 await self._process_partial_audio()
+            else:
+                # Send status update showing accumulated audio
+                await self.send(text_data=json.dumps({
+                    'type': 'status_update',
+                    'message': f'Accumulated {len(self.audio_chunks)} chunk{"" if len(self.audio_chunks) == 1 else "s"} ({total_bytes} bytes), need {32000 - total_bytes} more bytes for transcription...',
+                    'bytes_received': total_bytes,
+                    'bytes_needed': 32000,
+                    'chunks': len(self.audio_chunks)
+                }))
         
         except Exception as e:
             logger.error(f"[{self.session_id}] Error handling audio chunk: {str(e)}")
@@ -210,17 +243,16 @@ class VoiceStreamConsumer(AsyncWebsocketConsumer):
         try:
             # Combine audio chunks
             audio_data = b''.join(self.audio_chunks)
+            total_bytes = len(audio_data)
             
-            # Need at least ~32KB for 2 seconds of audio (at 16000 Hz, 16-bit, mono)
-            if len(audio_data) < 32000:
-                self.is_processing = False
-                return
+            logger.info(f"[{self.session_id}] Starting partial transcription: {total_bytes} bytes, {len(self.audio_chunks)} chunks")
             
             # Send processing indicator
             await self.send(text_data=json.dumps({
                 'type': 'processing_started',
-                'bytes': len(audio_data),
-                'chunks': len(self.audio_chunks)
+                'bytes': total_bytes,
+                'chunks': len(self.audio_chunks),
+                'message': 'Transcribing audio...'
             }))
             
             # Try to transcribe asynchronously (don't fail if it doesn't work on partial audio)
@@ -230,8 +262,12 @@ class VoiceStreamConsumer(AsyncWebsocketConsumer):
                     self.language
                 )
                 
-                if transcript_result['success'] and transcript_result['text']:
-                    self.transcribed_text = transcript_result['text']
+                logger.info(f"[{self.session_id}] Transcription result: success={transcript_result['success']}, text_len={len(transcript_result.get('text', ''))}")
+                
+                if transcript_result['success'] and transcript_result['text'].strip():
+                    self.transcribed_text = transcript_result['text'].strip()
+                    
+                    logger.info(f"[{self.session_id}] Text detected: '{self.transcribed_text[:100]}'")
                     
                     # Send partial transcription
                     await self.send(text_data=json.dumps({
@@ -256,21 +292,28 @@ class VoiceStreamConsumer(AsyncWebsocketConsumer):
                         'candidates': intent_result['candidates']
                     }))
                 else:
-                    # Transcription didn't yield results, just log silently
-                    logger.debug(f"[{self.session_id}] No text transcribed from partial audio yet")
+                    # Transcription didn't yield results, but still send status
+                    logger.warning(f"[{self.session_id}] No speech detected in {total_bytes} bytes of audio")
+                    await self.send(text_data=json.dumps({
+                        'type': 'status_update',
+                        'message': f'No speech detected yet. Keep speaking... ({total_bytes} bytes received)',
+                        'bytes_received': total_bytes,
+                        'chunks': len(self.audio_chunks)
+                    }))
             
             except Exception as transcribe_error:
-                # Don't fail the partial processing - just log and continue
-                # This is expected with partial MediaRecorder chunks
-                logger.debug(f"[{self.session_id}] Partial transcription skipped: {str(transcribe_error)}")
+                logger.error(f"[{self.session_id}] Transcription error during partial processing: {str(transcribe_error)}")
                 await self.send(text_data=json.dumps({
                     'type': 'status_update',
-                    'message': f'Received {len(self.audio_chunks)} chunks ({len(audio_data)} bytes), waiting for more...'
+                    'message': f'Processing audio... ({total_bytes} bytes received)'
                 }))
         
         except Exception as e:
-            logger.error(f"[{self.session_id}] Partial processing error: {str(e)}")
-            # Don't send error to client - just log it
+            logger.error(f"[{self.session_id}] Partial processing error: {str(e)}", exc_info=True)
+            await self.send(text_data=json.dumps({
+                'type': 'status_update',
+                'message': 'Listening...'
+            }))
         
         finally:
             self.is_processing = False
@@ -319,19 +362,39 @@ class VoiceStreamConsumer(AsyncWebsocketConsumer):
             # Handle case where transcription succeeded but no speech was detected
             self.transcribed_text = transcript_result['text'].strip()
             
+            # Check for audio clipping issues
+            clipping_warning = None
+            if transcript_result.get('audio_clipped'):
+                # Provide specific guidance based on severity
+                clipping_warning = (
+                    "🔊 **Microphone Level Too High!** \n"
+                    "Your audio is completely saturated/clipped. This is a hardware issue, not software.\n\n"
+                    "**Fix:**\n"
+                    "1. Lower your microphone volume in Windows/Mac settings\n"
+                    "2. Move the microphone 6-12 inches away from your mouth\n"
+                    "3. Try whispering instead of speaking loudly\n"
+                    "4. If available, select a different microphone\n\n"
+                    "⚠️ Until you fix the input level, the voice bot cannot detect speech."
+                )
+                logger.warning(f"[{self.session_id}] {clipping_warning}")
+            
             if not self.transcribed_text:
                 # No speech detected - still send result with empty text
                 logger.warning(f"[{self.session_id}] No speech detected in final audio")
-                await self.send(text_data=json.dumps({
+                response_data = {
                     'type': 'final_result',
                     'detected_text': '',
                     'detected_language': transcript_result.get('language', 'en'),
                     'intent': 'UNKNOWN',
                     'confidence': 0.0,
-                    'response': 'I could not understand any speech. Please try again.',
+                    'response': clipping_warning if clipping_warning else 'I could not understand any speech. Please try again.',
                     'data': {},
                     'processing_time_ms': int((time.time() - processing_start) * 1000)
-                }))
+                }
+                if clipping_warning:
+                    response_data['clipping_warning'] = clipping_warning
+                
+                await self.send(text_data=json.dumps(response_data))
                 return
             
             # Final intent classification
@@ -350,8 +413,27 @@ class VoiceStreamConsumer(AsyncWebsocketConsumer):
             response_text = service_result.get('response', '')
             response_data = service_result.get('data', {})
             
+            # Store results for later use (in case of disconnect)
+            processing_time_ms = int((time.time() - processing_start) * 1000)
+            self.transcript_result = transcript_result
+            self.intent_result = intent_result
+            self.service_result = service_result
+            self.processing_time_ms = processing_time_ms
+            
+            # Check for audio clipping issues
+            clipping_warning = None
+            if transcript_result.get('audio_clipped'):
+                clipping_warning = (
+                    "🔊 **Microphone Level Too High!** \n"
+                    "Your audio is being clipped/saturated. For best results:\n"
+                    "1. Lower your microphone volume in Windows/Mac settings\n"
+                    "2. Move the microphone further away from your mouth\n"
+                    "3. Try whispering instead of speaking loudly"
+                )
+                logger.warning(f"[{self.session_id}] {clipping_warning}")
+            
             # Send final result
-            await self.send(text_data=json.dumps({
+            result_data = {
                 'type': 'final_result',
                 'detected_text': self.transcribed_text,
                 'detected_language': transcript_result['language'],
@@ -359,8 +441,13 @@ class VoiceStreamConsumer(AsyncWebsocketConsumer):
                 'confidence': intent_result['confidence'],
                 'response': response_text,
                 'data': response_data,
-                'processing_time_ms': int((time.time() - processing_start) * 1000)
-            }))
+                'processing_time_ms': processing_time_ms
+            }
+            
+            if clipping_warning:
+                result_data['clipping_warning'] = clipping_warning
+            
+            await self.send(text_data=json.dumps(result_data))
             
             # Generate TTS response if requested
             if self.include_tts and response_text:
@@ -369,7 +456,7 @@ class VoiceStreamConsumer(AsyncWebsocketConsumer):
             # Save to database
             await self._save_voice_query_async(
                 transcript_result, intent_result, service_result, 
-                int((time.time() - processing_start) * 1000)
+                processing_time_ms
             )
         
         except Exception as e:
@@ -418,20 +505,30 @@ class VoiceStreamConsumer(AsyncWebsocketConsumer):
         """Sync wrapper for transcription"""
         try:
             import io
-            text, lang, confidence = self.stt_engine.transcribe(
+            from .stt import transcribe_audio
+            
+            # Use transcribe_audio function which returns dict with clipping info
+            result = transcribe_audio(
                 io.BytesIO(audio_data),
                 language=language
             )
+            
             return {
-                'success': True,
-                'text': text,
-                'language': lang,
-                'confidence': float(confidence)
+                'success': result['success'],
+                'text': result.get('text', ''),
+                'language': result.get('language', 'en'),
+                'confidence': float(result.get('confidence', 0.0)),
+                'audio_clipped': result.get('audio_clipped', False),
+                'error': result.get('error', '')
             }
         except Exception as e:
             logger.error(f"[{self.session_id}] Transcription sync error: {str(e)}")
             return {
                 'success': False,
+                'text': '',
+                'language': 'unknown',
+                'confidence': 0.0,
+                'audio_clipped': False,
                 'error': str(e)
             }
     
@@ -490,20 +587,45 @@ class VoiceStreamConsumer(AsyncWebsocketConsumer):
     ):
         """Save voice query to database asynchronously"""
         try:
+            if not self.transcribed_text:
+                logger.warning(f"[{self.session_id}] No transcribed text to save")
+                return
+            
             user = self.user if self.user.is_authenticated else None
             
-            await database_sync_to_async(VoiceQuery.objects.create)(
+            # Use provided results or fall back to instance variables
+            transcript_result = transcript_result or self.transcript_result or {}
+            intent_result = intent_result or self.intent_result or {}
+            service_result = service_result or self.service_result or {}
+            processing_time_ms = processing_time_ms or self.processing_time_ms
+            
+            logger.info(
+                f"[{self.session_id}] Saving query: text='{self.transcribed_text[:50]}', "
+                f"intent={intent_result.get('intent', 'UNKNOWN')}, "
+                f"user={user}"
+            )
+            
+            # Create VoiceQuery record
+            voice_query = await database_sync_to_async(VoiceQuery.objects.create)(
                 user=user,
                 session_id=self.session_id,
-                transcribed_text=self.transcribed_text or '',
-                detected_language=transcript_result.get('language', 'en') if transcript_result else 'en',
-                intent=intent_result.get('intent', 'UNKNOWN') if intent_result else 'UNKNOWN',
-                confidence_score=intent_result.get('confidence', 0) if intent_result else 0,
-                response_message=service_result.get('response', '') if service_result else '',
+                transcribed_text=self.transcribed_text,
+                detected_language=transcript_result.get('language', 'en'),
+                intent=intent_result.get('intent', 'UNKNOWN'),
+                confidence_score=float(intent_result.get('confidence', 0)),
+                response_message=service_result.get('response', ''),
                 processing_time_ms=processing_time_ms
             )
             
-            logger.info(f"[{self.session_id}] Query saved to database")
+            # Create VoiceQueryLog record for detailed tracking
+            if voice_query:
+                await database_sync_to_async(VoiceQueryLog.objects.create)(
+                    voice_query=voice_query,
+                    intent_candidates=intent_result.get('candidates', {}),
+                    raw_response=service_result
+                )
+            
+            logger.info(f"[{self.session_id}] Query saved successfully (ID: {voice_query.id})")
         
         except Exception as e:
-            logger.error(f"[{self.session_id}] Error saving query: {str(e)}")
+            logger.error(f"[{self.session_id}] Error saving query: {str(e)}", exc_info=True)

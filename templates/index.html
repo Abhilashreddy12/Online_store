@@ -1,0 +1,487 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}LUXE - Luxury Fashion Store | Home{% endblock %}
+
+{% block extra_css %}
+<style>
+    .hero-section {
+        background: linear-gradient(135deg, #f5f5f5 0%, #e8e8e8 100%);
+        min-height: 500px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        padding: 60px 20px;
+        position: relative;
+        overflow: hidden;
+    }
+
+    .hero-content {
+        max-width: 800px;
+        text-align: center;
+        z-index: 2;
+    }
+
+    .hero-content h1 {
+        font-family: 'Playfair Display', serif;
+        font-size: 4rem;
+        font-weight: 700;
+        margin-bottom: 20px;
+        color: #000;
+        letter-spacing: -1px;
+    }
+
+    .hero-content p {
+        font-size: 1.1rem;
+        color: #666;
+        margin-bottom: 30px;
+        line-height: 1.6;
+        font-weight: 300;
+    }
+
+    .hero-cta {
+        display: flex;
+        gap: 20px;
+        justify-content: center;
+        flex-wrap: wrap;
+    }
+
+    .hero-btn {
+        padding: 15px 40px;
+        border: 2px solid #D4AF37;
+        background: #D4AF37;
+        color: #000;
+        text-decoration: none;
+        border-radius: 0;
+        font-weight: 600;
+        cursor: pointer;
+        transition: all 0.3s ease;
+    }
+
+    .hero-btn:hover {
+        background: #000;
+        color: #D4AF37;
+        transform: translateY(-2px);
+    }
+
+    .hero-btn-secondary {
+        background: transparent;
+        color: #000;
+    }
+
+    .hero-btn-secondary:hover {
+        background: #000;
+        color: #D4AF37;
+    }
+
+    /* Categories Section */
+    .categories-section {
+        padding: 60px 20px;
+        background: #fff;
+    }
+
+    .section-title {
+        font-family: 'Playfair Display', serif;
+        font-size: 2.5rem;
+        text-align: center;
+        margin-bottom: 50px;
+        color: #000;
+        font-weight: 700;
+        text-transform: uppercase;
+        letter-spacing: 2px;
+    }
+
+    .categories-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+        gap: 20px;
+        max-width: 1200px;
+        margin: 0 auto;
+    }
+
+    .category-card {
+        background: #f5f5f5;
+        padding: 40px 20px;
+        text-align: center;
+        cursor: pointer;
+        transition: all 0.3s ease;
+        border: 1px solid #e0e0e0;
+    }
+
+    .category-card:hover {
+        background: #000;
+        color: #fff;
+        transform: translateY(-5px);
+        border-color: #D4AF37;
+    }
+
+    .category-icon {
+        font-size: 2.5rem;
+        margin-bottom: 15px;
+    }
+
+    .category-card h3 {
+        font-family: 'Inter', sans-serif;
+        font-size: 1.1rem;
+        font-weight: 600;
+        text-transform: uppercase;
+        letter-spacing: 1px;
+    }
+
+    /* Products Section */
+    .products-section {
+        padding: 60px 20px;
+        background: #fff;
+    }
+
+    .products-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+        gap: 30px;
+        max-width: 1400px;
+        margin: 0 auto;
+    }
+
+    .product-card {
+        background: #fff;
+        border: 1px solid #e0e0e0;
+        overflow: hidden;
+        transition: all 0.3s ease;
+        cursor: pointer;
+    }
+
+    .product-card:hover {
+        border-color: #D4AF37;
+        box-shadow: 0 10px 40px rgba(0, 0, 0, 0.1);
+        transform: translateY(-5px);
+    }
+
+    .product-image {
+        width: 100%;
+        height: 300px;
+        background: #f5f5f5;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 3rem;
+        color: #ddd;
+        overflow: hidden;
+    }
+
+    .product-card:hover .product-image {
+        background: #e0e0e0;
+    }
+
+    .product-info {
+        padding: 20px;
+    }
+
+    .product-brand {
+        font-size: 0.85rem;
+        color: #D4AF37;
+        text-transform: uppercase;
+        letter-spacing: 1px;
+        font-weight: 600;
+        margin-bottom: 8px;
+    }
+
+    .product-name {
+        font-size: 1rem;
+        font-weight: 600;
+        margin-bottom: 10px;
+        color: #000;
+        line-height: 1.4;
+    }
+
+    .product-rating {
+        font-size: 0.9rem;
+        color: #D4AF37;
+        margin-bottom: 10px;
+    }
+
+    .product-price {
+        font-size: 1.3rem;
+        font-weight: 700;
+        color: #000;
+    }
+
+    .product-original-price {
+        font-size: 0.9rem;
+        color: #999;
+        text-decoration: line-through;
+        margin-left: 10px;
+    }
+
+    /* CTA Section */
+    .cta-section {
+        background: #000;
+        color: #fff;
+        padding: 60px 20px;
+        text-align: center;
+    }
+
+    .cta-content h2 {
+        font-family: 'Playfair Display', serif;
+        font-size: 2.2rem;
+        margin-bottom: 20px;
+        font-weight: 700;
+    }
+
+    .cta-content p {
+        font-size: 1.1rem;
+        margin-bottom: 30px;
+        color: #ccc;
+    }
+
+    .cta-content button {
+        padding: 12px 40px;
+        background: #D4AF37;
+        color: #000;
+        border: none;
+        font-weight: 600;
+        cursor: pointer;
+        transition: all 0.3s ease;
+        font-size: 1rem;
+    }
+
+    .cta-content button:hover {
+        background: #fff;
+        transform: translateY(-2px);
+    }
+
+    @media (max-width: 768px) {
+        .hero-content h1 {
+            font-size: 2.5rem;
+        }
+
+        .products-grid {
+            grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
+            gap: 15px;
+        }
+
+        .product-image {
+            height: 200px;
+        }
+
+        .categories-grid {
+            grid-template-columns: repeat(2, 1fr);
+        }
+
+        .section-title {
+            font-size: 1.8rem;
+        }
+    }
+
+    @media (max-width: 480px) {
+        .hero-section {
+            min-height: 350px;
+            padding: 40px 20px;
+        }
+
+        .hero-content h1 {
+            font-size: 1.8rem;
+            margin-bottom: 15px;
+        }
+
+        .hero-content p {
+            font-size: 0.95rem;
+        }
+
+        .hero-cta {
+            gap: 10px;
+        }
+
+        .hero-btn {
+            padding: 12px 30px;
+            font-size: 0.9rem;
+        }
+
+        .products-grid {
+            grid-template-columns: repeat(2, 1fr);
+            gap: 10px;
+        }
+
+        .product-image {
+            height: 150px;
+        }
+
+        .categories-grid {
+            grid-template-columns: 1fr;
+        }
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<!-- HERO SECTION -->
+<section class="hero-section">
+    <div class="hero-content">
+        <h1>LUXURY REDEFINED</h1>
+        <p>Discover our exclusive collection of premium fashion and accessories. Elevate your style with LUXE.</p>
+        <div class="hero-cta">
+            <a href="{% url 'catalog:product_list' %}" class="hero-btn">Shop Collection</a>
+            <button class="hero-btn hero-btn-secondary" onclick="document.querySelector('.categories-section').scrollIntoView({behavior: 'smooth'})">Explore</button>
+        </div>
+    </div>
+</section>
+
+<!-- CATEGORIES SECTION -->
+<section class="categories-section">
+    <h2 class="section-title">Shop by Category</h2>
+    <div class="categories-grid">
+        <div class="category-card" onclick="window.location.href='{% url 'catalog:product_list' %}'">
+            <div class="category-icon">👗</div>
+            <h3>Women's Fashion</h3>
+        </div>
+        <div class="category-card" onclick="window.location.href='{% url 'catalog:product_list' %}'">
+            <div class="category-icon">👔</div>
+            <h3>Men's Collection</h3>
+        </div>
+        <div class="category-card" onclick="window.location.href='{% url 'catalog:product_list' %}'">
+            <div class="category-icon">👜</div>
+            <h3>Accessories</h3>
+        </div>
+        <div class="category-card" onclick="window.location.href='{% url 'catalog:product_list' %}'">
+            <div class="category-icon">👞</div>
+            <h3>Footwear</h3>
+        </div>
+    </div>
+</section>
+
+<!-- NEW ARRIVALS SECTION -->
+<section class="products-section">
+    <h2 class="section-title">New Arrivals</h2>
+    <div class="products-grid">
+        {% if new_arrivals %}
+            {% for product in new_arrivals %}
+            <div class="product-card">
+                <a href="{% url 'catalog:product_detail' product.slug %}" style="text-decoration: none; color: inherit;">
+                    <div class="product-image">
+                        {% if product.images.first %}
+                            <img src="{{ product.images.first.image.url }}" alt="{{ product.name }}" style="width: 100%; height: 100%; object-fit: cover;">
+                        {% else %}
+                            👗
+                        {% endif %}
+                    </div>
+                    <div class="product-info">
+                        {% if product.brand %}
+                        <div class="product-brand">{{ product.brand }}</div>
+                        {% endif %}
+                        <div class="product-name">{{ product.name }}</div>
+                        <div class="product-rating">
+                            <i class="fas fa-star"></i>
+                            <i class="fas fa-star"></i>
+                            <i class="fas fa-star"></i>
+                            <i class="fas fa-star"></i>
+                            <i class="fas fa-star-half"></i>
+                        </div>
+                        <div class="product-price">
+                            ₹{{ product.price }}
+                            {% if product.compare_price %}
+                            <span class="product-original-price">₹{{ product.compare_price }}</span>
+                            {% endif %}
+                        </div>
+                    </div>
+                </a>
+            </div>
+            {% endfor %}
+        {% else %}
+            <!-- Placeholder Products -->
+            {% for i in "xxxx" %}
+            <div class="product-card">
+                <div class="product-image">👗</div>
+                <div class="product-info">
+                    <div class="product-brand">Premium</div>
+                    <div class="product-name">Product Name</div>
+                    <div class="product-rating">
+                        <i class="fas fa-star"></i>
+                        <i class="fas fa-star"></i>
+                        <i class="fas fa-star"></i>
+                        <i class="fas fa-star"></i>
+                        <i class="fas fa-star-half"></i>
+                    </div>
+                    <div class="product-price">₹999</div>
+                </div>
+            </div>
+            {% endfor %}
+        {% endif %}
+    </div>
+</section>
+
+<!-- TRENDING SECTION -->
+<section class="products-section">
+    <h2 class="section-title">Trending Now</h2>
+    <div class="products-grid">
+        {% if trending_products %}
+            {% for product in trending_products %}
+            <div class="product-card">
+                <a href="{% url 'catalog:product_detail' product.slug %}" style="text-decoration: none; color: inherit;">
+                    <div class="product-image">
+                        {% if product.images.first %}
+                            <img src="{{ product.images.first.image.url }}" alt="{{ product.name }}" style="width: 100%; height: 100%; object-fit: cover;">
+                        {% else %}
+                            🔥
+                        {% endif %}
+                    </div>
+                    <div class="product-info">
+                        {% if product.brand %}
+                        <div class="product-brand">{{ product.brand }}</div>
+                        {% endif %}
+                        <div class="product-name">{{ product.name }}</div>
+                        <div class="product-rating">
+                            <i class="fas fa-star"></i>
+                            <i class="fas fa-star"></i>
+                            <i class="fas fa-star"></i>
+                            <i class="fas fa-star"></i>
+                            <i class="fas fa-star"></i>
+                        </div>
+                        <div class="product-price">₹{{ product.price }}</div>
+                    </div>
+                </a>
+            </div>
+            {% endfor %}
+        {% else %}
+            <!-- Placeholder Products -->
+            {% for i in "xxxx" %}
+            <div class="product-card">
+                <div class="product-image">🔥</div>
+                <div class="product-info">
+                    <div class="product-brand">Popular</div>
+                    <div class="product-name">Best Seller</div>
+                    <div class="product-rating">
+                        <i class="fas fa-star"></i>
+                        <i class="fas fa-star"></i>
+                        <i class="fas fa-star"></i>
+                        <i class="fas fa-star"></i>
+                        <i class="fas fa-star"></i>
+                    </div>
+                    <div class="product-price">₹1,499</div>
+                </div>
+            </div>
+            {% endfor %}
+        {% endif %}
+    </div>
+</section>
+
+<!-- CTA SECTION -->
+<section class="cta-section">
+    <div class="cta-content">
+        <h2>Join Our Luxury Community</h2>
+        <p>Get exclusive access to new collections, special discounts, and insider offers</p>
+        <button onclick="alert('Newsletter signup coming soon!')">Subscribe Now</button>
+    </div>
+</section>
+
+<script>
+    // Set active nav item to Home
+    document.addEventListener('DOMContentLoaded', function() {
+        const items = document.querySelectorAll('.mobile-nav-item');
+        if (items.length > 0) {
+            items.forEach((item, i) => {
+                item.classList.remove('active');
+                if (i === 0) item.classList.add('active');
+            });
+        }
+    });
+</script>
+{% endblock %}

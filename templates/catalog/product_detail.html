@@ -5,28 +5,28 @@
 
 {% block extra_css %}
 <style>
-    /* Breadcrumb */
+    /* Breadcrumb - Minimal */
     .breadcrumb {
         display: flex;
         align-items: center;
         gap: var(--space-2);
         margin-bottom: var(--space-6);
         font-size: var(--text-sm);
-        color: var(--gray-500);
+        color: #999999;
     }
     
     .breadcrumb a {
-        color: var(--gray-500);
+        color: #999999;
         text-decoration: none;
         transition: color var(--transition-fast);
     }
     
     .breadcrumb a:hover {
-        color: var(--primary-600);
+        color: #000000;
     }
     
     .breadcrumb-separator {
-        color: var(--gray-300);
+        color: #e0e0e0;
     }
     
     /* Product Detail Layout */
@@ -47,10 +47,11 @@
     .main-image-container {
         position: relative;
         aspect-ratio: 1;
-        border-radius: var(--radius-xl);
+        border-radius: 0;
         overflow: hidden;
-        background: var(--gray-100);
+        background: #f9f9f9;
         margin-bottom: var(--space-4);
+        border: 1px solid #f0f0f0;
     }
     
     .main-image {
@@ -63,12 +64,12 @@
     .main-image-placeholder {
         width: 100%;
         height: 100%;
-        background: var(--gradient-primary);
+        background: #f5f5f5;
         display: flex;
         align-items: center;
         justify-content: center;
         font-size: 8rem;
-        color: white;
+        color: #e0e0e0;
     }
     
     .image-badges {
@@ -82,19 +83,19 @@
     
     .image-badge {
         padding: var(--space-2) var(--space-3);
-        border-radius: var(--radius-md);
+        border-radius: 2px;
         font-size: var(--text-sm);
         font-weight: 700;
     }
     
     .badge-sale {
-        background: var(--error-500);
+        background: #000000;
         color: white;
     }
     
     .badge-featured {
-        background: var(--warning-500);
-        color: white;
+        background: #D4AF37;
+        color: black;
     }
     
     .thumbnails {
@@ -105,16 +106,16 @@
     
     .thumbnail {
         aspect-ratio: 1;
-        border-radius: var(--radius-lg);
+        border-radius: 0;
         overflow: hidden;
         cursor: pointer;
-        border: 3px solid transparent;
+        border: 1px solid #e0e0e0;
         transition: all var(--transition-fast);
     }
     
     .thumbnail:hover,
     .thumbnail.active {
-        border-color: var(--primary-500);
+        border-color: #D4AF37;
     }
     
     .thumbnail img {
@@ -133,28 +134,35 @@
         display: inline-flex;
         align-items: center;
         gap: var(--space-2);
-        padding: var(--space-1) var(--space-3);
-        background: var(--primary-100);
-        color: var(--primary-700);
-        border-radius: var(--radius-full);
-        font-size: var(--text-sm);
-        font-weight: 500;
+        padding: 0;
+        background: transparent;
+        color: #999999;
+        border-radius: 0;
+        font-size: var(--text-xs);
+        font-weight: 600;
         margin-bottom: var(--space-3);
         width: fit-content;
+        text-transform: uppercase;
+        letter-spacing: 1px;
     }
     
     .product-title {
         font-size: clamp(1.75rem, 3vw, 2.5rem);
         font-weight: 700;
-        color: var(--gray-900);
+        color: #000000;
         margin-bottom: var(--space-2);
         line-height: 1.2;
+        font-family: 'Playfair Display', serif;
+        letter-spacing: -1px;
     }
     
     .product-brand {
-        font-size: var(--text-lg);
-        color: var(--gray-500);
+        font-size: var(--text-sm);
+        color: #999999;
         margin-bottom: var(--space-6);
+        text-transform: uppercase;
+        letter-spacing: 1px;
+        font-weight: 600;
     }
     
     .product-pricing {
@@ -162,34 +170,36 @@
         align-items: center;
         gap: var(--space-4);
         margin-bottom: var(--space-6);
-        padding: var(--space-4);
-        background: var(--gray-50);
-        border-radius: var(--radius-lg);
+        padding: 0;
+        background: transparent;
+        border-radius: 0;
+        border-bottom: 1px solid #f0f0f0;
+        padding-bottom: var(--space-6);
     }
     
     .price-current {
         font-size: var(--text-3xl);
         font-weight: 700;
-        color: var(--primary-600);
+        color: #000000;
     }
     
     .price-old {
         font-size: var(--text-xl);
-        color: var(--gray-400);
+        color: #999999;
         text-decoration: line-through;
     }
     
     .discount-badge {
         padding: var(--space-2) var(--space-3);
-        background: var(--error-500);
+        background: #000000;
         color: white;
-        border-radius: var(--radius-md);
+        border-radius: 2px;
         font-weight: 700;
         font-size: var(--text-sm);
     }
     
     .product-description {
-        color: var(--gray-600);
+        color: #666666;
         line-height: 1.8;
         margin-bottom: var(--space-6);
     }
@@ -199,20 +209,23 @@
         display: flex;
         align-items: center;
         gap: var(--space-2);
-        padding: var(--space-3) var(--space-4);
-        border-radius: var(--radius-md);
+        padding: 0;
+        border-radius: 0;
         margin-bottom: var(--space-6);
         font-weight: 600;
+        font-size: var(--text-sm);
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
     }
     
     .in-stock {
-        background: var(--success-100);
-        color: var(--success-700);
+        background: transparent;
+        color: #006b3f;
     }
     
     .out-of-stock {
-        background: var(--error-100);
-        color: var(--error-700);
+        background: transparent;
+        color: #a60c0c;
     }
     
     /* Product Form */
@@ -227,29 +240,98 @@
     .form-label {
         display: block;
         font-weight: 600;
-        color: var(--gray-700);
+        color: #000000;
         margin-bottom: var(--space-2);
+        font-size: var(--text-sm);
     }
     
     .form-select,
     .form-input {
         width: 100%;
         padding: var(--space-3) var(--space-4);
-        border: 2px solid var(--gray-200);
-        border-radius: var(--radius-lg);
+        border: 1px solid #e0e0e0;
+        border-radius: 0;
         font-size: var(--text-base);
         transition: all var(--transition-fast);
     }
     
     .form-select:focus,
     .form-input:focus {
-        border-color: var(--primary-500);
+        border-color: #D4AF37;
         outline: none;
-        box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+        box-shadow: none;
     }
     
     .quantity-input {
         width: 120px;
+    }
+
+    /* Color and Size Selection */
+    .color-options,
+    .size-options {
+        display: flex;
+        gap: 12px;
+        flex-wrap: wrap;
+    }
+
+    .color-option {
+        position: relative;
+    }
+
+    .color-option input {
+        display: none;
+    }
+
+    .color-swatch {
+        display: inline-block;
+        width: 32px;
+        height: 32px;
+        border-radius: 50%;
+        border: 2px solid #ccc;
+        cursor: pointer;
+        transition: all 0.3s ease;
+        box-shadow: none;
+    }
+
+    .color-option input:checked + .color-swatch {
+        border-color: #D4AF37;
+        box-shadow: 0 0 0 2px #ffffff, 0 0 0 4px #D4AF37;
+        transform: scale(1.1);
+    }
+
+    .color-swatch:hover {
+        border-color: #D4AF37;
+    }
+
+    .size-option {
+        position: relative;
+    }
+
+    .size-option input {
+        display: none;
+    }
+
+    .size-button {
+        display: inline-block;
+        padding: 10px 16px;
+        border: 2px solid #ccc;
+        background: #ffffff;
+        border-radius: 4px;
+        cursor: pointer;
+        font-weight: 600;
+        transition: all 0.3s ease;
+        min-width: 48px;
+        text-align: center;
+    }
+
+    .size-option input:checked + .size-button {
+        border-color: #D4AF37;
+        background: #D4AF37;
+        color: #000000;
+    }
+
+    .size-button:hover {
+        border-color: #D4AF37;
     }
     
     /* Action Buttons */
@@ -263,37 +345,31 @@
         padding: var(--space-4);
         font-size: var(--text-lg);
         font-weight: 700;
-        background: var(--gradient-primary);
+        background: #000000;
         color: white;
         border: none;
-        border-radius: var(--radius-lg);
+        border-radius: 0;
         cursor: pointer;
-        box-shadow: 0 8px 25px rgba(99, 102, 241, 0.4);
-        animation: pulseGlow 2s ease-in-out infinite;
+        box-shadow: none;
+        animation: none;
         transition: all var(--transition-base);
+        text-transform: uppercase;
+        letter-spacing: 1px;
     }
     
     .btn-add-cart:hover:not(:disabled) {
         animation: none;
-        transform: translateY(-2px) scale(1.02);
-        box-shadow: 0 12px 35px rgba(99, 102, 241, 0.6);
+        transform: none;
+        box-shadow: none;
+        background: #333333;
     }
     
     .btn-add-cart:active:not(:disabled) {
-        transform: scale(0.98);
-    }
-    
-    @keyframes pulseGlow {
-        0%, 100% {
-            box-shadow: 0 8px 25px rgba(99, 102, 241, 0.4);
-        }
-        50% {
-            box-shadow: 0 8px 35px rgba(99, 102, 241, 0.6);
-        }
+        transform: none;
     }
     
     .btn-add-cart:disabled {
-        opacity: 0.6;
+        opacity: 0.5;
         cursor: not-allowed;
         animation: none;
     }
@@ -561,34 +637,43 @@
             </div>
             
             <!-- Add to Cart Form -->
-            {% if product.variants.exists and product.available_variants %}
-            <!-- Variant-based purchase -->
+            {% if product.variants.exists and available_colors and available_sizes %}
+            <!-- Variant-based purchase with professional color and size selection -->
             <form method="post" action="{% url 'cart:add_to_cart' product.id %}" class="product-form">
                 {% csrf_token %}
-                
+
+                <!-- Hidden input for variant_id -->
+                <input type="hidden" name="variant_id" id="variant_id_input">
+
                 <div class="form-group">
-                    <label class="form-label">Select Variant:</label>
-                    <select name="variant_id" class="form-select" required>
-                        <option value="">Choose size and color...</option>
-                        {% for variant in product.variants.all %}
-                        {% if variant.is_active and variant.stock_quantity > 0 %}
-                        <option value="{{ variant.id }}">
-                            {{ variant.size.name }} - {{ variant.color.name }} 
-                            (Stock: {{ variant.stock_quantity }}) 
-                            {% if variant.price_adjustment != 0 %}
-                            - ₹{{ variant.final_price }}
-                            {% endif %}
-                        </option>
-                        {% endif %}
+                    <label class="form-label">Select Color:</label>
+                    <div class="color-options">
+                        {% for color in available_colors %}
+                        <label class="color-option">
+                            <input type="radio" name="color_id" value="{{ color.color__id }}">
+                            <span class="color-swatch" title="{{ color.color__name }}" style="background-color: {{ color.color__code }};"></span>
+                        </label>
                         {% endfor %}
-                    </select>
+                    </div>
                 </div>
-                
+
+                <div class="form-group">
+                    <label class="form-label">Select Size:</label>
+                    <div class="size-options">
+                        {% for size in available_sizes %}
+                        <label class="size-option">
+                            <input type="radio" name="size_id" value="{{ size.size__id }}">
+                            <span class="size-button">{{ size.size__name }}</span>
+                        </label>
+                        {% endfor %}
+                    </div>
+                </div>
+
                 <div class="form-group">
                     <label class="form-label">Quantity:</label>
                     <input type="number" name="quantity" value="1" min="1" max="100" class="form-input quantity-input">
                 </div>
-                
+
                 <div class="product-actions">
                     {% if user.is_authenticated and product.stock_quantity > 0 %}
                     <button type="submit" class="btn btn-add-cart">🛒 Add to Cart</button>
@@ -597,12 +682,51 @@
                     {% else %}
                     <a href="{% url 'customers:login' %}?next={{ request.path }}" class="btn btn-add-cart">Login to Purchase</a>
                     {% endif %}
-                    
+
                     {% if user.is_authenticated %}
                     <a href="{% url 'cart:add_to_wishlist' product.id %}" class="btn btn-secondary btn-wishlist">❤️ Add to Wishlist</a>
                     {% endif %}
                 </div>
             </form>
+
+            <script>
+            // Collect all variants for this product (no trailing comma)
+            const variants = [
+                {% for variant in product.variants.all %}
+                {% if variant.is_active and variant.stock_quantity > 0 %}
+                {
+                    id: {{ variant.id }},
+                    color: '{{ variant.color.id }}',
+                    size: '{{ variant.size.id }}'
+                }{% if not forloop.last %},{% endif %}
+                {% endif %}
+                {% endfor %}
+            ];
+
+            // Handle form submission
+            document.addEventListener('DOMContentLoaded', function() {
+                const form = document.querySelector('.product-form');
+                if (!form) return;
+                form.addEventListener('submit', function(e) {
+                    const color = form.querySelector('input[name="color_id"]:checked');
+                    const size = form.querySelector('input[name="size_id"]:checked');
+                    if (!color || !size) {
+                        alert('Please select both color and size.');
+                        e.preventDefault();
+                        return false;
+                    }
+                    // Find the matching variant
+                    const variant = variants.find(v => v.color === color.value && v.size === size.value);
+                    if (!variant) {
+                        alert('Selected combination is not available.');
+                        e.preventDefault();
+                        return false;
+                    }
+                    // Set the variant_id hidden input
+                    form.querySelector('#variant_id_input').value = variant.id;
+                });
+            });
+            </script>
             {% elif product.stock_quantity > 0 %}
             <!-- Direct purchase (no variants) -->
             <form method="post" action="{% url 'cart:add_to_cart' product.id %}" class="product-form">
@@ -674,8 +798,8 @@
                     {% endif %}
                 </div>
             </div>
-        </div>
-    </div>
+        </div><!-- /.product-info -->
+    </div><!-- /.product-detail -->
     
     <!-- Reviews Section -->
     {% if approved_reviews or can_review %}

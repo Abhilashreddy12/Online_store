@@ -5,15 +5,19 @@
 
 {% block extra_css %}
 <style>
-    /* Page Header */
+    /* Page Header - Minimal */
     .page-header {
         margin-bottom: var(--space-8);
+        padding-bottom: var(--space-6);
+        border-bottom: 1px solid #f0f0f0;
     }
     
     .page-title {
         font-size: clamp(1.75rem, 3vw, 2.5rem);
         font-weight: 700;
-        color: var(--gray-900);
+        color: #000000;
+        font-family: 'Playfair Display', serif;
+        letter-spacing: -1px;
     }
     
     /* Profile Layout */
@@ -27,14 +31,16 @@
     /* Profile Card */
     .profile-card {
         background: white;
-        border-radius: var(--radius-xl);
-        box-shadow: var(--shadow-sm);
+        border-radius: 0;
+        box-shadow: none;
         padding: var(--space-6);
         transition: all var(--transition-base);
+        border: 1px solid #f0f0f0;
     }
     
     .profile-card:hover {
-        box-shadow: var(--shadow-md);
+        box-shadow: none;
+        border-color: #D4AF37;
     }
     
     .card-header {
@@ -43,24 +49,25 @@
         gap: var(--space-3);
         margin-bottom: var(--space-6);
         padding-bottom: var(--space-4);
-        border-bottom: 2px solid var(--gray-100);
+        border-bottom: 1px solid #f0f0f0;
     }
     
     .card-icon {
         width: 48px;
         height: 48px;
-        background: var(--primary-100);
-        border-radius: var(--radius-lg);
+        background: #f9f9f9;
+        border-radius: 0;
         display: flex;
         align-items: center;
         justify-content: center;
         font-size: 1.5rem;
+        border: 1px solid #e0e0e0;
     }
     
     .card-title {
         font-size: var(--text-lg);
         font-weight: 600;
-        color: var(--gray-800);
+        color: #000000;
     }
     
     /* Info Items */
@@ -69,7 +76,7 @@
         justify-content: space-between;
         align-items: center;
         padding: var(--space-3) 0;
-        border-bottom: 1px solid var(--gray-100);
+        border-bottom: 1px solid #f0f0f0;
     }
     
     .info-item:last-child {
@@ -77,17 +84,17 @@
     }
     
     .info-label {
-        color: var(--gray-500);
+        color: #999999;
         font-size: var(--text-sm);
     }
     
     .info-value {
         font-weight: 600;
-        color: var(--gray-800);
+        color: #000000;
     }
     
     .info-value.highlight {
-        color: var(--primary-600);
+        color: #D4AF37;
     }
     
     /* Badges */
@@ -96,9 +103,9 @@
         align-items: center;
         gap: var(--space-2);
         padding: var(--space-2) var(--space-4);
-        background: var(--gradient-primary);
+        background: #000000;
         color: white;
-        border-radius: var(--radius-full);
+        border-radius: 0;
         font-size: var(--text-sm);
         font-weight: 600;
     }
@@ -108,9 +115,9 @@
         align-items: center;
         gap: var(--space-2);
         padding: var(--space-2) var(--space-4);
-        background: var(--primary-100);
-        color: var(--primary-700);
-        border-radius: var(--radius-full);
+        background: #f0f0f0;
+        color: #000000;
+        border-radius: 0;
         font-size: var(--text-sm);
         font-weight: 600;
     }
@@ -125,28 +132,30 @@
     .stat-item {
         text-align: center;
         padding: var(--space-4);
-        background: var(--gray-50);
-        border-radius: var(--radius-lg);
+        background: #fafafa;
+        border-radius: 0;
+        border: 1px solid #f0f0f0;
     }
     
     .stat-value {
         font-size: var(--text-2xl);
         font-weight: 700;
-        color: var(--primary-600);
+        color: #000000;
         margin-bottom: var(--space-1);
     }
     
     .stat-label {
         font-size: var(--text-sm);
-        color: var(--gray-500);
+        color: #999999;
     }
     
     /* Addresses Section */
     .addresses-section {
         background: white;
-        border-radius: var(--radius-xl);
-        box-shadow: var(--shadow-sm);
+        border-radius: 0;
+        box-shadow: none;
         padding: var(--space-6);
+        border: 1px solid #f0f0f0;
     }
     
     .section-header {

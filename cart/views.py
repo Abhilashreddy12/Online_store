@@ -10,7 +10,8 @@ from catalog.models import Product, ProductVariant
 def cart_detail(request):
     """Display shopping cart"""
     cart, created = Cart.objects.get_or_create(customer=request.user)
-    return render(request, 'cart/cart_detail.html', {'cart': cart})
+    cart_count = cart.items.count()
+    return render(request, 'cart/cart_detail.html', {'cart': cart, 'cart_count': cart_count})
 
 
 @login_required
@@ -19,23 +20,44 @@ def add_to_cart(request, product_id):
     product = get_object_or_404(Product, id=product_id, is_active=True)
     cart, created = Cart.objects.get_or_create(customer=request.user)
     
+    # Support both variant_id (old) and color_id/size_id (new)
     variant_id = request.POST.get('variant_id')
+    color_id = request.POST.get('color_id')
+    size_id = request.POST.get('size_id')
     quantity = int(request.POST.get('quantity', 1))
-    
+
     variant = None
     if variant_id:
         variant = get_object_or_404(ProductVariant, id=variant_id, product=product)
-    
+    elif color_id and size_id:
+        try:
+            variant = ProductVariant.objects.get(product=product, color_id=color_id, size_id=size_id, is_active=True, stock_quantity__gt=0)
+        except ProductVariant.DoesNotExist:
+            messages.error(request, 'Selected combination is not available.')
+            return redirect('catalog:product_detail', slug=product.slug)
+
+    if not variant:
+        messages.error(request, 'Please select a valid variant.')
+        return redirect('catalog:product_detail', slug=product.slug)
+
     cart_item, created = CartItem.objects.get_or_create(
         cart=cart,
         product=product,
         variant=variant,
         defaults={'quantity': quantity}
     )
-    
+
     if not created:
         cart_item.quantity += quantity
         cart_item.save()
+    
+    # Check if this is an AJAX request
+    if request.headers.get('X-Requested-With') == 'XMLHttpRequest':
+        return JsonResponse({
+            'success': True,
+            'message': f'{product.name} added to cart!',
+            'cart_count': cart.items.count()
+        })
     
     messages.success(request, f'{product.name} added to cart!')
     return redirect('cart:cart_detail')
@@ -72,7 +94,9 @@ def remove_from_cart(request, item_id):
 def wishlist_detail(request):
     """Display wishlist"""
     wishlist, created = Wishlist.objects.get_or_create(customer=request.user)
-    return render(request, 'cart/wishlist_detail.html', {'wishlist': wishlist})
+    cart, _ = Cart.objects.get_or_create(customer=request.user)
+    cart_count = cart.items.count()
+    return render(request, 'cart/wishlist_detail.html', {'wishlist': wishlist, 'cart_count': cart_count})
 
 
 @login_required

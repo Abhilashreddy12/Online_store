@@ -2,7 +2,7 @@ from django.shortcuts import render, get_object_or_404, redirect
 from django.views.generic import ListView, DetailView
 from django.contrib.auth.decorators import login_required
 from django.contrib import messages
-from django.db.models import Sum, Avg, Count, F
+from django.db.models import Sum, Avg, Count, F, Q
 from django.utils import timezone
 from datetime import timedelta
 from .models import Product, Category, Brand, Review
@@ -19,6 +19,15 @@ class ProductListView(ListView):
 
     def get_queryset(self):
         queryset = Product.objects.filter(is_active=True).select_related('category', 'brand')
+        
+        # Search by product name or description
+        search_query = self.request.GET.get('search')
+        if search_query:
+            queryset = queryset.filter(
+                Q(name__icontains=search_query) | 
+                Q(description__icontains=search_query) |
+                Q(sku__icontains=search_query)
+            )
         
         # Filter by category
         category_slug = self.kwargs.get('category_slug')
@@ -37,14 +46,40 @@ class ProductListView(ListView):
         
         # Sorting
         sort = self.request.GET.get('sort', '-created_at')
-        queryset = queryset.order_by(sort)
+        if sort == 'newest':
+            queryset = queryset.order_by('-created_at')
+        elif sort == 'price-low':
+            queryset = queryset.order_by('price')
+        elif sort == 'price-high':
+            queryset = queryset.order_by('-price')
+        elif sort == 'rating':
+            queryset = queryset.annotate(avg_rating=Avg('reviews__rating')).order_by('-avg_rating')
+        else:
+            queryset = queryset.order_by('-created_at')
         
         return queryset
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
+        
+        # Add cart count
+        cart_count = 0
+        if self.request.user.is_authenticated:
+            from cart.models import Cart
+            try:
+                cart = Cart.objects.get(user=self.request.user)
+                cart_count = cart.items.count()
+            except:
+                cart_count = 0
+        
+        # Add search query to context
+        search_query = self.request.GET.get('search', '')
+        
         context['categories'] = Category.objects.filter(is_active=True, parent=None)
         context['brands'] = Brand.objects.filter(is_active=True)
+        context['cart_count'] = cart_count
+        context['search_query'] = search_query
+        context['is_search'] = bool(search_query)
         return context
 
 
@@ -62,12 +97,31 @@ class ProductDetailView(DetailView):
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
+        
+        # Add cart count
+        cart_count = 0
+        if self.request.user.is_authenticated:
+            from cart.models import Cart
+            try:
+                cart = Cart.objects.get(user=self.request.user)
+                cart_count = cart.items.count()
+            except:
+                cart_count = 0
+        
         context['related_products'] = Product.objects.filter(
             category=self.object.category,
             is_active=True
         ).exclude(id=self.object.id)[:4]
         context['approved_reviews'] = self.object.reviews.filter(is_approved=True)
-        
+        context['cart_count'] = cart_count
+
+        # Add available colors and sizes from active variants
+        variants = self.object.variants.filter(is_active=True, stock_quantity__gt=0)
+        available_colors = variants.values('color__id', 'color__name', 'color__code').distinct()
+        available_sizes = variants.values('size__id', 'size__name').distinct()
+        context['available_colors'] = available_colors
+        context['available_sizes'] = available_sizes
+
         # Check if user can review (must have delivered order with this product)
         if self.request.user.is_authenticated:
             has_purchased = OrderItem.objects.filter(
@@ -75,16 +129,13 @@ class ProductDetailView(DetailView):
                 order__status='DELIVERED',
                 product=self.object
             ).exists()
-            
             has_reviewed = Review.objects.filter(
                 product=self.object,
                 customer_email=self.request.user.email
             ).exists()
-            
             context['can_review'] = has_purchased and not has_reviewed
         else:
             context['can_review'] = False
-        
         return context
 
 
@@ -147,27 +198,39 @@ def add_review(request, slug):
 
 def home(request):
     """Homepage view with SEO optimization"""
+    # Get cart count
+    cart_count = 0
+    if request.user.is_authenticated:
+        from cart.models import Cart
+        try:
+            cart = Cart.objects.get(user=request.user)
+            cart_count = cart.items.count()
+        except:
+            cart_count = 0
+    
     context = {
-        'featured_products': Product.objects.filter(is_active=True, is_featured=True)[:8],
+        'featured_products': Product.objects.filter(is_active=True, is_featured=True).prefetch_related('images')[:8],
+        'new_arrivals': Product.objects.filter(is_active=True).order_by('-created_at').prefetch_related('images')[:8],
+        'trending_products': Product.objects.filter(is_active=True).order_by('-created_at').prefetch_related('images')[:8],
         'categories': Category.objects.filter(is_active=True, parent=None)[:6],
-        'new_arrivals': Product.objects.filter(is_active=True).order_by('-created_at')[:8],
+        'cart_count': cart_count,
         # SEO Meta Tags
-        'page_title': 'Madiriclet Shopping Store | Online Shopping Platform',
-        'meta_description': 'Madiriclet - Your premium online shopping destination. Discover curated collections of fashion, accessories, and lifestyle products with fast delivery and secure checkout.',
-        'meta_keywords': 'online shopping, ecommerce, fashion store, clothing, accessories, shopping platform, Madiriclet',
+        'page_title': 'LUXE Fashion Store | Luxury Fashion Online',
+        'meta_description': 'LUXE - Discover the finest curated luxury fashion collection. Premium clothing, accessories, and lifestyle products with fast worldwide delivery.',
+        'meta_keywords': 'luxury fashion, designer clothing, premium accessories, online shopping, fashion store, LUXE',
         'canonical_url': request.build_absolute_uri('/'),
         # Open Graph Tags
-        'og_title': 'Madiriclet Shopping Store',
-        'og_description': 'Discover curated collections of fashion, accessories, and lifestyle products with fast delivery and secure checkout.',
+        'og_title': 'LUXE Fashion Store',
+        'og_description': 'Discover the finest curated luxury fashion collection with premium quality and worldwide delivery.',
         'og_type': 'website',
         'og_url': request.build_absolute_uri('/'),
-        'og_image': request.build_absolute_uri('/static/images/preview.jpg'),
+        'og_image': request.build_absolute_uri('/static/images/logo.png'),
         # Twitter Card Tags
-        'twitter_title': 'Madiriclet Shopping Store | Online Shopping',
-        'twitter_description': 'Discover premium fashion and accessories online with Madiriclet',
-        'twitter_image': request.build_absolute_uri('/static/images/preview.jpg'),
+        'twitter_title': 'LUXE Fashion Store',
+        'twitter_description': 'Discover luxury fashion online',
+        'twitter_image': request.build_absolute_uri('/static/images/logo.png'),
     }
-    return render(request, 'catalog/home.html', context)
+    return render(request, 'index.html', context)
 
 
 
