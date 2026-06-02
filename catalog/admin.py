@@ -59,9 +59,9 @@ class ProductVariantInline(admin.TabularInline):
 
 @admin.register(Product)
 class ProductAdmin(admin.ModelAdmin):
-    list_display = ['name', 'sku', 'category', 'brand', 'price_display', 'stock_status', 
+    list_display = ['name', 'sku', 'category', 'brand', 'material', 'neck_type', 'pattern', 'price_display', 'stock_status', 
                    'variant_count', 'is_active', 'is_featured', 'created_at']
-    list_filter = ['is_active', 'is_featured', 'gender', 'category', 'brand', 'created_at']
+    list_filter = ['is_active', 'is_featured', 'gender', 'category', 'brand', 'material', 'neck_type', 'sleeves_type', 'dress_length', 'fit_type', 'pattern', 'created_at']
     search_fields = ['name', 'sku', 'description']
     prepopulated_fields = {'slug': ('name',)}
     readonly_fields = ['created_at', 'updated_at', 'discount_percentage']
@@ -77,14 +77,14 @@ class ProductAdmin(admin.ModelAdmin):
         ('Description', {
             'fields': ('short_description', 'description', 'material', 'care_instructions')
         }),
+        ('Product Details', {
+            'fields': ('neck_type', 'sleeves_type', 'dress_length', 'fit_type', 'pattern', 'occasion', 'weight')
+        }),
         ('Pricing', {
             'fields': ('price', 'compare_price', 'cost_price', 'discount_percentage')
         }),
         ('Inventory', {
             'fields': ('stock_quantity', 'low_stock_threshold')
-        }),
-        ('Product Details', {
-            'fields': ('weight',)
         }),
         ('Status & Features', {
             'fields': ('is_active', 'is_featured')

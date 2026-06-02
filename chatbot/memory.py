@@ -46,7 +46,7 @@ class ConversationMemory:
         history = self.get_history(session_id)
         if not history:
             return ""
-        
+            
         formatted = []
         for msg in history[-6:]:  # Last 3 turns
             role = "Customer" if msg['role'] == 'user' else "Assistant"

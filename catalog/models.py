@@ -59,6 +59,67 @@ class Product(models.Model):
         ('U', 'Unisex'),
         ('K', 'Kids'),
     ]
+    
+    NECK_CHOICES = [
+        ('round', 'Round Neck'),
+        ('square', 'Square Neck'),
+        ('v-neck', 'V-Neck'),
+        ('crew', 'Crew Neck'),
+        ('turtle', 'Turtleneck'),
+        ('boat', 'Boat Neck'),
+        ('halter', 'Halter Neck'),
+        ('cowl', 'Cowl Neck'),
+    ]
+    
+    SLEEVES_CHOICES = [
+        ('sleeveless', 'Sleeveless'),
+        ('half', 'Half Sleeves'),
+        ('puff', 'Puff Half Sleeves'),
+        ('full', 'Full Sleeves'),
+        ('three-quarter', 'Three-Quarter Sleeves'),
+        ('cap', 'Cap Sleeves'),
+        ('flutter', 'Flutter Sleeves'),
+    ]
+    
+    LENGTH_CHOICES = [
+        ('short', 'Short'),
+        ('knee', 'Knee Length'),
+        ('midi', 'Midi / Long Dress'),
+        ('maxi', 'Maxi'),
+        ('full', 'Full Length'),
+    ]
+    
+    FIT_CHOICES = [
+        ('slim', 'Slim Fit'),
+        ('regular', 'Regular Fit'),
+        ('relaxed', 'Relaxed & Comfortable Fit'),
+        ('fitted', 'Fitted'),
+        ('straight', 'Straight Fit'),
+        ('flowy', 'Flowy'),
+    ]
+    
+    PATTERN_CHOICES = [
+        ('solid', 'Solid'),
+        ('printed', 'Printed Ikkat Weave'),
+        ('striped', 'Striped'),
+        ('checkered', 'Checkered'),
+        ('floral', 'Floral'),
+        ('geometric', 'Geometric'),
+        ('embroidered', 'Embroidered'),
+        ('tie-dye', 'Tie-Dye'),
+    ]
+    
+    OCCASION_CHOICES = [
+        ('casual', 'Casual Wear'),
+        ('office', 'Office Wear'),
+        ('daily', 'Daily Wear'),
+        ('party', 'Party Wear'),
+        ('formal', 'Formal'),
+        ('wedding', 'Wedding'),
+        ('ethnic', 'Ethnic'),
+        ('festival', 'Festival'),
+        ('outings', 'Outings'),
+    ]
 
     name = models.CharField(max_length=300)
     slug = models.SlugField(max_length=300, unique=True, blank=True)
@@ -88,7 +149,15 @@ class Product(models.Model):
     weight = models.DecimalField(max_digits=6, decimal_places=2, null=True, blank=True, 
                                 help_text="Weight in kg")
     
-    material = models.CharField(max_length=200, blank=True)
+    # Product Details Fields
+    material = models.CharField(max_length=200, blank=True, help_text="E.g., Premium Ikkat Cotton")
+    neck_type = models.CharField(max_length=50, choices=NECK_CHOICES, blank=True)
+    sleeves_type = models.CharField(max_length=50, choices=SLEEVES_CHOICES, blank=True)
+    dress_length = models.CharField(max_length=50, choices=LENGTH_CHOICES, blank=True)
+    fit_type = models.CharField(max_length=50, choices=FIT_CHOICES, blank=True)
+    pattern = models.CharField(max_length=100, choices=PATTERN_CHOICES, blank=True)
+    occasion = models.CharField(max_length=200, blank=True, help_text="Comma-separated occasions (e.g., Casual Wear, Office Wear, Daily Wear, Outings)")
+    
     care_instructions = models.TextField(blank=True)
     
     meta_title = models.CharField(max_length=200, blank=True)
