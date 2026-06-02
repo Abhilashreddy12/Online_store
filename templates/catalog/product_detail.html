@@ -754,6 +754,7 @@
                 });
             });
             </script>
+
             {% elif product.stock_quantity > 0 %}
             <!-- Direct purchase (no variants) -->
             <form method="post" action="{% url 'cart:add_to_cart' product.id %}" class="product-form">
@@ -799,7 +800,7 @@
             
             <!-- Product Details -->
             <div class="product-details-card">
-                <h3 class="details-title">Product Details</h3>
+                <h3 class="details-title">✨ Product Details</h3>
                 <div class="details-list">
                     <div class="detail-item">
                         <span class="detail-label">Category</span>
@@ -813,13 +814,55 @@
                     {% endif %}
                     {% if product.material %}
                     <div class="detail-item">
-                        <span class="detail-label">Material</span>
+                        <span class="detail-label">Fabric</span>
                         <span class="detail-value">{{ product.material }}</span>
+                    </div>
+                    {% endif %}
+                    {% if product.neck_type %}
+                    <div class="detail-item">
+                        <span class="detail-label">Neck</span>
+                        <span class="detail-value">{{ product.get_neck_type_display }}</span>
+                    </div>
+                    {% endif %}
+                    {% if product.sleeves_type %}
+                    <div class="detail-item">
+                        <span class="detail-label">Sleeves</span>
+                        <span class="detail-value">{{ product.get_sleeves_type_display }}</span>
+                    </div>
+                    {% endif %}
+                    {% if product.dress_length %}
+                    <div class="detail-item">
+                        <span class="detail-label">Length</span>
+                        <span class="detail-value">{{ product.get_dress_length_display }}</span>
+                    </div>
+                    {% endif %}
+                    {% if product.fit_type %}
+                    <div class="detail-item">
+                        <span class="detail-label">Fit</span>
+                        <span class="detail-value">{{ product.get_fit_type_display }}</span>
+                    </div>
+                    {% endif %}
+                    {% if product.pattern %}
+                    <div class="detail-item">
+                        <span class="detail-label">Pattern</span>
+                        <span class="detail-value">{{ product.get_pattern_display }}</span>
+                    </div>
+                    {% endif %}
+                    {% if product.occasion %}
+                    <div class="detail-item">
+                        <span class="detail-label">Occasion</span>
+                        <span class="detail-value">{{ product.occasion }}</span>
+                    </div>
+                    {% endif %}
+                    {% if product.weight %}
+                    <div class="detail-item">
+                        <span class="detail-label">Weight</span>
+                        <span class="detail-value">{{ product.weight }} kg</span>
                     </div>
                     {% endif %}
                     {% if product.care_instructions %}
                     <div class="detail-item">
-                        <span class="detail-label">Care</span>
+                        <span class="detail-label">Care Instructions</span>
                         <span class="detail-value">{{ product.care_instructions }}</span>
                     </div>
                     {% endif %}
